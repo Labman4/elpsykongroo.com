@@ -156,11 +156,8 @@ function ipListAdd() {
     },
   }
   axios(option).then(function(response){
-    console.log(response.data);
-    if (response.data.length > 0) {
-      console.log(1)
-      ipList(ipPage.pageNumber, ipPage.pageSize, ipPage.order);
-      
+    if (response.data.data.length > 0) {
+      ipList(ipPage.pageNumber, ipPage.pageSize, ipPage.order);   
     }
   })
 
@@ -256,7 +253,6 @@ const handleSelectionChange = (val: Record[]) => {
   for(let i of multipleSelection.value) {
     selectRecord.push(i.id);
   }
-  console.log(selectRecord);
 }
 
 const DeleteSelect= (index: number) => {
