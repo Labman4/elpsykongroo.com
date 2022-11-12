@@ -1,0 +1,6 @@
+  <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512" version="1.1">
+                <path class="nixie-number-part"
+                      d="M38.3,66.4C59.3,32,91.7,10,128,10c63.5,0,115,67.5,115,150.7s-51.5,150.7-115,150.7"/>
+                <path class="nixie-number-part" d="M13,496c0-102,51.5-184.7,115-184.7"/>
+                <line class="nixie-number-part" x1="13" y1="496" x2="227.3" y2="496"/>
+            </svg>

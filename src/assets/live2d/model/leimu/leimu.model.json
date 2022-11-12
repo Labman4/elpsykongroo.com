@@ -1,0 +1,153 @@
+{
+  "version": "Live2DViewerEX Config 1.0",
+  "model": "leimu.moc",
+  "textures": [
+    "leimu.2048/texture_00.png",
+    "leimu.2048/texture_01.png",
+    "leimu.2048/texture_02.png"
+  ],
+  "layout": {
+    "center_x": 0.0,
+    "center_y": 0.0,
+    "width": 2.0
+  },
+  "motions": {
+    "tap": [
+      {
+        "file": "motions/tap/01.mtn"
+      },
+      {
+        "file": "motions/tap/02.mtn"
+      },
+      {
+        "file": "motions/tap/06-2.mtn"
+      },
+      {
+        "file": "motions/tap/06.mtn"
+      },
+      {
+        "file": "motions/tap/10.mtn"
+      },
+      {
+        "file": "motions/tap/11.mtn"
+      },
+      {
+        "file": "motions/tap/12.mtn"
+      },
+      {
+        "file": "motions/tap/13.mtn"
+      },
+      {
+        "file": "motions/tap/14.mtn"
+      },
+      {
+        "file": "motions/tap/15.mtn"
+      },
+      {
+        "file": "motions/tap/16.mtn"
+      },
+      {
+        "file": "motions/tap/17.mtn"
+      },
+      {
+        "file": "motions/tap/18.mtn"
+      },
+      {
+        "file": "motions/tap/2.mtn"
+      },
+      {
+        "file": "motions/tap/3.mtn"
+      },
+      {
+        "file": "motions/tap/shake_01.mtn"
+      },
+      {
+        "file": "motions/tap/touch1.mtn"
+      },
+      {
+        "file": "motions/tap/touch2.mtn"
+      },
+      {
+        "file": "motions/tap/touch3.mtn"
+      },
+      {
+        "file": "motions/tap/touch4.mtn"
+      }
+    ],
+    "shake": [
+      {
+        "file": "motions/shake/shake_01.mtn"
+      }
+    ],
+    "idle": [
+      {
+        "file": "motions/idle/00.mtn"
+      },
+      {
+        "file": "motions/idle/01.mtn"
+      },
+      {
+        "file": "motions/idle/04.mtn"
+      },
+      {
+        "file": "motions/idle/05.mtn"
+      },
+      {
+        "file": "motions/idle/07.mtn"
+      },
+      {
+        "file": "motions/idle/08.mtn"
+      },
+      {
+        "file": "motions/idle/09.mtn"
+      },
+      {
+        "file": "motions/idle/idle_03.mtn"
+      },
+      {
+        "file": "motions/idle/idle_06.mtn"
+      },
+      {
+        "file": "motions/idle/idle_07.mtn"
+      },
+      {
+        "file": "motions/idle/idle_08.mtn"
+      },
+      {
+        "file": "motions/idle/idle_09.mtn"
+      },
+      {
+        "file": "motions/idle/idl_00.mtn"
+      },
+      {
+        "file": "motions/idle/idl_01.mtn"
+      },
+      {
+        "file": "motions/idle/sleep.mtn"
+      },
+      {
+        "file": "motions/idle/stretch.mtn"
+      }
+    ]
+  },
+  "expressions": [
+    {
+      "name": "expression.json",
+      "file": "expressions/expression.json"
+    },
+    {
+      "name": "F00.exp.json",
+      "file": "expressions/F00.exp.json"
+    },
+    {
+      "name": "F01.exp.json",
+      "file": "expressions/F01.exp.json"
+    },
+    {
+      "name": "F02.exp.json",
+      "file": "expressions/F02.exp.json"
+    }
+  ],
+  "physics": "physics.json",
+  "pose": "pose.json"
+}
