@@ -1,12 +1,6 @@
 <template>
     <el-button id="darkMode" size=small @click="openAuth()">
-        <!-- <i inline-flex  i="dark:ep-moon ep-sunny" /> -->
-
-      <!-- <span class="ml-2">{{ isDark ? 'Dark' : 'Light' }}</span> -->
     </el-button>
-    <!-- <el-button class="datkbutton2" @click="dialogFormVisible = true">
-        <i inline-flex  i="dark:ep-moon ep-sunny" />
-    </el-button> -->
     <el-dialog v-model="dialogFormVisible" title="">
       <el-form :model="form">
          <el-form-item label="grant_type" :label-width="formLabelWidth">
@@ -21,7 +15,6 @@
         <el-form-item label="client secret" :label-width="formLabelWidth"  v-if = "form.grant_type == 'client_credentials'">
           <el-input v-model="form.secret" autocomplete="off" @keyup.enter="oauth" />
         </el-form-item>
-  
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -36,7 +29,6 @@
 
 <script lang="ts" setup>
 import { reactive, ref} from 'vue'
-import { toggleDark } from '../composables';
 import axios from 'axios';
 import {access} from '../access';
 
@@ -57,17 +49,14 @@ function oauth() {
   dialogFormVisible.value = false;
   if (form.grant_type == "client_credentials") {
     const option = {
+      baseURL: 'https://auth.elpsykongroo.com/',
       url: "/oauth2/token",
       method: "POST",
       params: {
         grant_type: "client_credentials"
       },
       headers: {
-      // 'Access-Control-Allow-Credentials': true,
-      // 'Access-Control-Allow-Origin': '*',
-      // 'Access-Control-Allow-Methods': 'POST',
-      // 'Access-Control-Allow-Headers': 'application/x-www-form-urlencoded',
-      // 'Authorization': 'Bearer eyJraWQiOiI1NTE4YzBjNS01Yzk0LTQ2MzMtOTc1Zi1lYjE1NzAwNDI5YmYiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJsYWJtYW40IiwiYXVkIjoibGFibWFuNCIsIm5iZiI6MTY2NzQ4NTI4MCwic2NvcGUiOlsibWVzc2FnZS5yZWFkIl0sImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6OTAwMCIsImV4cCI6MTY2NzQ4NTU4MCwiaWF0IjoxNjY3NDg1MjgwfQ.on4oTJSjfy91GDvNuJYywzHfYG7Hd9D_zlR-bAq46QYC_MUcMbireMbdmGSr63rN7a7Sto_eRIZIa3DhlEGyyJ7ZdkSN3dd1TLY_KpNLzfRbrxY0pV5_QXpbnOD1pHAPmCc5yNDfA3Fv6pteoMQ8qgd1c5eBGVmZKOSsXZnb2i-10cBM_KEeOWL1MudhjTRHluk9xrS9LAczPoG9UM5ZU2_Q9J3-Mx1RmSvybSQG6OP9VXuH4r6ecXITCYMeJryveVY5gpZvvnzbFkY5fKf4jVjvV_lay19net-UwBB7vOwxfo7fBs-GM2T-Oa3XwoQhSDxT-Blr88BViunKS9TW_g'
+    
       },           
       auth : { 
           username : form.name , 

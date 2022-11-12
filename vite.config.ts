@@ -23,32 +23,32 @@ const pathSrc = path.resolve(__dirname, 'src')
 export default defineConfig({
   server: {
     cors: true, // 默认启用并允许任何源
-    proxy: {
-      "^/oauth2": {
-        target: "https://auth.elpsykongroo.com",
-        changeOrigin: true,
-        secure: false,
-        // rewrite: (path) => path.replace(/^\/oauth2/, ""),
-      },
-      "^/public": {
-        target: "https://api.elpsykongroo.com",
-        changeOrigin: true,
-        secure: false,
-        // rewrite: (path) => path.replace(/^\/public/, ""),
-      },
-      "^/ip": {
-        target: "https://api.elpsykongroo.com",
-        changeOrigin: true,
-        secure: false,
-        // rewrite: (path) => path.replace(/^\/public/, ""),
-      },
-      "^/record": {
-        target: "https://api.elpsykongroo.com",
-        changeOrigin: true,
-        secure: false,
-        // rewrite: (path) => path.replace(/^\/public/, ""),
-      },
-    }
+    // proxy: {
+    //   "^/oauth2": {
+    //     target: "https://auth.elpsykongroo.com",
+    //     changeOrigin: true,
+    //     secure: false,
+    //     // rewrite: (path) => path.replace(/^\/oauth2/, ""),
+    //   },
+    //   "^/public": {
+    //     target: "https://api.elpsykongroo.com",
+    //     changeOrigin: true,
+    //     secure: false,
+    //     // rewrite: (path) => path.replace(/^\/public/, ""),
+    //   },
+    //   "^/ip": {
+    //     target: "https://api.elpsykongroo.com",
+    //     changeOrigin: true,
+    //     secure: false,
+    //     // rewrite: (path) => path.replace(/^\/public/, ""),
+    //   },
+    //   "^/record": {
+    //     target: "https://api.elpsykongroo.com",
+    //     changeOrigin: true,
+    //     secure: false,
+    //     // rewrite: (path) => path.replace(/^\/public/, ""),
+    //   },
+    // }
   },
   resolve: {
     alias: {

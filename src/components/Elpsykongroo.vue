@@ -15,7 +15,6 @@
           <el-dropdown-item>Kubernetes-dashboard</el-dropdown-item>
           <el-dropdown-item>Linkerd</el-dropdown-item>
           <el-dropdown-item>Jaeger</el-dropdown-item>
-          <!-- <el-dropdown-item divided>Action 5</el-dropdown-item> -->
         </el-dropdown-menu>
       </template>
     </el-dropdown>
@@ -27,22 +26,43 @@
       <el-table-column property="black" label="black"/>
       <el-table-column label="Operations">
       <template #default="scope">
-        <!-- <el-button size="small" @click="handleEdit(scope.$index, scope.row)">Edit</el-button> -->
         <el-button
           size="small"
           type="danger"
           @click="DeleteIP(scope.$index, scope.row)"
           >Delete</el-button>
       </template>
-    </el-table-column>
-
+      </el-table-column>
     </el-table>
     <el-pagination layout="prev, pager, next, sizes" :total="50" 
-    :current-page="ipPage.pageNumber"  
-    :page-size="ipPage.pageSize"
-    @update:current-page="ipPageChange"
-    @update:page-size="ipPageSizeChange"/>
-    </el-dialog>
+      :current-page="ipPage.pageNumber"  
+      :page-size="ipPage.pageSize"
+      @update:current-page="ipPageChange"
+      @update:page-size="ipPageSizeChange"/>
+  </el-dialog>
+
+  <el-dialog v-model="ipFormVisible" title="">
+    <el-form :model="form">
+        <el-form-item label="type" :label-width="ipFormLabelWidth">
+        <el-select v-model="form.black" placeholder="">
+          <el-option label="white" value="false" />
+          <el-option label="black" value="true" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="address" :label-width="ipFormLabelWidth">
+        <el-input v-model="form.address" autocomplete="off" @keyup.enter="ipListAdd" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="ipFormVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="ipListAdd" >
+          Confirm
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
+
   <el-dialog v-model="recordTableVisible" title="records">
     <el-button type="danger" @click="DeleteSelect">DeleteSelect</el-button>
     <el-table :data="datas.records" @selection-change="handleSelectionChange">
@@ -53,43 +73,21 @@
       <el-table-column property="timestamp" label="date" :formatter="timestamp" sortable/>
       <el-table-column label="Operations">
       <template #default="scope">
-        <!-- <el-button size="small" @click="handleEdit(scope.$index, scope.row)">Edit</el-button> -->
         <el-button
           size="small"
           type="danger"
           @click="DeleteRecord(scope.$index, scope.row)"
           >Delete</el-button>
       </template>
-    </el-table-column>
+      </el-table-column>
     </el-table>
     <el-pagination layout="prev, pager, next, sizes" :total="50" 
-    :current-page="recordPage.pageNumber"  
-    :page-size="recordPage.pageSize"
-    @update:current-page="recordPageChange"
-    @update:page-size="recordPageSizeChange"/>
+      :current-page="recordPage.pageNumber"  
+      :page-size="recordPage.pageSize"
+      @update:current-page="recordPageChange"
+      @update:page-size="recordPageSizeChange"/>
   </el-dialog>
-  <el-dialog v-model="ipFormVisible" title="">
-      <el-form :model="form">
-         <el-form-item label="type" :label-width="ipFormLabelWidth">
-          <el-select v-model="form.black" placeholder="white">
-            <el-option label="white" value="true" />
-            <el-option label="black" value="false" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="address" :label-width="ipFormLabelWidth">
-          <el-input v-model="form.address" autocomplete="off" @keyup.enter="ipListAdd" />
-        </el-form-item>
-  
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="ipFormVisible = false">Cancel</el-button>
-          <el-button type="primary" @click="ipListAdd" >
-            Confirm
-          </el-button>
-        </span>
-      </template>
-    </el-dialog>
+
   </template>
   
 <script lang="ts" setup>
@@ -101,27 +99,29 @@ import moment  from 'moment';
 import { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults';
 const ips = [{}];
 const records:Record[]= [];
-const record:Record[] = []
-
 const recordPage = {
   "pageNumber": 1,
   "pageSize": 10,
   "order": "0"
 };
+
 const ipPage = {
   "pageNumber": 1,
   "pageSize": 20,
   "order": "0"
 };
+
 const form =  reactive({
   "address": '',
-  "black": "true"
+  "black": ""
 })
+
 const datas = reactive({ips, records});
 const ipTableVisible=ref(false);
 const recordTableVisible=ref(false);
 const ipFormVisible=ref(false)
 const ipFormLabelWidth="100px";
+
 interface Record {
   timestamp: string
   id: string
@@ -141,10 +141,10 @@ function openIpAdd() {
 
 }
 
-
 function ipListAdd() {
     ipFormVisible.value = false ;
     const option = {
+    baseURL: 'https://api.elpsykongroo.com/',
     url: "/ip/manage/add",
     method: "PUT",
     params: {
@@ -152,10 +152,6 @@ function ipListAdd() {
       address: form.address,
     },
     headers: {
-    // 'Access-Control-Allow-Credentials': true,
-    // 'Access-Control-Allow-Origin': '*',
-    // 'Access-Control-Allow-Methods': 'POST',
-    // 'Access-Control-Allow-Headers': 'application/x-www-form-urlencoded',
     'Authorization': 'Bearer '+ access.access_token
     },
   }
@@ -167,10 +163,12 @@ function ipListAdd() {
       
     }
   })
+
 }
 function ipList(pageNumber:number, pageSize:number, order:string) {
   ipTableVisible.value = true;
   const option = {
+    baseURL: 'https://api.elpsykongroo.com/',
     url: "/ip/manage/list",
     method: "GET",
     params: {
@@ -179,10 +177,6 @@ function ipList(pageNumber:number, pageSize:number, order:string) {
       pageSize: ipPage.pageSize
     },
     headers: {
-    // 'Access-Control-Allow-Credentials': true,
-    // 'Access-Control-Allow-Origin': '*',
-    // 'Access-Control-Allow-Methods': 'POST',
-    // 'Access-Control-Allow-Headers': 'application/x-www-form-urlencoded',
     'Authorization': 'Bearer '+ access.access_token
     },
   }
@@ -191,9 +185,32 @@ function ipList(pageNumber:number, pageSize:number, order:string) {
   })
 }
 
+const DeleteIP = (index: number, row: IP) => {
+  const option = {
+    baseURL: 'https://api.elpsykongroo.com/',
+    url: "/ip/manage/patch",
+    method: "PATCH",
+    params: {
+      "address": "",
+      "black": row.black,
+      "id": row.id
+    },
+    headers: {
+    'Authorization': 'Bearer '+ access.access_token
+    },
+  }
+  axios(option).then(function (response) {
+    var count = response.data.data;
+    if (count == "done") {
+      datas.ips.splice(index, 1);
+    }
+  }) 
+}
+
 function recordList(pageNumber:number, pageSize:number, order:string) {
   recordTableVisible.value = true;
   const option = {
+    baseURL: 'https://api.elpsykongroo.com/',
     url: "/record/access",
     method: "GET",
     params: {
@@ -202,17 +219,12 @@ function recordList(pageNumber:number, pageSize:number, order:string) {
       "order": recordPage.order
     },
     headers: {
-    // 'Access-Control-Allow-Credentials': true,
-    // 'Access-Control-Allow-Origin': '*',
-    // 'Access-Control-Allow-Methods': 'POST',
-    // 'Access-Control-Allow-Headers': 'application/x-www-form-urlencoded',
-    'Authorization': 'Bearer '+ access.access_token
-  },
-}
-axios(option).then(function (response) {
-  record.values = response.data.data.content;
+      'Authorization': 'Bearer '+ access.access_token
+    },
+  } 
+  axios(option).then(function (response) {
   datas.records = response.data.data.content;
-})
+  })
 }
 const ipPageChange = (newPage: number) => {
   ipPage.pageNumber = newPage;
@@ -249,6 +261,7 @@ const handleSelectionChange = (val: Record[]) => {
 
 const DeleteSelect= (index: number) => {
   const option = {
+    baseURL: 'https://api.elpsykongroo.com/',
     url: "/record/delete",
     method: "DELETE",
     params: {
@@ -256,11 +269,7 @@ const DeleteSelect= (index: number) => {
       "id": selectRecord.toString(),
     },
     headers: {
-    // 'Access-Control-Allow-Credentials': true,
-    // 'Access-Control-Allow-Origin': '*',
-    // 'Access-Control-Allow-Methods': 'POST',
-    // 'Access-Control-Allow-Headers': 'application/x-www-form-urlencoded',
-    'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function (response) {
@@ -296,6 +305,7 @@ const DeleteSelect= (index: number) => {
 
 const DeleteRecord = (index: number, row: Record) => {
   const option = {
+    baseURL: 'https://api.elpsykongroo.com/',
     url: "/record/delete",
     method: "DELETE",
     params: {
@@ -303,11 +313,7 @@ const DeleteRecord = (index: number, row: Record) => {
       "id": row.id,
     },
     headers: {
-    // 'Access-Control-Allow-Credentials': true,
-    // 'Access-Control-Allow-Origin': '*',
-    // 'Access-Control-Allow-Methods': 'POST',
-    // 'Access-Control-Allow-Headers': 'application/x-www-form-urlencoded',
-    'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function (response) {
@@ -317,36 +323,6 @@ const DeleteRecord = (index: number, row: Record) => {
     }
   })
 }
-const DeleteIP = (index: number, row: IP) => {
-  const option = {
-    url: "/ip/manage/patch",
-    method: "PATCH",
-    params: {
-      "address": "",
-      "black": "",
-      "id": row.id
-    },
-    headers: {
-    // 'Access-Control-Allow-Credentials': true,
-    // 'Access-Control-Allow-Origin': '*',
-    // 'Access-Control-Allow-Methods': 'POST',
-    // 'Access-Control-Allow-Headers': 'application/x-www-form-urlencoded',
-    'Authorization': 'Bearer '+ access.access_token
-    },
-  }
-  axios(option).then(function (response) {
-    var count = response.data.data;
-    if (count == "done") {
-      datas.ips.splice(index, 1);
-    }
-  })
-  
-}
-
-
-
-
-
 
 function timestamp(row:Record, column:TableColumnCtx<Record>) {
   return moment(row.timestamp).format("YYYY-MM-DD HH:mm:ss");
@@ -360,8 +336,4 @@ function timestamp(row:Record, column:TableColumnCtx<Record>) {
   display: flex;
   align-items: center;
 }
-
-/* #domainlist {
-  position: absolute;left: 0px; top: 50px;
-} */
 </style>

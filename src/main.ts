@@ -11,10 +11,9 @@ import App from "./App.vue";
 
 import "~/styles/index.scss";
 import 'uno.css'
-// import "bootstrap/dist/css/bootstrap.min.css";
 
 // If you want to use ElMessage, import it.
-import "element-plus/theme-chalk/src/message.scss"
+// import "element-plus/theme-chalk/src/message.scss"
 
 import 'virtual:svg-icons-register'
 import SvgIcon from "~/components/Svg/SvgIcon.vue";

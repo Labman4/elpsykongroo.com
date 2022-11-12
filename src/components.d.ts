@@ -32,7 +32,6 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     SvgIcon: typeof import('./components/Svg/SvgIcon.vue')['default']
     Tabs: typeof import('./components/layouts/Tabs.vue')['default']
-    TimeCountdown: typeof import('./components/TimeCountdown.vue')['default']
     Topblank: typeof import('./components/Topblank.vue')['default']
   }
 }
