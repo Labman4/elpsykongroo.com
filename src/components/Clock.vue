@@ -1,22 +1,35 @@
 <template>
-    <div id='nixietube-template' style='display:none;'>
-        <div id='nixie-tube-[order]' class='nixie-container'>
-            <div class='nixie-background'></div>
-            <SvgIcon class='nixie-number nixie-number-0' name="clock-0"></SvgIcon>
-            <SvgIcon class='nixie-number nixie-number-1' name="clock-1"></SvgIcon>
-            <SvgIcon class='nixie-number nixie-number-2' name="clock-2"></SvgIcon>
-            <SvgIcon class='nixie-number nixie-number-3' name="clock-3"></SvgIcon>
-            <SvgIcon class='nixie-number nixie-number-4' name="clock-4"></SvgIcon>
-            <SvgIcon class='nixie-number nixie-number-5' name="clock-5"></SvgIcon>
-            <SvgIcon class='nixie-number nixie-number-6' name="clock-6"></SvgIcon>
-            <SvgIcon class='nixie-number nixie-number-7' name="clock-7"></SvgIcon>
-            <SvgIcon class='nixie-number nixie-number-8' name="clock-8"></SvgIcon>
-            <SvgIcon class='nixie-number nixie-number-9' name="clock-9"></SvgIcon>
+    <div class="hidden-md-and-down">
+        <div id="top-blank"></div>
+        <div id='nixietube-template' style='display:none;'>
+            <div id='nixie-tube-[order]' class='nixie-container'>
+                <div class='nixie-background'></div>
+                <SvgIcon class='nixie-number nixie-number-0' name="clock-0"></SvgIcon>
+                <SvgIcon class='nixie-number nixie-number-1' name="clock-1"></SvgIcon>
+                <SvgIcon class='nixie-number nixie-number-2' name="clock-2"></SvgIcon>
+                <SvgIcon class='nixie-number nixie-number-3' name="clock-3"></SvgIcon>
+                <SvgIcon class='nixie-number nixie-number-4' name="clock-4"></SvgIcon>
+                <SvgIcon class='nixie-number nixie-number-5' name="clock-5"></SvgIcon>
+                <SvgIcon class='nixie-number nixie-number-6' name="clock-6"></SvgIcon>
+                <SvgIcon class='nixie-number nixie-number-7' name="clock-7"></SvgIcon>
+                <SvgIcon class='nixie-number nixie-number-8' name="clock-8"></SvgIcon>
+                <SvgIcon class='nixie-number nixie-number-9' name="clock-9"></SvgIcon>
+            </div>
         </div>
-      </div>
-      <div id='clock-surface'></div>
+        <div id='clock-surface'></div>
+    </div>
 </template>
 <style>
+  #top-blank {
+    top: 56px;
+    position: fixed;
+    left: 0px;
+    background-color: #000000;
+    height: 18.96%;
+    width: 100%;
+    border: 0px;
+  }
+
   #clock-surface {
       position: fixed;
       top: 200px;
@@ -52,7 +65,7 @@
   .nixie-container .nixie-number {
       display: block;
       position: absolute;
-      width: 100px;
+      width: px;
   }
   
   .nixie-number .nixie-number-part {

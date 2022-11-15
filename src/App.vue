@@ -1,5 +1,5 @@
 <template>
-  <Hybrid/>
+  <Bootstrap/>
   <Dark/>
 </template>
 

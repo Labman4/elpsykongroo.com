@@ -1,5 +1,5 @@
 <template>
-    <el-button id="darkMode" size=small @click="openAuth()">
+    <el-button id="darkMode" size=small @click="openAuth()" v-if = "access.expires_in == 0">
     </el-button>
     <el-dialog v-model="dialogFormVisible" title="">
       <el-form :model="form">
@@ -31,6 +31,8 @@
 import { reactive, ref} from 'vue'
 import axios from 'axios';
 import {access} from '../access';
+import { ElButton, ElDialog, ElForm, ElFormItem, ElSelect, ElOption, ElInput } from 'element-plus';
+import { toggleDark } from '~/composables';
 
 const timeCount= ref(0);
 const dialogFormVisible = ref(false);
@@ -66,18 +68,18 @@ function oauth() {
     axios(option).then(function (response) {
       if(response.data.access_token != "") {
         access.update(response.data.access_token, response.data.expires_in);
-        // toggleDark();
+        toggleDark();
         countDown();
       }
     })     
   }    
 }
 
-
 function countDown() {
   timeCount.value = window.setInterval(() => {
     access.expires_in--;
-    if(access.expires_in <= 0) {
+    if(access.expires_in == 0) {
+      toggleDark();
       clearInterval(timeCount.value)
     }
   }, 1000)

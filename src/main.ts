@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
+import router from './router/router'
 
 // import "~/styles/element/index.scss";
 
@@ -17,8 +18,11 @@ import 'uno.css'
 
 import 'virtual:svg-icons-register'
 import SvgIcon from "~/components/Svg/SvgIcon.vue";
+import 'element-plus/theme-chalk/display.css'
 
 const app = createApp(App)
-.component('svg-icon', SvgIcon);
+            .component('svg-icon', SvgIcon);
+
+app.use(router);
 // app.use(ElementPlus);
 app.mount("#app");

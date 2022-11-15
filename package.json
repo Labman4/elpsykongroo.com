@@ -17,7 +17,8 @@
     "markdown": "^0.5.0",
     "moment": "^2.29.4",
     "vite-plugin-svg-icons": "^2.0.1",
-    "vue": "^3.2.36"
+    "vue": "^3.2.36",
+    "vue-router": "^4.1.6"
   },
   "devDependencies": {
     "@iconify-json/ep": "^1.1.4",

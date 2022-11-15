@@ -1,23 +1,26 @@
 <template>
-    <el-dropdown id="domainlist" v-if = "access.expires_in > 0">
-      <span class="el-dropdown-link">
-        <el-button size="small" @click="access.update(access.access_token, access.expires_in)">
-         {{access.expires_in}}s
-        </el-button>
-        <el-icon class="el-icon--right">
-          <arrow-down />
-        </el-icon>
-      </span>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item @click="ipList" >ip manage</el-dropdown-item>
-          <el-dropdown-item @click="recordList" >access record</el-dropdown-item>
-          <el-dropdown-item>Kubernetes-dashboard</el-dropdown-item>
-          <el-dropdown-item>Linkerd</el-dropdown-item>
-          <el-dropdown-item>Jaeger</el-dropdown-item>
-        </el-dropdown-menu>
+  <el-menu
+    default-active="1"
+    class="el-menu-vertical-demo"
+    :collapse="false">
+    <el-sub-menu index="1">
+      <template #title>
+        <el-icon><location /></el-icon>Gateway
       </template>
-    </el-dropdown>
+      <el-menu-item-group>
+        <el-menu-item index="1-1" @click="ipList">ip</el-menu-item>
+      </el-menu-item-group>
+      <el-sub-menu index="1-2">
+        <template #title><span>record</span></template>
+        <el-menu-item index="1-2-1" @click="recordList(recordPage.pageNumber,recordPage.pageSize,'1')" >Asc</el-menu-item>
+        <el-menu-item index="1-2-2" @click="recordList(recordPage.pageNumber,recordPage.pageSize,'0')" >Desc</el-menu-item>
+      </el-sub-menu>
+    </el-sub-menu>
+    <el-menu-item>
+      <el-icon><setting /></el-icon>
+      <template #title>{{access.expires_in}}s</template>
+    </el-menu-item>
+  </el-menu>
 
   <el-dialog v-model="ipTableVisible" title="address">
     <el-button type="" @click="openIpAdd">Add</el-button>
@@ -91,12 +94,18 @@
   </template>
   
 <script lang="ts" setup>
-import { ArrowDown } from '@element-plus/icons-vue'
 import axios from 'axios';
 import { access } from '../access';
 import { reactive, ref } from 'vue'
 import moment  from 'moment';
 import { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults';
+import {
+  Document,
+  Menu as IconMenu,
+  Location,
+  Setting,
+} from '@element-plus/icons-vue'
+
 const ips = [{}];
 const records:Record[]= [];
 const recordPage = {
@@ -138,7 +147,6 @@ interface IP {
 
 function openIpAdd() {
   ipFormVisible.value = true ;
-
 }
 
 function ipListAdd() {
@@ -156,7 +164,8 @@ function ipListAdd() {
     },
   }
   axios(option).then(function(response){
-    if (response.data.data.length > 0) {
+    const len = response.data.data.length;
+    if (len > 0) {
       ipList(ipPage.pageNumber, ipPage.pageSize, ipPage.order);   
     }
   })
@@ -206,6 +215,7 @@ const DeleteIP = (index: number, row: IP) => {
 
 function recordList(pageNumber:number, pageSize:number, order:string) {
   recordTableVisible.value = true;
+  recordPage.order = order;
   const option = {
     baseURL: 'https://api.elpsykongroo.com/',
     url: "/record/access",
@@ -326,10 +336,14 @@ function timestamp(row:Record, column:TableColumnCtx<Record>) {
 }
 </script>
 <style scoped>
-.example-showcase .el-dropdown-link {
+/* .example-showcase .el-dropdown-link {
   cursor: pointer;
   color: var(--el-color-primary);
   display: flex;
   align-items: center;
-}
+} */
+/* .el-menu-vertical-demo:not(.el-menu--collapse) {
+  width: 200px;
+  min-height: 200px;
+} */
 </style>
