@@ -5,6 +5,7 @@ import '@vue/runtime-core'
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    Argocd: typeof import('./components/dashboard/Argocd.vue')['default']
     Bootstrap: typeof import('./components/layouts/Bootstrap.vue')['default']
     Clock: typeof import('./components/Clock.vue')['default']
     Dark: typeof import('./components/Dark.vue')['default']
@@ -33,8 +34,8 @@ declare module '@vue/runtime-core' {
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
+    Harbor: typeof import('./components/dashboard/Harbor.vue')['default']
     Home: typeof import('./components/Home.vue')['default']
-    Jaeger: typeof import('./components/dashboard/Jaeger.vue')['default']
     Kibana: typeof import('./components/dashboard/Kibana.vue')['default']
     Kubernetes: typeof import('./components/dashboard/Kubernetes.vue')['default']
     Linkerd: typeof import('./components/dashboard/Linkerd.vue')['default']
