@@ -3,16 +3,16 @@
     </el-button>
     <el-dialog v-model="dialogFormVisible" title="">
       <el-form :model="form">
-         <el-form-item label="grant_type" :label-width="formLabelWidth">
+         <el-form-item label="type" :label-width="formLabelWidth">
           <el-select v-model="form.grant_type" placeholder="">
-            <el-option label="------------------" value="" />
-            <el-option label="client_credentials" value="client_credentials" />
+            <el-option label="-----------" value="" />
+            <el-option label="credentials" value="client_credentials" />
           </el-select>
         </el-form-item>
-        <el-form-item label="client id" :label-width="formLabelWidth"  v-if = "form.grant_type == 'client_credentials'">
+        <el-form-item label="client" :label-width="formLabelWidth"  v-if = "form.grant_type == 'client_credentials'">
           <el-input v-model="form.name" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="client secret" :label-width="formLabelWidth"  v-if = "form.grant_type == 'client_credentials'">
+        <el-form-item label="secret" :label-width="formLabelWidth"  v-if = "form.grant_type == 'client_credentials'">
           <el-input v-model="form.secret" autocomplete="off" @keyup.enter="oauth" />
         </el-form-item>
       </el-form>
@@ -30,13 +30,13 @@
 <script lang="ts" setup>
 import { reactive, ref} from 'vue'
 import axios from 'axios';
-import {access} from '../access';
+import { access } from '../access';
 import { ElButton, ElDialog, ElForm, ElFormItem, ElSelect, ElOption, ElInput } from 'element-plus';
 import { toggleDark } from '~/composables';
 
 const timeCount= ref(0);
 const dialogFormVisible = ref(false);
-const formLabelWidth = '100px';
+const formLabelWidth = "auto";
 const form = reactive({
   name: '',
   secret: '',

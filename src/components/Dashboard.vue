@@ -10,10 +10,11 @@
               </template>
               <el-menu-item-group>
                 <!-- <template #title>Kubernetes</template> -->
-                <el-menu-item index="1-1" route="kubernetes">kubernetes</el-menu-item>
-                <el-menu-item index="1-2" route="Linkerd">Linkerd</el-menu-item>
-                <el-menu-item index="1-3" route="Jaeger">Jaeger</el-menu-item>
-                <el-menu-item index="1-4" route="Kibana">Kibana</el-menu-item>
+                <el-menu-item route="kubernetes">kubernetes</el-menu-item>
+                <el-menu-item route="linkerd">Linkerd</el-menu-item>
+                <el-menu-item route="kibana">Kibana</el-menu-item>
+                <el-menu-item route="harbor">Harbor</el-menu-item>
+                <el-menu-item route="argocd">Argocd</el-menu-item>
 
               </el-menu-item-group>
             </el-sub-menu>
@@ -42,16 +43,24 @@
         </el-header> -->
   
         <el-main>
-          <router-view/>
+          <router-view ref="iframeView"/>
         </el-main>
       </el-container>
     </el-container>
   </template>
   
-  <script lang="ts" setup>
-  import { access } from '../access';
+<script lang="ts" setup>
+import { access } from '../access';
+// import { ref, onMounted} from 'vue'
 
-  </script>
+// let iframeView = ref<any>(null);
+  // onMounted(() => {
+  //   window.addEventListener("message", (event) => {
+  //     if (event.origin !== 'https://dashboard.elpsykongroo.com') return
+ 
+  //   });
+  // })
+</script>
   
   <style scoped>
   .layout-container-demo .el-header {
