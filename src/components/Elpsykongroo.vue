@@ -187,7 +187,7 @@ function ipList(pageNumber:number, pageSize:number, order:string) {
     },
   }
   axios(option).then(function (response) {
-    datas.ips=response.data.data.content;
+    datas.ips=response.data.data;
   })
 }
 
@@ -230,7 +230,7 @@ function recordList(pageNumber:number, pageSize:number, order:string) {
     },
   } 
   axios(option).then(function (response) {
-  datas.records = response.data.data.content;
+  datas.records = response.data.data;
   })
 }
 const ipPageChange = (newPage: number) => {

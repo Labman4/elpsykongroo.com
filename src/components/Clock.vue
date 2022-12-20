@@ -21,11 +21,11 @@
 </template>
 <style>
   #top-blank {
-    top: 56px;
+    top: 5.8%;
     position: fixed;
     left: 0px;
     background-color: #000000;
-    height: 18.96%;
+    height: 22.6%;
     width: 100%;
     border: 0px;
   }
