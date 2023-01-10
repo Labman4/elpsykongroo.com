@@ -66,15 +66,21 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="recordTableVisible" title="records">
+  <el-dialog v-model="recordTableVisible" title="records" style="width: 70%">
     <el-button type="danger" @click="DeleteSelect">DeleteSelect</el-button>
     <el-table :data="datas.records" @selection-change="handleSelectionChange">
       <el-table-column type="selection"/>
-      <el-table-column property="sourceIP" label="address" />
-      <el-table-column property="accessPath" label="path"  width="300px"/>
-      <el-table-column property="userAgent" label="userAgent"/>
+      <el-table-column property="sourceIP" label="address" width="130px" >
+      </el-table-column>
+      <el-table-column property="accessPath" label="path"  width="170px">
+      </el-table-column>
+      <el-table-column property="userAgent" label="userAgent"  width="300px">
+      </el-table-column>
       <el-table-column property="timestamp" label="date" :formatter="timestamp" sortable/>
-      <el-table-column label="Operations">
+      <el-table-column  align="right">
+      <template #header>
+        <el-input v-model="search" size="small" placeholder="Type to search"  @keyup.enter="filterByParam" />
+      </template>
       <template #default="scope">
         <el-button
           size="small"
@@ -121,7 +127,7 @@ const ipPage = {
 };
 
 const form =  reactive({
-  "address": '',
+  "address": "",
   "black": ""
 })
 
@@ -144,6 +150,27 @@ interface IP {
   black: string
   id: string
 }
+
+const search = ref('')
+
+function filterByParam(pageNumber:number, pageSize:number) {
+  const option = {
+    baseURL: 'https://api.elpsykongroo.com/',
+    url: "/record/filter",
+    method: "POST",
+    params: {
+      "param": search.value,
+      "pageNumber": recordPage.pageNumber,
+      "pageSize": recordPage.pageSize
+    },
+    headers: {
+      'Authorization': 'Bearer '+ access.access_token
+    },
+  }
+  axios(option).then(function (response) {
+    datas.records=response.data.data;
+  })
+ }
 
 function openIpAdd() {
   ipFormVisible.value = true ;
@@ -289,7 +316,11 @@ const DeleteSelect= (index: number) => {
         }) 
       });
       if (datas.records.length == 0) {
-        recordList(recordPage.pageNumber, recordPage.pageSize, recordPage.order);
+        if (search.value != '') {
+          filterByParam(recordPage.pageNumber, recordPage.pageSize);
+        } else {
+          recordList(recordPage.pageNumber, recordPage.pageSize, recordPage.order);
+        }
       } 
     }
     // if (count == selectRecord.length) {
