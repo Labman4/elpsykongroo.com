@@ -1,0 +1,1 @@
+import{d as o,c as r,a as t,n,o as a}from"./index.c9875a30.js";const m=o({__name:"Harbor",setup(s){const e=window.innerHeight+"px";return(i,c)=>(a(),r("div",null,[t("iframe",{src:"https://registry.elpsykongroo.com",scrolling:"no",frameborder:"0",style:n({width:"100%",height:e})},null,4)]))}});export{m as default};

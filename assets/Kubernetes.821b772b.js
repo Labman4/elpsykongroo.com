@@ -1,0 +1,2 @@
+import{d as o,c as n,a as t,n as r,o as a}from"./index.c9875a30.js";const d=o({__name:"Kubernetes",setup(s){const e=window.innerHeight+"px";return(c,i)=>(a(),n("div",null,[t("iframe",{src:"https://dashboard.elpsykongroo.com",scrolling:"no",frameborder:"0",style:r({width:"100%",height:e})},`
+        `,4)]))}});export{d as default};

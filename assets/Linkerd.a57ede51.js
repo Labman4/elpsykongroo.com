@@ -1,0 +1,1 @@
+import{d as n,c as o,a as t,n as r,o as a}from"./index.c9875a30.js";const d=n({__name:"Linkerd",setup(s){const e=window.innerHeight+"px";return(i,l)=>(a(),o("div",null,[t("iframe",{src:"https://linkerd.elpsykongroo.com",scrolling:"no",frameborder:"0",style:r({width:"100%",height:e})},null,4)]))}});export{d as default};

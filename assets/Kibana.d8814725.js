@@ -1,0 +1,1 @@
+import{d as n,c as o,a as t,n as a,o as r}from"./index.c9875a30.js";const m=n({__name:"Kibana",setup(s){const e=window.innerHeight+"px";return(i,c)=>(r(),o("div",null,[t("iframe",{src:"https://kibana.elpsykongroo.com",scrolling:"no",frameborder:"0",style:a({width:"100%",height:e})},null,4)]))}});export{m as default};
