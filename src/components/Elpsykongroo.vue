@@ -160,7 +160,7 @@ function filterByParam(pageNumber:number, pageSize:number) {
     method: "POST",
     params: {
       "param": search.value,
-      "pageNumber": recordPage.pageNumber,
+      "pageNumber": recordPage.pageNumber-1,
       "pageSize": recordPage.pageSize
     },
     headers: {
@@ -272,12 +272,20 @@ const ipPageSizeChange = (newPage: number) => {
 
 const recordPageChange = (newPage: number) => {
   recordPage.pageNumber = newPage;
-  recordList(recordPage.pageNumber, recordPage.pageSize, recordPage.order);
+  if (search.value != '') {
+    filterByParam(recordPage.pageNumber, recordPage.pageSize);
+  } else {
+    recordList(recordPage.pageNumber, recordPage.pageSize, recordPage.order);
+  }
 }
 
 const recordPageSizeChange = (newPage: number) => {
   recordPage.pageSize = newPage;
-  recordList(recordPage.pageNumber, recordPage.pageSize, recordPage.order);
+  if (search.value != '') {
+    filterByParam(recordPage.pageNumber, recordPage.pageSize);
+  } else {
+    recordList(recordPage.pageNumber, recordPage.pageSize, recordPage.order);
+  }
 }
 
 const multipleSelection = ref<Record[]>([])
