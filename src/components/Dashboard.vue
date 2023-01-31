@@ -6,7 +6,7 @@
           :collapse="false" :router="true">
             <el-sub-menu index="1" route="dashboard">
               <template #title>
-                <el-icon><message /></el-icon>Dashboard
+                <el-icon><Menu/></el-icon>Dashboard
               </template>
               <el-menu-item-group>
                 <!-- <template #title>Kubernetes</template> -->
@@ -14,8 +14,6 @@
                 <el-menu-item route="linkerd">Linkerd</el-menu-item>
                 <el-menu-item route="kibana">Kibana</el-menu-item>
                 <el-menu-item route="harbor">Harbor</el-menu-item>
-                <el-menu-item route="argocd">Argocd</el-menu-item>
-
               </el-menu-item-group>
             </el-sub-menu>
           </el-menu>
@@ -50,6 +48,7 @@
   </template>
   
 <script lang="ts" setup>
+import { Menu } from '@element-plus/icons-vue';
 import { access } from '../access';
 // import { ref, onMounted} from 'vue'
 

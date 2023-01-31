@@ -8,7 +8,7 @@
         <el-icon><location /></el-icon>Gateway
       </template>
       <el-menu-item-group>
-        <el-menu-item index="1-1" @click="ipList">ip</el-menu-item>
+        <el-menu-item index="1-1" click="ipList">ip</el-menu-item>
       </el-menu-item-group>
       <el-sub-menu index="1-2">
         <template #title><span>record</span></template>
@@ -18,7 +18,7 @@
     </el-sub-menu>
     <el-menu-item>
       <el-icon><setting /></el-icon>
-      <template #title>{{access.expires_in}}s</template>
+      <template #title v-if="access.grant_type !='authorization_code'">{{access.expires_in}}s</template>
     </el-menu-item>
   </el-menu>
 
@@ -67,7 +67,7 @@
   </el-dialog>
 
   <el-dialog v-model="recordTableVisible" title="records" style="width: 70%">
-    <el-button type="danger" @click="DeleteSelect">DeleteSelect</el-button>
+    <el-button type="danger" click="DeleteSelect">DeleteSelect</el-button>
     <el-table :data="datas.records" @selection-change="handleSelectionChange">
       <el-table-column type="selection"/>
       <el-table-column property="sourceIP" label="address" width="130px" >
@@ -106,8 +106,6 @@ import { reactive, ref } from 'vue'
 import moment  from 'moment';
 import { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults';
 import {
-  Document,
-  Menu as IconMenu,
   Location,
   Setting,
 } from '@element-plus/icons-vue'
@@ -136,6 +134,8 @@ const ipTableVisible=ref(false);
 const recordTableVisible=ref(false);
 const ipFormVisible=ref(false)
 const ipFormLabelWidth="100px";
+const baseURL='https://api.elpsykongroo.com/';
+// const baseURL='http://localhost:8080/';
 
 interface Record {
   timestamp: string
@@ -155,7 +155,7 @@ const search = ref('')
 
 function filterByParam(pageNumber:number, pageSize:number) {
   const option = {
-    baseURL: 'https://api.elpsykongroo.com/',
+    baseURL: baseURL,
     url: "/record/filter",
     method: "POST",
     params: {
@@ -179,7 +179,7 @@ function openIpAdd() {
 function ipListAdd() {
     ipFormVisible.value = false ;
     const option = {
-    baseURL: 'https://api.elpsykongroo.com/',
+    baseURL: baseURL,
     url: "/ip/manage/add",
     method: "PUT",
     params: {
@@ -201,7 +201,7 @@ function ipListAdd() {
 function ipList(pageNumber:number, pageSize:number, order:string) {
   ipTableVisible.value = true;
   const option = {
-    baseURL: 'https://api.elpsykongroo.com/',
+    baseURL: baseURL,
     url: "/ip/manage/list",
     method: "GET",
     params: {
@@ -220,7 +220,7 @@ function ipList(pageNumber:number, pageSize:number, order:string) {
 
 const DeleteIP = (index: number, row: IP) => {
   const option = {
-    baseURL: 'https://api.elpsykongroo.com/',
+    baseURL: baseURL,
     url: "/ip/manage/patch",
     method: "PATCH",
     params: {
@@ -244,7 +244,7 @@ function recordList(pageNumber:number, pageSize:number, order:string) {
   recordTableVisible.value = true;
   recordPage.order = order;
   const option = {
-    baseURL: 'https://api.elpsykongroo.com/',
+    baseURL: baseURL,
     url: "/record/access",
     method: "GET",
     params: {
@@ -302,7 +302,7 @@ const handleSelectionChange = (val: Record[]) => {
 
 const DeleteSelect= (index: number) => {
   const option = {
-    baseURL: 'https://api.elpsykongroo.com/',
+    baseURL: baseURL,
     url: "/record/delete",
     method: "DELETE",
     params: {
@@ -350,7 +350,7 @@ const DeleteSelect= (index: number) => {
 
 const DeleteRecord = (index: number, row: Record) => {
   const option = {
-    baseURL: 'https://api.elpsykongroo.com/',
+    baseURL: baseURL,
     url: "/record/delete",
     method: "DELETE",
     params: {

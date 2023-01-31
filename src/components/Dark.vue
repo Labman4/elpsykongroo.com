@@ -6,14 +6,16 @@
          <el-form-item label="type" :label-width="formLabelWidth">
           <el-select v-model="form.grant_type" placeholder="">
             <el-option label="-----------" value="" />
-            <el-option label="credentials" value="client_credentials" />
+            <el-option label="client credentials" value="client_credentials" />
+            <el-option label="authorization code" value="authorization_code" />
+            <el-option label="access token" value="access_token" />
           </el-select>
         </el-form-item>
-        <el-form-item label="client" :label-width="formLabelWidth"  v-if = "form.grant_type == 'client_credentials'">
+        <el-form-item label="client" :label-width="formLabelWidth"  v-if = "form.grant_type == 'client_credentials' || form.grant_type == 'access_token' ">
           <el-input v-model="form.name" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="secret" :label-width="formLabelWidth"  v-if = "form.grant_type == 'client_credentials'">
-          <el-input v-model="form.secret" autocomplete="off" @keyup.enter="oauth" />
+        <el-form-item label="secret" :label-width="formLabelWidth"  v-if = "form.grant_type == 'client_credentials' || form.grant_type == 'access_token' ">
+          <el-input v-model="form.secret" type="password" autocomplete="off" @keyup.enter="oauth" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -28,11 +30,16 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref} from 'vue'
+import { reactive, ref } from 'vue'
 import axios from 'axios';
 import { access } from '../access';
 import { ElButton, ElDialog, ElForm, ElFormItem, ElSelect, ElOption, ElInput } from 'element-plus';
 import { toggleDark } from '~/composables';
+
+const authUrl = 'http://localhost:9000/';
+const callbackUrl = window.location.href;
+const code = new URL(callbackUrl).searchParams.get('code');
+let refresh_token;
 
 const timeCount= ref(0);
 const dialogFormVisible = ref(false);
@@ -43,19 +50,54 @@ const form = reactive({
   grant_type: '',
 });
 
+if (code != null) {
+  openAuth();
+}
+
 function openAuth() {
   dialogFormVisible.value = true
+}
+function auth() {
+  console.log("auth");
+  const authOption = {
+      baseURL: authUrl,
+      url: "/oauth2/token",
+      method: "POST",
+      params: {
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: "http://127.0.0.1:3000/dashboard",
+      },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },  
+      auth : { 
+          username : form.name , 
+          password : form.secret 
+      } ,           
+    }
+    axios(authOption).then(function (response) {
+      console.log(response.data);
+      if(response.data.access_token != "") {
+        refresh_token = response.data.refresh_token;
+        access.grant_type = "authorization_code";
+        access.update(response.data.access_token, response.data.expires_in);
+        toggleDark();
+        countDown();
+      }
+    }) 
 }
 
 function oauth() {  
   dialogFormVisible.value = false;
+  console.log(form.grant_type);
   if (form.grant_type == "client_credentials") {
     const option = {
-      baseURL: 'https://auth.elpsykongroo.com/',
+      baseURL: authUrl,
       url: "/oauth2/token",
       method: "POST",
       params: {
-        grant_type: "client_credentials"
+        grant_type: form.grant_type
       },
       headers: {
     
@@ -71,16 +113,44 @@ function oauth() {
         toggleDark();
         countDown();
       }
-    })     
-  }    
+    })      
+  } else if (form.grant_type == "authorization_code") {
+    window.open("http://localhost:8080/oauth2/authorization/spring");
+  } else if (form.grant_type == "access_token") {
+      auth();
+  } 
 }
 
 function countDown() {
   timeCount.value = window.setInterval(() => {
     access.expires_in--;
-    if(access.expires_in == 0) {
-      toggleDark();
-      clearInterval(timeCount.value)
+    if(access.expires_in == 10) {
+      if(refresh_token != '') {
+        const refreshOption = {
+          baseURL: authUrl,
+          url: "/oauth2/token",
+          method: "POST",
+          params: {
+            grant_type: 'refresh_token',
+            refresh_token: refresh_token,
+          },
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },  
+          auth : { 
+            username : form.name , 
+            password : form.secret 
+          } ,           
+        }
+        axios(refreshOption).then(function (response) {
+          if(response.data.access_token != "") {
+            access.update(response.data.access_token, response.data.expires_in);
+          }
+        })  
+      } else {
+        toggleDark();
+        clearInterval(timeCount.value);
+      }
     }
   }, 1000)
 }
@@ -95,7 +165,6 @@ function countDown() {
     height: 10px;
     position:absolute;right: 40px;top: 10px;
   }
-
 
   .el-button--text {
     margin-right: 15px;
