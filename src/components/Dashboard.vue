@@ -49,7 +49,6 @@
   
 <script lang="ts" setup>
 import { Menu } from '@element-plus/icons-vue';
-import { access } from '../access';
 // import { ref, onMounted} from 'vue'
 
 // let iframeView = ref<any>(null);

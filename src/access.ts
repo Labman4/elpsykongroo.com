@@ -1,10 +1,9 @@
-import { reactive, ref} from 'vue'
-
-// const access_token = ref('');
+import { reactive } from 'vue'
 
 export const access = reactive(
 {
     access_token: "",
+    refresh_token: "",
     expires_in: 0,
     grant_type: "",
     update(token:string, expires_in:number) {

@@ -10,14 +10,15 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "lib": ["esnext"],
+    "lib": ["esnext", "DOM"],
     "paths": {
       "~/*": ["src/*"]
     },
     "skipLibCheck": true,
-    "types": ["vite-plugin-svg-icons/client"],
+    "types": ["vite-plugin-svg-icons/client", "vite/client"],
     "noImplicitAny": false,
     "allowJs": true,
+    "isolatedModules": true
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

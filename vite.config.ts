@@ -6,6 +6,7 @@ import IconsResolver from 'unplugin-icons/resolver'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import ElementPlus from 'unplugin-element-plus/vite'
 
 import Unocss from 'unocss/vite'
 
@@ -76,6 +77,9 @@ export default defineConfig({
     include: ['axios'],
   },
   plugins: [
+    ElementPlus({
+
+    }),
     vue(),
     AutoImport({
       // Auto import functions from Vue, e.g. ref, reactive, toRef...
