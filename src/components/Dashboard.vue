@@ -1,25 +1,28 @@
 <template>
     <el-container class="layout-container-demo " style="height: 100%">
-      <el-aside width="200px">
         <el-scrollbar>
-          <el-menu :default-openeds="['1']"     
-          :collapse="false" :router="true">
+          <el-menu :default-openeds="['1']"   
+          class="el-menu-vertical-demo"
+          :collapse="isCollapse" :router="true">
+            <el-menu-item index="0">
+              <el-icon @click="expand()" v-if="isCollapse"><Expand /></el-icon>
+              <el-icon @click="collapse()" v-if="!isCollapse"><Fold /></el-icon>
+            </el-menu-item>
             <el-sub-menu index="1" route="dashboard">
               <template #title>
-                <el-icon><Menu/></el-icon>Dashboard
+                <el-icon><Menu/></el-icon>
+                <span>Dashboard</span>
               </template>
               <el-menu-item-group>
-                <!-- <template #title>Kubernetes</template> -->
-                <el-menu-item route="kubernetes">kubernetes</el-menu-item>
+                <el-menu-item route="kubernetes">dashboard</el-menu-item>
                 <el-menu-item route="linkerd">Linkerd</el-menu-item>
                 <el-menu-item route="kibana">Kibana</el-menu-item>
                 <el-menu-item route="harbor">Harbor</el-menu-item>
               </el-menu-item-group>
             </el-sub-menu>
+            <Elpsykongroo/>
           </el-menu>
-          <Elpsykongroo/>
         </el-scrollbar>
-      </el-aside>
   
       <el-container>
         <!-- <el-header style="text-align: right; font-size: 12px">
@@ -38,8 +41,7 @@
             </el-dropdown>
             <span>Tom</span>
           </div>
-        </el-header> -->
-  
+        </el-header> --> 
         <el-main>
           <router-view ref="iframeView"/>
         </el-main>
@@ -48,7 +50,17 @@
   </template>
   
 <script lang="ts" setup>
-import { Menu } from '@element-plus/icons-vue';
+import { Expand, Fold, Menu } from '@element-plus/icons-vue';
+
+let isCollapse = ref(true)
+
+const expand = () => {
+  isCollapse.value = false;
+}
+
+const collapse = () => {
+  isCollapse.value = true;
+}
 // import { ref, onMounted} from 'vue'
 
 // let iframeView = ref<any>(null);
@@ -82,6 +94,10 @@ import { Menu } from '@element-plus/icons-vue';
     justify-content: center;
     height: 100%;
     right: 20px;
+  }
+  .el-menu-vertical-demo:not(.el-menu--collapse) {
+    width: 200px;
+    min-height: 400px;
   }
   </style>
   

@@ -1,24 +1,21 @@
 <template>
-  <el-menu
-    default-active="1"
-    class="el-menu-vertical-demo"
-    :collapse="false">
-    <el-sub-menu index="1">
+    <el-sub-menu index="2">
       <template #title>
-        <el-icon><location /></el-icon>Gateway
+        <el-icon><Operation /></el-icon>
+        <span>Gateway</span>
       </template>
       <el-menu-item-group>
-        <el-menu-item index="1-1" @click="openIp()" >ip</el-menu-item>
+        <el-menu-item index="2-1" @click="openIp()" >ip</el-menu-item>
       </el-menu-item-group>
-      <el-sub-menu index="1-2">
+      <el-sub-menu index="2-2">
         <template #title><span>record</span></template>
-        <el-menu-item index="1-2-1" @click="openRecordAsc()" >Asc</el-menu-item>
-        <el-menu-item index="1-2-2" @click="openRecordDesc()" >Desc</el-menu-item>
+        <el-menu-item index="2-2-1" @click="openRecordAsc()" >Asc</el-menu-item>
+        <el-menu-item index="2-2-2" @click="openRecordDesc()" >Desc</el-menu-item>
       </el-sub-menu>
-      <el-sub-menu index="1-3">
+      <el-sub-menu index="2-3">
         <template #title><span>auth</span></template>
-        <el-menu-item index="1-3-1" @click="openAuthClient()" >client</el-menu-item>
-        <el-menu-item index="1-3-2" @click=""></el-menu-item>
+        <el-menu-item index="2-3-1" @click="openAuthClient()" >client</el-menu-item>
+        <el-menu-item index="2-3-2" @click=""></el-menu-item>
       </el-sub-menu>
     </el-sub-menu>
     <el-menu-item v-if="access.grant_type !='authorization_code'">
@@ -31,7 +28,6 @@
         Logout
       </template>
     </el-menu-item>
-  </el-menu>
   <IP ref="ip"></IP>
   <Record ref="record"></Record>
   <AuthClient ref="authClient"></AuthClient>
@@ -43,7 +39,7 @@ import { access } from '~/access';
 import { env } from '~/env';
 import { ref } from 'vue'
 import {
-  Location,
+  Operation,
   Setting,
   SwitchButton,
 } from '@element-plus/icons-vue'
