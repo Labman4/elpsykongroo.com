@@ -189,7 +189,8 @@ function filterByParam() {
       "pageSize": recordPage.pageSize
     },
     headers: {
-      'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token,
+      "Content-Type": "application/x-www-form-urlencoded"
     },
   }
   axios(option).then(function (response) {
