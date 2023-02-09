@@ -15,7 +15,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { access } from '../../access';
+import { access } from '~/assets/js/access';
 
 const activeName = ref('Home')
 </script>

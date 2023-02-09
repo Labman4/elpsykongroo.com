@@ -28,11 +28,12 @@
   </el-dialog>
 </template>
 
-<script lang="ts" setup>import axios from 'axios';
-import { dayjs, TableColumnCtx } from 'element-plus';
-import { access } from '~/access';
-import { env } from '~/env';
-import { visible } from '~/visible';
+<script lang="ts" setup>
+import { axios } from '~/assets/js/axio';
+import { dayjs } from 'element-plus';
+import { access } from '~/assets/js/access';
+import { env } from '~/assets/js/env';
+import { visible } from '~/assets/js/visible';
 
 const records:Record[]= [];
 

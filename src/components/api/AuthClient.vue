@@ -99,15 +99,14 @@
 </template>
 
 <script lang="ts" setup>
-import axios from 'axios';
-import { access } from '~/access';
-import { env } from '~/env';
-import { reactive, ref } from 'vue'
-import { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults';
+import { axios } from '~/assets/js/axio';
+import { access }  from '~/assets/js/access';
+import { env } from '~/assets/js/env';
+import { reactive, ref } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { dayjs, ElMessageBox } from 'element-plus';
 import bcrypt from 'bcryptjs'
-import { visible } from '~/visible';
+import { visible } from '~/assets/js/visible';
 
 const authclient = [{}];
 const data = reactive({authclient});
@@ -195,6 +194,10 @@ const tokenSettings = [
           value: "java.time.Duration",
           label: "Duration",
           children: [
+            {
+              value: 30,
+              label: "30s"
+            },
             {
               value: 300,
               label: "5min"
@@ -527,7 +530,7 @@ const DeleteClient = (index: number, row: AuthClient) => {
   }
   axios(option).then(function (response) {
     var count = response.data;
-    if (count == "done") {
+    if (count > 0) {
       data.authclient.splice(index, 1);
     }
   })
@@ -603,6 +606,7 @@ function openClientAdd() {
     clientForm = multipleAuthSelect.value[0];
     visible.authClientForm = true ;
   } else {
+    clientForm.clientId = "";
     visible.authClientForm = true ;
   }
 }

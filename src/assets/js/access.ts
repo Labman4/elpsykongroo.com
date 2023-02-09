@@ -6,6 +6,8 @@ export const access = reactive(
     refresh_token: "",
     expires_in: 0,
     grant_type: "",
+    client_id: "",
+    client_secret: "",
     update(token:string, expires_in:number) {
       this.access_token = token;
       this.expires_in = expires_in;
