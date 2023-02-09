@@ -6,11 +6,11 @@ import '@vue/runtime-core'
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Argocd: typeof import('./components/dashboard/Argocd.vue')['default']
+    AuthClient: typeof import('./components/api/AuthClient.vue')['default']
     Bootstrap: typeof import('./components/layouts/Bootstrap.vue')['default']
     Clock: typeof import('./components/Clock.vue')['default']
     Dark: typeof import('./components/Dark.vue')['default']
     Dashboard: typeof import('./components/Dashboard.vue')['default']
-    ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCascader: typeof import('element-plus/es')['ElCascader']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
@@ -29,7 +29,6 @@ declare module '@vue/runtime-core' {
     ElMenuItemGroup: typeof import('element-plus/es')['ElMenuItemGroup']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElPagination: typeof import('element-plus/es')['ElPagination']
-    Elpsykongroo: typeof import('./components/Elpsykongroo.vue')['default']
     ElRow: typeof import('element-plus/es')['ElRow']
     ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
     ElSelect: typeof import('element-plus/es')['ElSelect']
@@ -44,6 +43,7 @@ declare module '@vue/runtime-core' {
     Kibana: typeof import('./components/dashboard/Kibana.vue')['default']
     Kubernetes: typeof import('./components/dashboard/Kubernetes.vue')['default']
     Linkerd: typeof import('./components/dashboard/Linkerd.vue')['default']
+    Record: typeof import('./components/api/Record.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SvgIcon: typeof import('./components/Svg/SvgIcon.vue')['default']
