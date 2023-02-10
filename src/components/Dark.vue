@@ -1,5 +1,5 @@
 <template>
-    <el-button id="darkMode" size=small @click="openAuth()" v-if = "access.expires_in == 0">{{ access.expires_in }}
+    <el-button id="darkMode" size=small @click="openAuth()" v-if = "access.expires_in == 0">
     </el-button>
     <el-dialog v-model="dialogFormVisible" width="65%">
       <el-form 
