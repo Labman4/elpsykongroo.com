@@ -4,46 +4,55 @@
         <el-menu    
           class="el-menu-vertical-demo"
           :collapse="isCollapse" 
-          :router="true">
-          <el-menu-item route="expand">
-            <el-icon @click="expand()"  v-if="isCollapse"><Expand /></el-icon>
-            <el-icon @click="collapse()" v-if="!isCollapse"><Fold /></el-icon>
+          :router="false">
+          <el-menu-item index="0">
+            <el-icon  @click="expand()"  v-if="isCollapse"><Expand /></el-icon>
+            <el-icon  @click="collapse()" v-if="!isCollapse"><Fold /></el-icon>
           </el-menu-item>
-          <el-sub-menu index="1">
+        </el-menu>
+        <el-menu    
+          class="el-menu-vertical-demo"
+          :collapse="isCollapse" 
+          :router="true">
+          <el-sub-menu index="1" class="hidden-md-and-down">
             <template #title>
               <el-icon><Menu/></el-icon>
               <span>Dashboard</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item route="kubernetes">dashboard</el-menu-item>
-              <el-menu-item route="linkerd">Linkerd</el-menu-item>
-              <el-menu-item route="kibana">Kibana</el-menu-item>
-              <el-menu-item route="harbor">Harbor</el-menu-item>
+              <el-menu-item index="1-1" route="kubernetes">dashboard</el-menu-item>
+              <el-menu-item index="1-2" route="linkerd">Linkerd</el-menu-item>
+              <el-menu-item index="1-3" route="kibana">Kibana</el-menu-item>
+              <el-menu-item index="1-4" route="harbor">Harbor</el-menu-item>
             </el-menu-item-group>
           </el-sub-menu>
+        </el-menu>
+        <el-menu    
+          class="el-menu-vertical-demo"
+          :collapse="isCollapse">
           <el-sub-menu index="2">
             <template #title>
               <el-icon><Operation /></el-icon>
-              <span>Gateway</span>
+              <span>Gateway</span> 
             </template>
             <el-menu-item-group>
-              <el-menu-item @click="openIp()" route="ip">ip</el-menu-item>
+              <el-menu-item index="2-1"  @click="openIp()">ip</el-menu-item>
             </el-menu-item-group>
-            <el-sub-menu index="2-1">
-              <template #title><span>record</span></template>
-              <el-menu-item @click="openRecordAsc()"  route="record/asc" >Asc</el-menu-item>
-              <el-menu-item @click="openRecordDesc()" route="record/desc" >Desc</el-menu-item>
-            </el-sub-menu>
             <el-sub-menu index="2-2">
+              <template #title><span>record</span></template>
+              <el-menu-item index="2-2-1" @click="openRecordAsc()" >Asc</el-menu-item>
+              <el-menu-item index="2-2-2" @click="openRecordDesc()" >Desc</el-menu-item>
+            </el-sub-menu>
+            <el-sub-menu index="2-3" >
               <template #title><span>auth</span></template>
-              <el-menu-item @click="openAuthClient()" route="record/desc" >client</el-menu-item>
+              <el-menu-item index="2-3-1" @click="openAuthClient()" >client</el-menu-item>
             </el-sub-menu>
           </el-sub-menu>
-          <el-menu-item v-if="access.grant_type !='authorization_code'" route="timer">
+          <el-menu-item index="3" v-if="access.grant_type !='authorization_code'">
             <el-icon><Timer /></el-icon>
             <template #title v-if="access.grant_type =='client_credentials'">{{access.expires_in}}s</template>
           </el-menu-item>
-          <el-menu-item v-if="access.grant_type =='authorization_code'" route="logout">
+          <el-menu-item index="3-1" v-if="access.grant_type =='authorization_code'" >
             <el-icon @click="logout()"><SwitchButton /></el-icon>
             <template #title >
               Logout
@@ -55,23 +64,6 @@
       <Record ref="record"></Record>
       <AuthClient ref="authClient"></AuthClient>
       <el-container>
-        <!-- <el-header style="text-align: right; font-size: 12px">
-          <div class="toolbar">
-            <el-dropdown>
-              <el-icon style="margin-right: 8px; margin-top: 1px"
-                ><setting
-              /></el-icon>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item>View</el-dropdown-item>
-                  <el-dropdown-item>Add</el-dropdown-item>
-                  <el-dropdown-item>Delete</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-            <span>Tom</span>
-          </div>
-        </el-header> --> 
         <el-main>
           <router-view ref="iframeView"/>
         </el-main>
@@ -80,6 +72,7 @@
   </template>
   
 <script lang="ts" setup>
+import 'element-plus/theme-chalk/display.css';
 import { axios } from '~/assets/js/axio';
 import { access } from '~/assets/js/access';
 import { env } from '~/assets/js/env';
@@ -140,6 +133,12 @@ const collapse = () => {
   isCollapse.value = true;
 }
 
+const handleOpen = (key: string, keyPath: string[]) => {
+
+}
+const handleClose = (key: string, keyPath: string[]) => {
+  
+}
 // let iframeView = ref<any>(null);
   // onMounted(() => {
   //   window.addEventListener("message", (event) => {
@@ -149,7 +148,7 @@ const collapse = () => {
   // })
 </script>
   
-  <style scoped>
+<style scoped>
   .layout-container-demo .el-header {
     position: relative;
     background-color: var(--el-color-primary-light-7);
@@ -173,8 +172,8 @@ const collapse = () => {
     right: 20px;
   }
   .el-menu-vertical-demo:not(.el-menu--collapse) {
-    width: 200px;
-    min-height: 400px;
+    width: auto;
+    min-height: auto;
   }
   </style>
   

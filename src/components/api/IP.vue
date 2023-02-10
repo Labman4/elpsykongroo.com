@@ -1,8 +1,8 @@
 <template>
-  <el-dialog v-model="visible.ipTable" title="address">
+  <el-dialog v-model="visible.ipTable" title="address" width="75%">
     <el-button type="" @click="openIpAdd">Add</el-button>
     <el-table :data="data.ips">
-      <el-table-column property="address" label="address" width="300px"/>
+      <el-table-column property="address" label="address" width="auto"/>
       <el-table-column property="black" label="black"/>
       <el-table-column label="Operations">
       <template #default="scope">
@@ -153,3 +153,6 @@ defineExpose({
   ipList
 })
 </script>
+<style scoped>
+
+</style>

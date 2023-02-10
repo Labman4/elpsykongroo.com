@@ -1,21 +1,24 @@
 <template>
-    <el-button id="darkMode" size=small @click="openAuth()" v-if = "access.expires_in == 0">
+    <el-button id="darkMode" size=small @click="openAuth()" v-if = "access.expires_in == 0">{{ access.expires_in }}
     </el-button>
-    <el-dialog v-model="dialogFormVisible" title="">
-      <el-form>
-         <el-form-item label="type" :label-width="formLabelWidth">
-          <el-select v-model="access.grant_type" placeholder="">
-            <el-option label="-----------" value="" />
+    <el-dialog v-model="dialogFormVisible" width="65%">
+      <el-form 
+        label-position="left"
+        label-width="auto" 
+        :fit-input-width=true	>
+         <el-form-item label="type">
+          <el-select v-model="access.grant_type" placeholder="grant type">
+            <!-- <el-option label="-----------" value="" /> -->
             <el-option label="client credentials" value="client_credentials" />
             <el-option label="authorization code" value="authorization_code" />
             <el-option label="access token" value="access_token" />
             <el-option label="github" value="github" />
           </el-select>
         </el-form-item>
-        <el-form-item label="client" :label-width="formLabelWidth"  v-if = "access.grant_type != 'authorization_code'">
+        <el-form-item label="client" label-width="auto"  v-if = "access.grant_type != 'authorization_code'">
           <el-input v-model="access.client_id" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="secret" :label-width="formLabelWidth"  v-if = "access.grant_type != 'authorization_code'">
+        <el-form-item label="secret" label-width="auto"  v-if = "access.grant_type != 'authorization_code'">
           <el-input v-model="access.client_secret" type="password" :show-password=true autocomplete="off" @keyup.enter="oauth" />
         </el-form-item>
       </el-form>
@@ -43,7 +46,6 @@ const code = new URL(callbackUrl).searchParams.get('code');
 
 const timeCount= ref(0);
 const dialogFormVisible = ref(false);
-const formLabelWidth = "auto";
 
 if (code != null) {
   if (code.length > 20) {
@@ -171,7 +173,7 @@ const clearAcess = () => {
 
 </script>
 
-<style>
+<style scoped>
   #darkMode {
     position:absolute;right: 20px; top:10px;
     border: 0px;
@@ -185,10 +187,10 @@ const clearAcess = () => {
     margin-right: 15px;
   }
   .el-select {
-    width: 300px;
+    width: 90%;
   }
   .el-input {
-    width: 300px;
+    width: 90%;
   }
   .dialog-footer button:first-child {
     margin-right: 10px;

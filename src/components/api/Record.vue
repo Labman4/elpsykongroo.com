@@ -1,5 +1,5 @@
 <template>
-    <el-dialog v-model="visible.recordTable" title="records" style="width: 70%">
+    <el-dialog v-model="visible.recordTable" title="records" width="70%">
     <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
     <el-table :data="data.records" @selection-change="handleRecordSelectChange">
       <el-table-column type="selection"/>

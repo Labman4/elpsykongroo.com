@@ -1,24 +1,23 @@
 const dashboard = {
     path: '/dashboard',
-    componment: () => import('../components/Dashboard.vue'),
     children:[
         {
-            path: "/kubernetes",
+            path: "kubernetes",
             name: "kubernetes",
             component: () => import('../components/dashboard/Kubernetes.vue'), // 注意这里要带上 文件后缀.vue 
         },
         {
-            path: "/linkerd",
+            path: "linkerd",
             name: "linkerd",
             component: () => import('../components/dashboard/Linkerd.vue'), // 注意这里要带上 文件后缀.vue 
         },
         {
-            path: "/kibana",
+            path: "kibana",
             name: "kibana",
             component: () => import('../components/dashboard/Kibana.vue'), // 注意这里要带上 文件后缀.vue 
         },
         {
-            path: "/harbor",
+            path: "harbor",
             name: "harbor",
             component: () => import('../components/dashboard/Harbor.vue'), // 注意这里要带上 文件后缀.vue 
         }

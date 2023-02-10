@@ -60,7 +60,7 @@
       </span>
     </template>
   </el-dialog>
-      <el-dialog v-model="visible.authClientTable" title="client" style="width: 95%">
+      <el-dialog v-model="visible.authClientTable" title="client" width="95%">
     <el-button type="" @click="openClientAdd">Add</el-button>
     <!-- <el-button type="danger" click="DeleteSelect">DeleteSelect</el-button> -->
     <el-table :data="data.authclient" @selection-change="handleAuthSelectChange">
