@@ -82,6 +82,11 @@ export default defineConfig({
     }),
     vue(),
     AutoImport({
+      include: [
+        /\.[t]sx?$/, // .ts, .tsx, .js, .jsx
+        /\.vue$/, /\.vue\?vue/, // .vue
+        /\.md$/, // .md
+      ],
       // Auto import functions from Vue, e.g. ref, reactive, toRef...
       imports: ['vue'],
 
