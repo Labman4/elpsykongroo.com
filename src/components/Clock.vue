@@ -65,7 +65,7 @@
   .nixie-container .nixie-number {
       display: block;
       position: absolute;
-      width: px;
+      width: 100px;
   }
   
   .nixie-number .nixie-number-part {

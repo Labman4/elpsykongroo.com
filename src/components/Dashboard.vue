@@ -72,7 +72,6 @@
   </template>
   
 <script lang="ts" setup>
-import 'element-plus/theme-chalk/display.css';
 import { axios } from '~/assets/js/axio';
 import { access } from '~/assets/js/access';
 import { env } from '~/assets/js/env';

@@ -153,6 +153,3 @@ defineExpose({
   ipList
 })
 </script>
-<style scoped>
-
-</style>
