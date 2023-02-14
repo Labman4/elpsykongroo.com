@@ -16,6 +16,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { access } from '~/assets/js/access';
+import '~/assets/js/live2d';
 
 const activeName = ref('Home')
 </script>

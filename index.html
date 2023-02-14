@@ -3,32 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/microfavico.ico" />
-    <link rel="stylesheet" href="src/assets/live2d/css/live2d.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>someone whitout you</title>
-    <!-- <script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.2/dist/browser/pixi.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js"></script>
-    <script src="src/assets/js/live2dcubismcore.min.js"></script> -->
-    <script type="text/javascript">
-      var message_Path = 'src/assets/live2d/'
-      var home_Path = 'https://elpsykongroo.com/'
-    </script>
-    <script type="text/javascript" src="src/assets/live2d/js/jquery-3.4.1.js"></script>
-    <script type="text/javascript" src="src/assets/live2d/js/live2d.js"></script>
-    <script type="text/javascript" src="src/assets/live2d/js/message.js"></script>
-  </head>
+    </head>
   <body>
     <div id="app"></div>
-    <div id="landlord">
-      <!-- <div class="message" style="opacity:0"></div> -->
-      <canvas id="live2d" width="200" height="300" class="live2d"></canvas>
-      <div class="hide-button">隐藏</div>
-  </div>
+    <!-- <canvas id="Rintaro"></canvas> -->
+    <div id="live2d">
+      <canvas id="Kurisu"></canvas>
+    </div>
+    <!-- <canvas id="Mayuri"></canvas> -->
   <script type="module" src="/src/main.ts"></script>
   </body>
-  <script type="text/javascript">
-    loadlive2d("live2d", "src/assets/live2d/model/leimu/leimu.model.json");
-  </script>
 </html>
+<style>
+  #live2d {
+    position: fixed;
+    top: 5.8%;
+}
+</style>

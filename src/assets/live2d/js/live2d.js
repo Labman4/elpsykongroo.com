@@ -544,15 +544,20 @@
     }
 
     function o(t) {
-        C = document.getElementById(t), C.addEventListener && (window.addEventListener("click", g), window.addEventListener("mousedown", g), window.addEventListener("mousemove", g), window.addEventListener("mouseup", g), document.addEventListener("mouseout", g), window.addEventListener("touchstart", y), window.addEventListener("touchend", y), window.addEventListener("touchmove", y))
+        var cc = document.getElementById(t);
+        if (cc) {
+            C = document.getElementById(t), C.addEventListener && (window.addEventListener("click", g), window.addEventListener("mousedown", g), window.addEventListener("mousemove", g), window.addEventListener("mouseup", g), document.addEventListener("mouseout", g), window.addEventListener("touchstart", y), window.addEventListener("touchend", y), window.addEventListener("touchmove", y))
+        }
     }
 
     function n(t) {
-        var i = C.width, e = C.height;
-        N = new M.L2DTargetPoint;
-        var r = e / i, o = w.default.VIEW_LOGICAL_LEFT, n = w.default.VIEW_LOGICAL_RIGHT, _ = -r, h = r;
-        if (window.Live2D.captureFrame = !1, B = new M.L2DViewMatrix, B.setScreenRect(o, n, _, h), B.setMaxScreenRect(w.default.VIEW_LOGICAL_MAX_LEFT, w.default.VIEW_LOGICAL_MAX_RIGHT, w.default.VIEW_LOGICAL_MAX_BOTTOM, w.default.VIEW_LOGICAL_MAX_TOP), B.setMaxScale(w.default.VIEW_MAX_SCALE), B.setMinScale(w.default.VIEW_MIN_SCALE), U = new M.L2DMatrix44, U.multScale(1, i / e), G = new M.L2DMatrix44, G.multTranslate(-i / 2, -e / 2), G.multScale(2 / i, -2 / i), F = v(), (0, D.setContext)(F), !F) return console.error("Failed to create WebGL context."), void (window.WebGLRenderingContext && console.error("Your browser don't support WebGL, check https://get.webgl.org/ for futher information."));
-        window.Live2D.setGL(F), F.clearColor(0, 0, 0, 0), a(t), s()
+        if (C) {
+            var i = C.width, e = C.height;
+            N = new M.L2DTargetPoint;
+            var r = e / i, o = w.default.VIEW_LOGICAL_LEFT, n = w.default.VIEW_LOGICAL_RIGHT, _ = -r, h = r;
+            if (window.Live2D.captureFrame = !1, B = new M.L2DViewMatrix, B.setScreenRect(o, n, _, h), B.setMaxScreenRect(w.default.VIEW_LOGICAL_MAX_LEFT, w.default.VIEW_LOGICAL_MAX_RIGHT, w.default.VIEW_LOGICAL_MAX_BOTTOM, w.default.VIEW_LOGICAL_MAX_TOP), B.setMaxScale(w.default.VIEW_MAX_SCALE), B.setMinScale(w.default.VIEW_MIN_SCALE), U = new M.L2DMatrix44, U.multScale(1, i / e), G = new M.L2DMatrix44, G.multTranslate(-i / 2, -e / 2), G.multScale(2 / i, -2 / i), F = v(), (0, D.setContext)(F), !F) return console.error("Failed to create WebGL context."), void (window.WebGLRenderingContext && console.error("Your browser don't support WebGL, check https://get.webgl.org/ for futher information."));
+            window.Live2D.setGL(F), F.clearColor(0, 0, 0, 0), a(t), s()
+        }
     }
 
     function s() {
