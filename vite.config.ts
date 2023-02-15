@@ -7,6 +7,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import ElementPlus from 'unplugin-element-plus/vite'
+import topLevelAwait from "vite-plugin-top-level-await";
 
 import Unocss from 'unocss/vite'
 
@@ -24,9 +25,9 @@ const pathSrc = path.resolve(__dirname, 'src')
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  build: {
-    target: "esnext"
-  },
+  // build: {
+  //   target: "esnext"
+  // },
   server: {
     cors: true, // 默认启用并允许任何源
     // proxy: {
@@ -80,6 +81,12 @@ export default defineConfig({
     include: ['axios'],
   },
   plugins: [
+    topLevelAwait({
+      // The export name of top-level await promise for each chunk module
+      promiseExportName: "__tla",
+      // The function to generate import names of top-level await promise in each chunk module
+      promiseImportName: i => `__tla_${i}`
+    }),
     ElementPlus({
 
     }),

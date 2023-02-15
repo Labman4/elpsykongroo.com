@@ -37,7 +37,7 @@ const model = await Live2DModel.from('https://raw.githubusercontent.com/Labman4/
 app.stage.addChild(model);
     // transforms
 
-    draggable(model);
+draggable(model);
     // model.rotation = Math.PI;
     // model.skew.x = Math.PI;
     // model.scale.set(2, 2);
