@@ -16,64 +16,53 @@ import "pixi-live2d-display/extra";
 // Application.registerPlugin(TickerPlugin);
 
 // Renderer.registerPlugin('interaction', InteractionManager);
+// var ratio;
+//   if(window.innerWidth > window.innerHeight ) {
+//     ratio = window.innerWidth / window.innerHeight -1;  
+//   } else {
+//     ratio =window.innerHeight / window.innerWidth -1;
+//   }
 
 (window as any).PIXI = PIXI;
 
-(async function () {
-    const app = new PIXI.Application({
-        view: document.getElementById('Kurisu') as HTMLCanvasElement,
-        autoStart: true,
-        resizeTo: window,
-        backgroundAlpha: 0,
+const app = new PIXI.Application({
+    view: document.getElementById('Kurisu') as HTMLCanvasElement,
+    autoStart: true,
+    resizeTo: window,
+    backgroundAlpha: 0,
+});
+    
+const model = await Live2DModel.from('https://raw.githubusercontent.com/Labman4/live2d/main/%E5%86%BB%E4%BA%AC/Christina/Christina.model3.json');
 
-    });
-    const model = await Live2DModel.from('https://raw.githubusercontent.com/Labman4/live2d/main/%E5%86%BB%E4%BA%AC/Christina/Christina.model3.json');
-    app.stage.addChild(model);
+app.stage.addChild(model);
     // transforms
-    const scaleX = (innerWidth * 0.9) / model.width;
-    const scaleY = (innerHeight * 0.9) / model.height;
-    // fit the window
-    model.scale.set(Math.min(scaleX, scaleY));
-    model.x = 1000
-    // model.y = innerHeight * 0.1;
-    // draggable(model);
+
+    draggable(model);
     // model.rotation = Math.PI;
     // model.skew.x = Math.PI;
     // model.scale.set(2, 2);
     // model.anchor.set(0.0005, 0.0005);
 
-    const phone = window.matchMedia('screen and (max-width: 500px)');
-    const xs = window.matchMedia('screen and (max-width: 576px)');
-    const sm = window.matchMedia('screen and (max-width: 768px)');
-    const md = window.matchMedia('screen and (max-width: 992px)');
 
-    phone.addEventListener('change', (e) => {
-        if (e.matches) {
-            model.scale.set(Math.min(scaleX, scaleY));
-            model.x = 10;
-        }
-    })
 
-    xs.addEventListener('change', (e) => {
-        if (e.matches) {
-            model.scale.set(Math.min(scaleX, scaleY));
-            model.x = 300;
-        }
-    })
-    sm.addEventListener('change', (e) => {
-        if (e.matches) {
-            model.scale.set(Math.min(scaleX, scaleY));
-            model.x = 500;
-        }
-    });
-    md.addEventListener('change', (e) => {
-        if (e.matches)    {
-            model.scale.set(Math.min(scaleX, scaleY));
-            model.x = 700;
-        }
-    });
-    // interaction
-})();
+function resize() {
+    if (window.innerWidth < window.innerHeight) {
+        app.renderer.resize(window.innerWidth, window.innerHeight + (((((window.innerWidth * 100) / window.innerHeight) / 100) - 0.5) * window.innerWidth));  
+        model.scale.set(0.3);
+
+    } else {
+        app.renderer.resize(window.innerWidth, window.innerHeight - (((((window.innerHeight * 100) / window.innerWidth) / 100) - 0.65) * window.innerWidth));
+        model.scale.set(0.8);
+    }
+  
+    const scaleX = (innerWidth * 0.4) / model.width;
+    const scaleY = (innerHeight * 0.8) / model.height;
+    console.log(Math.min(scaleX, scaleY));
+    // model.y = innerHeight * 0.1;
+}
+window.onresize = function() {
+    resize();
+};
 
 // (async function () {
 //     const app = new PIXI.Application({
