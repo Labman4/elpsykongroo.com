@@ -36,8 +36,13 @@ const model = await Live2DModel.from('https://raw.githubusercontent.com/Labman4/
 
 app.stage.addChild(model);
     // transforms
-
-draggable(model);
+    resize();
+    // const scaleX = (innerWidth * 0.4) / model.width;
+    // const scaleY = (innerHeight * 0.8) / model.height;
+    // model.scale.set(Math.min(scaleX, scaleY));
+    // model.y = innerHeight * 0.1;
+    // console.log(Math.min(scaleX, scaleY));
+    draggable(model);
     // model.rotation = Math.PI;
     // model.skew.x = Math.PI;
     // model.scale.set(2, 2);
@@ -54,11 +59,6 @@ function resize() {
         app.renderer.resize(window.innerWidth, window.innerHeight - (((((window.innerHeight * 100) / window.innerWidth) / 100) - 0.65) * window.innerWidth));
         model.scale.set(0.8);
     }
-  
-    const scaleX = (innerWidth * 0.4) / model.width;
-    const scaleY = (innerHeight * 0.8) / model.height;
-    console.log(Math.min(scaleX, scaleY));
-    // model.y = innerHeight * 0.1;
 }
 window.onresize = function() {
     resize();
