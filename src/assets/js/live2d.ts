@@ -42,9 +42,17 @@ import "pixi-live2d-display/extra";
     // model.scale.set(2, 2);
     // model.anchor.set(0.0005, 0.0005);
 
+    const phone = window.matchMedia('screen and (max-width: 500px)');
     const xs = window.matchMedia('screen and (max-width: 576px)');
     const sm = window.matchMedia('screen and (max-width: 768px)');
     const md = window.matchMedia('screen and (max-width: 992px)');
+
+    phone.addEventListener('change', (e) => {
+        if (e.matches) {
+            model.scale.set(Math.min(scaleX, scaleY));
+            model.x = 10;
+        }
+    })
 
     xs.addEventListener('change', (e) => {
         if (e.matches) {
