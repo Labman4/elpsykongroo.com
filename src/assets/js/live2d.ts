@@ -84,7 +84,7 @@ document.addEventListener('touchstart', function (event) {
     console.log(store);
     // model.scale.set(0.2);
 
-},{ passive: false });
+},false);
 
 document.addEventListener('touchmove', function (event) {
     console.log("move");
@@ -142,16 +142,16 @@ document.addEventListener('touchmove', function (event) {
         }
         console.log(store);
 
-    },{ passive: false });
+    }, false);
 
-    document.addEventListener('touchend', function () {
-        console.log("touchend");
+    // document.addEventListener('touchend', function () {
+    //     console.log("touchend");
     
-    });
-    document.addEventListener('touchcancel', function () {
-        console.log("touchcanel");
+    // });
+    // document.addEventListener('touchcancel', function () {
+    //     console.log("touchcanel");
     
-    });
+    // });
 function resize() {
     if (window.innerWidth < window.innerHeight) {
         // app.renderer.resize(window.innerWidth, window.innerHeight + (((((window.innerWidth * 100) / window.innerHeight) / 100) - 0.5) * window.innerWidth)); 
