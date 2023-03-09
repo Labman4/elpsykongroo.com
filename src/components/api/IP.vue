@@ -46,10 +46,10 @@
 
 <script lang="ts" setup>
 
-import { env } from '~/assets/js/env';
-import { access } from '~/assets/js/access';
-import { visible } from '~/assets/js/visible';
-import { axios } from '~/assets/js/axio';
+import { env } from '~/assets/ts/env';
+import { access } from '~/assets/ts/access';
+import { visible } from '~/assets/ts/visible';
+import { axios } from '~/assets/ts/axio';
 import { ElDialog, ElButton, ElTable, ElTableColumn, ElPagination, ElForm, ElFormItem, ElSelect, ElOption, ElInput } from 'element-plus';
 
 const ips = [{}];

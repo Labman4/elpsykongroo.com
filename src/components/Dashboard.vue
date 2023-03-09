@@ -72,9 +72,9 @@
   </template>
   
 <script lang="ts" setup>
-import { axios } from '~/assets/js/axio';
-import { access } from '~/assets/js/access';
-import { env } from '~/assets/js/env';
+import { axios } from '~/assets/ts/axio';
+import { access } from '~/assets/ts/access';
+import { env } from '~/assets/ts/env';
 import { ref } from 'vue';
 import { Timer, Operation, SwitchButton, Expand, Fold, Menu } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';

@@ -35,11 +35,12 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { axios, refreshToken }  from '~/assets/js/axio';
-import { env } from '~/assets/js/env';
-import { access } from '~/assets/js/access';
+import { axios, refreshToken }  from '~/assets/ts/axio';
+import { env } from '~/assets/ts/env';
+import { access } from '~/assets/ts/access';
 import { ElButton, ElDialog, ElForm, ElFormItem, ElSelect, ElOption, ElInput } from 'element-plus';
 import { toggleDark } from '~/composables';
+
 
 const callbackUrl = window.location.href;
 const code = new URL(callbackUrl).searchParams.get('code');

@@ -29,11 +29,11 @@
 </template>
 
 <script lang="ts" setup>
-import { axios } from '~/assets/js/axio';
+import { axios } from '~/assets/ts/axio';
 import { dayjs } from 'element-plus';
-import { access } from '~/assets/js/access';
-import { env } from '~/assets/js/env';
-import { visible } from '~/assets/js/visible';
+import { access } from '~/assets/ts/access';
+import { env } from '~/assets/ts/env';
+import { visible } from '~/assets/ts/visible';
 
 const records:Record[]= [];
 

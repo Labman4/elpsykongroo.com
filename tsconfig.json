@@ -18,7 +18,8 @@
     "types": ["vite-plugin-svg-icons/client", "vite/client"],
     "noImplicitAny": false,
     "allowJs": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

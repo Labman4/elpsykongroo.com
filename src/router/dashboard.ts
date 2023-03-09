@@ -1,5 +1,5 @@
 const dashboard = {
-    path: '/dashboard',
+    path: '/',
     children:[
         {
             path: "kubernetes",

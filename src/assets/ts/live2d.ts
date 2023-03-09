@@ -1,14 +1,16 @@
-import '~/assets/live2d/js/live2d.min';
-import '~/assets/live2d/js/live2dcubismcore';
+import '~/assets/js/live2d/live2d.min';
+import '~/assets/js/live2d/live2dcubismcore';
 import * as PIXI from 'pixi.js';
-import { Live2DModel } from "pixi-live2d-display";
+import { Live2DModel } from 'pixi-live2d-display';
+import '../ts/wechat';
+// import  * as Wechat from 'wechat4u';
 
-// var ratio;
-//   if(window.innerWidth > window.innerHeight ) {
-//     ratio = window.innerWidth / window.innerHeight -1;  
-//   } else {
-//     ratio =window.innerHeight / window.innerWidth -1;
-//   }
+// let bot = new Wechat();
+// console.log(bot);
+// bot.start();
+
+// import { HitAreaFrames } from 'pixi-live2d-display/extra';
+
 (window as any).PIXI = PIXI;
 
 const app = new PIXI.Application({
@@ -19,29 +21,66 @@ const app = new PIXI.Application({
     resizeTo: window,
     backgroundAlpha: 0,
 });
-const model = await Live2DModel.from('https://raw.githubusercontent.com/Labman4/live2d/main/%E5%86%BB%E4%BA%AC/Christina/Christina.model3.json');
+
+const Rintaro_URL = "https://raw.githubusercontent.com/Labman4/live2d/main/%E5%86%BB%E4%BA%AC/Rintaro/Rintaro.model3.json";
+const Christina_URL = "https://raw.githubusercontent.com/Labman4/live2d/main/%E5%86%BB%E4%BA%AC/Christina/Christina.model3.json";
+const Mayuri_URL = "https://raw.githubusercontent.com/Labman4/live2d/main/%E5%86%BB%E4%BA%AC/Mayuri/Mayuri.model3.json";
+
+const models = await Promise.all([
+    Live2DModel.from(Christina_URL),
+    Live2DModel.from(Rintaro_URL),
+    Live2DModel.from(Mayuri_URL),
+  ]);
+
 // app.renderer.view.style.position = 'absolute';
 // app.renderer.view.style.left = '25%';
-
 // app.renderer.view.style.top = '6.8%';
-app.stage.addChild(model);
-    resize();
+
+models.forEach((model) => {
+    app.stage.addChild(model);
+
+    // resize();
+
+    // fit the window
+    const scaleX = (innerWidth * 0.4) / model.width;
+    const scaleY = (innerHeight * 0.8) / model.height;
+
+    // fit the window
+    model.scale.set(Math.min(scaleX, scaleY));
+
     model.y = innerHeight * 0.1;
-    draggable(model);
+    // model[0].anchor.set(0.5, 0.5);
+    // draggable(model);
+    model.on('pointertap', () => {
+        models[0].motion('tap')
+    });
+    model.on('pointerleave', () => {
+        models[0].motion('Idle')
+    });
+    model.on('pointertap', () => {
+        models[0].motion('tap')
+    });
+    model.on('pointerupoutside', () => {
+        models[0].motion('pose')
+    });
+});
 
-// const item = document.querySelector("#live2d");
-// const hm = new Hammer(item) ;
+const Mayuri = models[2];
+const Rintaro = models[1];
+const Christina = models[0];
 
-// hm.get('pinch').set({
-//     enable: true
-// })
+Christina.x = (innerWidth - Mayuri.width - Rintaro.width- Christina.width) / 3;
+Rintaro.x =  Christina.x + Christina.width;
+Mayuri.x = Rintaro.x + Rintaro.width;
+draggable(models[0]);
+// const hit = new HitAreaFrames();
+// models[0].addChild(hit);
+// hit.visible = true;
 
-// var scaleRatio = 1;
+models[0].on('pointertap', () => {
+    models[0].motion('tap')
+});
 
-// hm.on("pinchmove", ev =>{
-//     scaleRatio = ev.scale * scaleInit
-//     model.scale.set(scaleRatio);
-// })
 
 var scaleInit;
 // 
@@ -58,7 +97,7 @@ document.addEventListener('touchstart', function (event) {
     var touches = event.touches;
     var events = touches[0];
     var events2 = touches[1];
-    event.preventDefault();
+    // event.preventDefault();
     // 第一个触摸点的坐标
     store.pageX = events.pageX;
     store.pageY = events.pageY;
@@ -67,10 +106,10 @@ document.addEventListener('touchstart', function (event) {
         store.pageY2 = events2.pageY;
     }
     store.originScale = store.scale || 1;
-},false);
+});
 
 document.addEventListener('touchmove', function (event) {
-    event.preventDefault();
+    // event.preventDefault();
     var touches = event.touches;
 
     var events = touches[0];
@@ -111,21 +150,25 @@ document.addEventListener('touchmove', function (event) {
         // 记住使用的缩放值
         store.scale = newScale;
         // 图像应用缩放效果
-        model.scale.set(store.scale);
+        models[0].scale.set(store.scale);
     }
 
-    }, false);
+    });
 
 function resize() {
     if (window.innerWidth < window.innerHeight) {
         // app.renderer.resize(window.innerWidth, window.innerHeight + (((((window.innerWidth * 100) / window.innerHeight) / 100) - 0.5) * window.innerWidth)); 
         scaleInit = 0.3;
-        model.scale.set(scaleInit);
+        models[0].scale.set(scaleInit);
+        models[1].scale.set(scaleInit);
+
 
     } else {
         // app.renderer.resize(window.innerWidth, window.innerHeight - (((((window.innerHeight * 100) / window.innerWidth) / 100) - 0.65) * window.innerWidth));
         scaleInit = 0.8;
-        model.scale.set(scaleInit);
+        models[0].scale.set(scaleInit);
+        models[1].scale.set(scaleInit);
+
     }
     // app.renderer.resize(window.innerWidth/2, window.innerHeight/2);
 }
@@ -150,5 +193,3 @@ function draggable(model) {
     model.on("pointerupoutside", () => (model.dragging = false));
     model.on("pointerup", () => (model.dragging = false));
 }
-
-    

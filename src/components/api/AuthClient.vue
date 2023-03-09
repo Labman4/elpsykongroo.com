@@ -99,14 +99,14 @@
 </template>
 
 <script lang="ts" setup>
-import { axios } from '~/assets/js/axio';
-import { access }  from '~/assets/js/access';
-import { env } from '~/assets/js/env';
+import { axios } from '~/assets/ts/axio';
+import { access }  from '~/assets/ts/access';
+import { env } from '~/assets/ts/env';
 import { reactive, ref } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { dayjs, ElMessageBox } from 'element-plus';
-import bcrypt from 'bcryptjs'
-import { visible } from '~/assets/js/visible';
+import bcrypt from 'bcryptjs';
+import { visible } from '~/assets/ts/visible';
 
 const authclient = [{}];
 const data = reactive({authclient});
@@ -122,7 +122,21 @@ const props = {
   // checkStrictly: true,
 }
 
-let clientForm =  reactive({
+// let clientForm  = reactive({
+//   id: uuidv4(),
+//   clientId: "",
+//   clientSecret: "",
+//   clientSecretExpiresAt: "",
+//   scopes: "",
+//   redirectUris: "",
+//   clientName: "",
+//   clientSettings: "",
+//   tokenSettings: "",
+//   authorizationGrantTypes: "",
+//   clientAuthenticationMethods: ""
+// })
+
+let initClientForm  = () => ({
   id: uuidv4(),
   clientId: "",
   clientSecret: "",
@@ -135,6 +149,8 @@ let clientForm =  reactive({
   authorizationGrantTypes: "",
   clientAuthenticationMethods: ""
 })
+
+let clientForm = reactive(initClientForm());
 
 interface AuthClient {
   id: string
@@ -593,20 +609,28 @@ function openClientAdd() {
     ElMessageBox.alert("dont support batch update")
   } else if (selectAuthId.length == 1){
     const authClient = multipleAuthSelect.value[0];
-    const clientset = JSON.parse(authClient.clientSettings);
-    const tokenset = JSON.parse(authClient.tokenSettings);
     const clientArray = new Array();
     const tokenArray = new Array();
-    objToArray(clientset, clientArray);
-    objToArray(tokenset, tokenArray);
+    if (authClient.clientSettings != "") {
+      const clientset = JSON.parse(authClient.clientSettings);
+      objToArray(clientset, clientArray);
+    }
+    if (authClient.clientSettings != "") {
+      const tokenset = JSON.parse(authClient.tokenSettings);
+      objToArray(tokenset, tokenArray);
+    }
     clientSettingList.value = clientArray;
     tokenSettingList.value = tokenArray;
     clientSecretExpiresString.value = dayjs.unix(parseInt(authClient.clientSecretExpiresAt, 10)).format("YYYY-MM-DDTHH:mm:ss[Z]");    
     authorizationGrantTypes.value = authClient.authorizationGrantTypes.split(",");
-    clientForm = multipleAuthSelect.value[0];
+    Object.assign(clientForm, multipleAuthSelect.value[0]);
     visible.authClientForm = true ;
   } else {
-    clientForm.clientId = "";
+    Object.assign(clientForm, initClientForm());
+    authorizationGrantTypes.value = [];
+    clientSettingList.value = [];
+    clientSecretExpiresString.value = "";
+    tokenSettingList.value = [];
     visible.authClientForm = true ;
   }
 }

@@ -6,6 +6,6 @@
 </template>
 
 <script lang="ts" setup>
-import {access} from '~/assets/js/access';
+import {access} from '~/assets/ts/access';
 
 </script>
