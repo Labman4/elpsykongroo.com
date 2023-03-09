@@ -1,6 +1,10 @@
 <template>
     <el-dialog v-model="visible.authClientForm" title="">
-    <el-form :model="clientForm">
+    <el-form 
+    ref="clientformRef"
+    :model="clientForm" 
+    :inline-message="true"
+    >
         <el-form-item label="GrantTypes" :label-width=visible.authClientFormWidth>
           <el-checkbox-group v-model=authorizationGrantTypes>
             <el-checkbox label="client_credentials" />
@@ -26,8 +30,15 @@
       <el-form-item label="scopes" :label-width=visible.authClientFormWidth>
         <el-input v-model="clientForm.scopes" />
       </el-form-item>
-      <el-form-item label="clientId" :label-width=visible.authClientFormWidth>
-        <el-input v-model="clientForm.clientId" autocomplete="off" />
+      <el-form-item
+        :label-width=visible.authClientFormWidth
+        label="clientId" 
+        prop="clientId"
+        :rules="[
+          { required: true, message: 'clientId is required' }
+        ]" 
+        >
+        <el-input v-model="clientForm.clientId" style="width: auto;"/>
       </el-form-item>
       <el-form-item label="clientSecret" :label-width=visible.authClientFormWidth>
         <el-input v-model="clientForm.clientSecret" type="password" :show-password="true" autocomplete="off" @keyup.enter="" />
@@ -54,14 +65,14 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="visible.authClientForm = false">Cancel</el-button>
-        <el-button type="primary" @click="clientAdd()" >
+        <el-button type="primary" @click="clientAdd(clientformRef)" >
           Confirm
         </el-button>
       </span>
     </template>
   </el-dialog>
       <el-dialog v-model="visible.authClientTable" title="client" width="95%">
-    <el-button type="" @click="openClientAdd">Add</el-button>
+    <el-button type="" @click="openClientAdd(clientformRef)">Add</el-button>
     <!-- <el-button type="danger" click="DeleteSelect">DeleteSelect</el-button> -->
     <el-table :data="data.authclient" @selection-change="handleAuthSelectChange">
       <el-table-column type="selection"/>
@@ -103,10 +114,11 @@ import { axios } from '~/assets/ts/axio';
 import { access }  from '~/assets/ts/access';
 import { env } from '~/assets/ts/env';
 import { reactive, ref } from 'vue';
-import { v4 as uuidv4 } from 'uuid';
-import { dayjs, ElMessageBox } from 'element-plus';
+import { dayjs, ElMessageBox, FormInstance } from 'element-plus';
 import bcrypt from 'bcryptjs';
 import { visible } from '~/assets/ts/visible';
+
+const clientformRef = ref<FormInstance>()
 
 const authclient = [{}];
 const data = reactive({authclient});
@@ -137,7 +149,7 @@ const props = {
 // })
 
 let initClientForm  = () => ({
-  id: uuidv4(),
+  id: "",
   clientId: "",
   clientSecret: "",
   clientSecretExpiresAt: "",
@@ -552,8 +564,11 @@ const DeleteClient = (index: number, row: AuthClient) => {
   })
 }
 
-function clientAdd() {
-  const option = {
+const clientAdd = (formEl: FormInstance | undefined)  => {
+  if (!formEl) return
+  formEl.validate((valid) => {
+    if (valid) {
+      const option = {
         baseURL: env.apiUrl,
         url: "/auth/client/add",
         method: "POST",
@@ -563,25 +578,30 @@ function clientAdd() {
           "Content-Type": "application/json"
         },
       }
-  clientForm.authorizationGrantTypes = authorizationGrantTypes.value.toString();
-  if (!clientForm.clientSecret.startsWith("{bcrypt}")){
-    bcrypt.hash(clientForm.clientSecret, 10).then(function(hash) {
-      clientForm.clientSecret = '{bcrypt}' + hash ;
-      axios(option).then(function (response) {
-        if(response.data.length > 0) {
-          visible.authClientForm = false ;
-          authClientList();
-        }
-      })
-    });
-  } else {
-      axios(option).then(function (response) {
-        if(response.data.length > 0) {
-          visible.authClientForm = false ;
-          authClientList();
-        }
-      })
-  }
+      clientForm.authorizationGrantTypes = authorizationGrantTypes.value.toString();
+      if (!clientForm.clientSecret.startsWith("{bcrypt}")){
+        bcrypt.hash(clientForm.clientSecret, 10).then(function(hash) {
+          clientForm.clientSecret = '{bcrypt}' + hash ;
+          axios(option).then(function (response) {
+            if(response.data.length > 0) {
+              visible.authClientForm = false ;
+              authClientList();
+            }
+          })
+        });
+      } else {
+          axios(option).then(function (response) {
+            if(response.data.length > 0) {
+              visible.authClientForm = false ;
+              authClientList();
+            }
+          })
+      }
+    } else {
+      return false
+    }
+  })
+  
 }
 
 function authClientList() {
@@ -604,7 +624,8 @@ function authClientList() {
   })
 }
 
-function openClientAdd() {
+const openClientAdd = (formEl: FormInstance | undefined)  =>  {
+  formEl?.resetFields();
   if (selectAuthId.length > 1) {
     ElMessageBox.alert("dont support batch update")
   } else if (selectAuthId.length == 1){
