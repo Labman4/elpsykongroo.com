@@ -24,6 +24,7 @@
               <el-menu-item index="1-2" route="linkerd">Linkerd</el-menu-item>
               <el-menu-item index="1-3" route="kibana">Kibana</el-menu-item>
               <el-menu-item index="1-4" route="harbor">Harbor</el-menu-item>
+              <el-menu-item index="1-5" route="minio">Minio</el-menu-item>
             </el-menu-item-group>
           </el-sub-menu>
         </el-menu>
@@ -46,18 +47,26 @@
             <el-sub-menu index="2-3" >
               <template #title><span>auth</span></template>
               <el-menu-item index="2-3-1" @click="openAuthClient()" >client</el-menu-item>
+              <el-menu-item index="2-3-2" @click="openAuthClientRegister()" >register</el-menu-item>
             </el-sub-menu>
           </el-sub-menu>
-          <el-menu-item index="3" v-if="access.grant_type !='authorization_code'">
+          <el-menu-item index="3" >
+            <el-icon @click="upload()"><UploadFilled /></el-icon>
+            <template #title >
+              storage
+            </template>
+          </el-menu-item>
+          <el-menu-item index="4" v-if="access.grant_type !='authorization_code'">
             <el-icon><Timer /></el-icon>
             <template #title v-if="access.grant_type =='client_credentials'">{{access.expires_in}}s</template>
           </el-menu-item>
-          <el-menu-item index="3-1" v-if="access.grant_type =='authorization_code'" >
+          <el-menu-item index="4-1" v-if="access.grant_type =='authorization_code'" >
             <el-icon @click="logout()"><SwitchButton /></el-icon>
             <template #title >
               Logout
             </template>
           </el-menu-item>
+        
         </el-menu>
       </el-scrollbar>
       <IP ref="ip"></IP>
@@ -69,6 +78,24 @@
         </el-main>
       </el-container>
     </el-container>
+
+    <!-- <el-upload
+    v-model:file-list="fileList"
+    class="upload-demo"
+    action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+    multiple
+    :on-preview="handlePreview"
+    :on-remove="handleRemove"
+    :before-remove="beforeRemove"
+    :limit="3"
+    :on-exceed="handleExceed"
+  >
+    <template #tip>
+      <div class="el-upload__tip">
+        jpg/png files with a size less than 500KB.
+      </div>
+    </template>
+  </el-upload> -->
   </template>
   
 <script lang="ts" setup>
@@ -76,7 +103,7 @@ import { axios } from '~/assets/ts/axio';
 import { access } from '~/assets/ts/access';
 import { env } from '~/assets/ts/env';
 import { ref } from 'vue';
-import { Timer, Operation, SwitchButton, Expand, Fold, Menu } from '@element-plus/icons-vue';
+import { Timer, Operation, SwitchButton, Expand, Fold, Menu, UploadFilled } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import IP from '~/components/api/IP.vue';
 import Record from '~/components/api/Record.vue';
@@ -102,6 +129,10 @@ const openAuthClient = () => {
   authClient.value?.authClientList();
 }
 
+const openAuthClientRegister = () => {
+  authClient.value?.authClientRegisterList();
+}
+
 const logout = () => {
   ElMessage('you will logout in 3s');
   if(access.grant_type == 'authorization_code') {
@@ -124,6 +155,10 @@ const logout = () => {
 
 let isCollapse = ref(true)
 
+const upload = () => {
+
+
+}
 const expand = () => {
   isCollapse.value = false;
 }

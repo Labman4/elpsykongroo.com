@@ -7,7 +7,10 @@ export const visible = reactive(
     "ipFormLabelWidth": "100px",
     "recordTable": false,
     "authClientTable": false,
+    "authClientRegisterTable": false,
     "authClientForm": false,
+    "authClientRegisterForm": false,
     "authClientFormWidth": "100px",
+    "authClientRegisterFormWidth": "100px",
 
 })

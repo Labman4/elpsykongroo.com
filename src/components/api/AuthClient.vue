@@ -1,5 +1,5 @@
 <template>
-    <el-dialog v-model="visible.authClientForm" title="">
+  <el-dialog v-model="visible.authClientForm" title="">
     <el-form 
     ref="clientformRef"
     :model="clientForm" 
@@ -71,10 +71,11 @@
       </span>
     </template>
   </el-dialog>
-      <el-dialog v-model="visible.authClientTable" title="client" width="95%">
+
+  <el-dialog v-model="visible.authClientTable" title="client" width="95%">
     <el-button type="" @click="openClientAdd(clientformRef)">Add</el-button>
     <!-- <el-button type="danger" click="DeleteSelect">DeleteSelect</el-button> -->
-    <el-table :data="data.authclient" @selection-change="handleAuthSelectChange">
+    <el-table :data="data.authclient" @selection-change="handleClientSelectChange">
       <el-table-column type="selection"/>
       <el-table-column property="clientId" label="Id" width="60px"/>
       <el-table-column property="clientSecret" label="Secret" />
@@ -107,6 +108,138 @@
       @update:current-page="authClientPageChange"
       @update:page-size="authClientPageSizeChange"/>
   </el-dialog>
+
+  <el-dialog v-model="visible.authClientRegisterForm" title="">
+    <el-form 
+    ref="registerformRef"
+    :model="registerForm" 
+    :inline-message="true"
+    >
+        <el-form-item label="Types" :label-width=visible.authClientRegisterFormWidth>
+          <el-radio-group v-model="registerForm.authorizationGrantType">
+            <el-radio label="client_credentials">client_credentials</el-radio>
+            <el-radio label="authorization_code">authorization_code</el-radio>
+            <el-radio label="refresh_token">refresh_token</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="Methods" :label-width=visible.authClientFormWidth>
+        <el-select v-model="registerForm.clientAuthenticationMethod" placeholder="">
+          <el-option label="client_secret_basic" value="client_secret_basic" />
+          <el-option label="client_secret_post" value="client_secret_post" />
+          <el-option label="private_key_jwt" value="private_key_jwt" />
+          <el-option label="client_secret_jwt" value="client_secret_jwt" />
+          <el-option label="none" value="none" />
+        </el-select>
+        </el-form-item>
+      <el-form-item label="redirectUri" :label-width=visible.authClientFormWidth>
+        <el-input v-model="registerForm.redirectUri" />
+      </el-form-item>
+      <el-form-item label="clientName" :label-width=visible.authClientFormWidth>
+        <el-input v-model="registerForm.clientName" />
+      </el-form-item>
+      <el-form-item label="scopes" :label-width=visible.authClientFormWidth>
+        <el-input v-model="registerForm.scopes" placeholder="openid"/>
+      </el-form-item>
+      <el-form-item
+        :label-width=visible.authClientFormWidth
+        label="registerId" 
+        prop="registrationId"
+        :rules="[
+          { required: true, message: 'registerId is required' }
+        ]" 
+        >
+        <el-input v-model="registerForm.registrationId" style="width: auto;"/>
+      </el-form-item>
+      <el-form-item
+        :label-width=visible.authClientFormWidth
+        label="clientId" 
+        prop="clientId"
+        :rules="[
+          { required: true, message: 'clientId is required' }
+        ]" 
+        >
+        <el-input v-model="registerForm.clientId" style="width: auto;"/>
+      </el-form-item>
+      <el-form-item label="clientSecret" :label-width=visible.authClientFormWidth>
+        <el-input v-model="registerForm.clientSecret" type="password" :show-password="true" autocomplete="off" @keyup.enter="" />
+      </el-form-item>
+      <el-form-item label="authorizationUri" :label-width=visible.authClientFormWidth :required="true">
+        <el-input v-model="registerForm.authorizationUri" />
+      </el-form-item>
+
+      <el-form-item label="tokenUri" :label-width=visible.authClientFormWidth :required="true">
+        <el-input v-model="registerForm.tokenUri" />
+      </el-form-item>
+      
+      <el-form-item label="jwkSetUri" :label-width=visible.authClientFormWidth>
+        <el-input v-model="registerForm.jwkSetUri" />
+      </el-form-item>
+
+      <el-form-item label="issuerUri" :label-width=visible.authClientFormWidth>
+        <el-input v-model="registerForm.issuerUri" />
+      </el-form-item>
+
+      <el-form-item label="userInfoUri" :label-width=visible.authClientFormWidth>
+        <el-input v-model="registerForm.userInfoUri" />
+      </el-form-item>
+
+      <el-form-item label="authenticationMethod" :label-width=visible.authClientFormWidth>
+        <el-input v-model="registerForm.authenticationMethod" />
+      </el-form-item>
+
+      <el-form-item label="userNameAttributeName" :label-width=visible.authClientFormWidth>
+        <el-input v-model="registerForm.userNameAttributeName" />
+      </el-form-item>
+
+      <!-- <el-form-item label="configurationMetadata" :label-width=visible.authClientFormWidth>
+        <el-input v-model="registerForm.providerDetails" />
+      </el-form-item> -->
+    
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="visible.authClientRegisterForm = false">Cancel</el-button>
+        <el-button type="primary" @click="registerAdd(registerformRef)" >
+          Confirm
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
+
+  <el-dialog v-model="visible.authClientRegisterTable" title="client" width="95%">
+    <el-button type="" @click="openRegisterAdd(registerformRef)">Add</el-button>
+    <!-- <el-button type="danger" click="DeleteSelect">DeleteSelect</el-button> -->
+    <el-table :data="data.authclientRegister" @selection-change="handleAuthRegisterSelectChange">
+      <el-table-column type="selection"/>
+      
+      <el-table-column property="registrationId" label="registrationId" width="auto"/>
+      <el-table-column property="clientId" label="clientId" width="auto"/>
+      <el-table-column property="clientSecret" label="clientSecret" />
+      <el-table-column property="clientName" label="clientName" />
+      <el-table-column property="redirectUri" label="redirectUri" width="auto" />
+      <el-table-column property="scopes" label="scopes" width="auto"/>
+      <el-table-column property="clientAuthenticationMethod" label="Methods" width="auto"/>
+      <el-table-column property="authorizationGrantType" label="type" width="auto"/>
+
+      <el-table-column>
+      <!-- <template #header>
+        <el-input v-model="search" size="small" placeholder="Type to search"  @keyup.enter="" />
+      </template> -->
+      <template #default="scope">
+        <el-button
+          size="small"
+          type="danger"
+          @click="DeleteReigster(scope.$index, scope.row)"
+          >Delete</el-button>
+      </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination layout="prev, pager, next, sizes" :total="50" 
+      :current-page="authPage.pageNumber"  
+      :page-size="authPage.pageSize"
+      @update:current-page="authClientPageChange"
+      @update:page-size="authClientPageSizeChange"/>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -119,9 +252,11 @@ import bcrypt from 'bcryptjs';
 import { visible } from '~/assets/ts/visible';
 
 const clientformRef = ref<FormInstance>()
+const registerformRef = ref<FormInstance>()
 
 const authclient = [{}];
-const data = reactive({authclient});
+const authclientRegister = [{}]
+const data = reactive({authclient, authclientRegister});
 
 const authPage = {
   "pageNumber": 1,
@@ -133,20 +268,6 @@ const props = {
   expandTrigger: 'hover' as const,
   // checkStrictly: true,
 }
-
-// let clientForm  = reactive({
-//   id: uuidv4(),
-//   clientId: "",
-//   clientSecret: "",
-//   clientSecretExpiresAt: "",
-//   scopes: "",
-//   redirectUris: "",
-//   clientName: "",
-//   clientSettings: "",
-//   tokenSettings: "",
-//   authorizationGrantTypes: "",
-//   clientAuthenticationMethods: ""
-// })
 
 let initClientForm  = () => ({
   id: "",
@@ -161,6 +282,26 @@ let initClientForm  = () => ({
   authorizationGrantTypes: "",
   clientAuthenticationMethods: ""
 })
+
+let initRegisterForm  = () => ({
+  registrationId: "",
+  clientId: "",
+  clientSecret: "",
+  clientAuthenticationMethod: "",
+  authorizationGrantType : "",
+  scopes: "",
+  redirectUri: "",
+  clientName: "",
+  authorizationUri: "",
+  tokenUri: "",
+  jwkSetUri: "",
+  issuerUri: "",
+  userInfoUri: "",
+  authenticationMethod: "",
+  userNameAttributeName: ""
+})
+
+let registerForm = reactive(initRegisterForm());
 
 let clientForm = reactive(initClientForm());
 
@@ -177,6 +318,33 @@ interface AuthClient {
   tokenSettings: string
   authorizationGrantTypes: string
   clientAuthenticationMethods: string
+}
+
+interface AuthClientRegister {
+  registrationId: string
+  clientId: string
+  clientSecret: string
+  clientAuthenticationMethod: string
+  authorizationGrantType : string
+  scopes: any[]
+  redirectUri: string
+  clientName: string
+  providerDetails: ProviderDetails
+}
+
+interface ProviderDetails {
+  authorizationUri: string
+  tokenUri: string
+  jwkSetUri: string
+  issuerUri: string
+  configurationMetadata: Map<string, object>
+  userInfoEndpoint: UserInfoEndpoint
+}
+
+interface UserInfoEndpoint {
+  uri: string
+  authenticationMethod: string
+  userNameAttributeName: string
 }
 
 const tokenSettings = [
@@ -417,24 +585,9 @@ const clientSettings = [
   },
 ]
 
-// interface clientSettings {
-//   requireProofKey: string
-//   requireAuthorizationConsent: string
-//   jwkSetUrl: string
-//   tokenEndpointAuthenticationSigningAlgorithm: string
-// }
-
-// interface tokenSettings {
-//   authorizationCodeTimeToLive: string
-//   accessTokenTimeToLive: string
-//   accessTokenFormat: string
-//   reuseRefreshTokens: string
-//   refreshTokenTimeToLive: string
-//   idTokenSignatureAlgorithm: string
-// }
-
 let authorizationGrantTypes = ref([""]);
 let clientSecretExpiresString = ref("");
+
 const clientSettingList= ref(new Array());
 const tokenSettingList= ref(new Array());
 
@@ -496,7 +649,7 @@ const convertToBool = (s) => {
   return s;
 } 
 
-function handleTokenSetting(data) {
+const handleTokenSetting = (data) => {
   const map = new Map();
   data.map(i=>{
     if (i[0] == "settings.token.access-token-format" && i.length > 2) {
@@ -527,7 +680,7 @@ function handleTokenSetting(data) {
   clientForm.tokenSettings = json1;
 }
 
-function handleClientSetting(data) {
+const handleClientSetting = (data) => {
   const map = new Map();
   data.map(i=>{
     if (i.length > 2){
@@ -557,9 +710,27 @@ const DeleteClient = (index: number, row: AuthClient) => {
     },
   }
   axios(option).then(function (response) {
-    var count = response.data;
-    if (count > 0) {
+    if (response.data > 0) {
       data.authclient.splice(index, 1);
+    }
+  })
+}
+
+const DeleteReigster = (index: number, row: AuthClientRegister) => {
+  const option = {
+    baseURL: env.apiUrl,
+    url: "/auth/register/delete",
+    method: "DELETE",
+    params: {
+      "registerId": row.registrationId
+    },
+    headers: {
+      'Authorization': 'Bearer '+ access.access_token
+    },
+  }
+  axios(option).then(function (response) {
+    if (response.data > 0) {
+      data.authclientRegister.splice(index, 1);
     }
   })
 }
@@ -583,7 +754,7 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
         bcrypt.hash(clientForm.clientSecret, 10).then(function(hash) {
           clientForm.clientSecret = '{bcrypt}' + hash ;
           axios(option).then(function (response) {
-            if(response.data.length > 0) {
+            if(response.data > 0) {
               visible.authClientForm = false ;
               authClientList();
             }
@@ -591,7 +762,7 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
         });
       } else {
           axios(option).then(function (response) {
-            if(response.data.length > 0) {
+            if(response.data > 0) {
               visible.authClientForm = false ;
               authClientList();
             }
@@ -604,7 +775,99 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
   
 }
 
-function authClientList() {
+const registerAdd = (formEl: FormInstance | undefined)  => {
+  if (!formEl) return
+  formEl.validate((valid) => {
+    if (valid) {
+      let scopes;
+      if(registerForm.scopes != "") {
+        if(registerForm.scopes.includes(",")) {
+          scopes = registerForm.scopes.split(",");
+        } else {
+          scopes = registerForm.scopes.split(" ");
+        }
+      }
+      const userInfoEndpoint: UserInfoEndpoint = {
+        uri: registerForm.userInfoUri,
+        authenticationMethod: registerForm.authenticationMethod,
+        userNameAttributeName: registerForm.userNameAttributeName
+      }
+      const provider: ProviderDetails = {
+        authorizationUri: registerForm.authorizationUri,
+        tokenUri: registerForm.tokenUri,
+        jwkSetUri: registerForm.jwkSetUri,
+        issuerUri: registerForm.issuerUri,
+        configurationMetadata: new Map<string, object>,
+        userInfoEndpoint: userInfoEndpoint
+      }
+      const authRegister: AuthClientRegister = {
+        registrationId: registerForm.registrationId,
+        clientId: registerForm.clientId,
+        clientSecret: registerForm.clientSecret,
+        clientAuthenticationMethod: registerForm.clientAuthenticationMethod,
+        authorizationGrantType: registerForm.authorizationGrantType,
+        scopes: scopes,
+        redirectUri: registerForm.redirectUri,
+        clientName: registerForm.clientName,
+        providerDetails: provider
+      };
+      console.log(JSON.stringify(authRegister));
+      const option = {
+        baseURL: env.apiUrl,
+        url: "/auth/register/add",
+        method: "POST",
+        data: authRegister,
+        headers: {
+          'Authorization': 'Bearer '+ access.access_token,
+          "Content-Type": "application/json"
+        },
+      }
+      if (!registerForm.clientSecret.startsWith("{bcrypt}")){
+        bcrypt.hash(registerForm.clientSecret, 10).then(function(hash) {
+          authRegister.clientSecret = '{bcrypt}' + hash ;
+          axios(option).then(function (response) {
+            if(response.data > 0) {
+              visible.authClientRegisterForm = false ;
+              authClientRegisterList();
+            } 
+          })
+        });
+      } else {
+          axios(option).then(function (response) {
+            if(response.data > 0) {
+              visible.authClientRegisterForm = false ;
+              authClientRegisterList();
+            } 
+          })
+      }
+    } else {
+      return false
+    }
+  })
+  
+}
+const authClientRegisterList = () => {
+  visible.authClientRegisterTable = true;
+  const option = {
+    baseURL: env.apiUrl,
+    url: "/auth/register/list",
+    method: "GET",
+    // params: {
+    //   "param": search.value,
+    //   "pageNumber": recordPage.pageNumber-1,
+    //   "pageSize": recordPage.pageSize
+    // },
+    headers: {
+      'Authorization': 'Bearer '+ access.access_token
+    },
+  }
+  axios(option).then(function (response) {
+    data.authclientRegister=response.data;
+    
+  })
+}
+
+const authClientList = () =>  {
   visible.authClientTable = true;
   const option = {
     baseURL: env.apiUrl,
@@ -629,7 +892,7 @@ const openClientAdd = (formEl: FormInstance | undefined)  =>  {
   if (selectAuthId.length > 1) {
     ElMessageBox.alert("dont support batch update")
   } else if (selectAuthId.length == 1){
-    const authClient = multipleAuthSelect.value[0];
+    const authClient = multipleClientSelect.value[0];
     const clientArray = new Array();
     const tokenArray = new Array();
     if (authClient.clientSettings != "") {
@@ -644,7 +907,7 @@ const openClientAdd = (formEl: FormInstance | undefined)  =>  {
     tokenSettingList.value = tokenArray;
     clientSecretExpiresString.value = dayjs.unix(parseInt(authClient.clientSecretExpiresAt, 10)).format("YYYY-MM-DDTHH:mm:ss[Z]");    
     authorizationGrantTypes.value = authClient.authorizationGrantTypes.split(",");
-    Object.assign(clientForm, multipleAuthSelect.value[0]);
+    Object.assign(clientForm, multipleClientSelect.value[0]);
     visible.authClientForm = true ;
   } else {
     Object.assign(clientForm, initClientForm());
@@ -656,12 +919,44 @@ const openClientAdd = (formEl: FormInstance | undefined)  =>  {
   }
 }
 
-const multipleAuthSelect = ref<AuthClient[]>([])
+const openRegisterAdd = (formEl: FormInstance | undefined)  =>  {
+  formEl?.resetFields();
+  if (selectAuthId.length > 1) {
+    ElMessageBox.alert("dont support batch update")
+  } else if (selectAuthId.length == 1){
+    const authRegister = multipleRegisterSelect.value[0];
+    console.log(authRegister);
+    registerForm.authorizationUri=authRegister.providerDetails.authorizationUri;
+    registerForm.tokenUri=authRegister.providerDetails.tokenUri;
+    registerForm.issuerUri=authRegister.providerDetails.issuerUri;
+    registerForm.jwkSetUri=authRegister.providerDetails.jwkSetUri;
+    registerForm.userNameAttributeName=authRegister.providerDetails.userInfoEndpoint.userNameAttributeName;
+    registerForm.userInfoUri=authRegister.providerDetails.userInfoEndpoint.uri;
+    registerForm.authenticationMethod=authRegister.providerDetails.userInfoEndpoint.authenticationMethod;
+    Object.assign(registerForm, multipleRegisterSelect.value[0]);
+    visible.authClientRegisterForm = true ;
+  } else {
+    Object.assign(registerForm, initRegisterForm());
+    visible.authClientRegisterForm = true ;
+  }
+}
 
-const handleAuthSelectChange = (val: AuthClient[]) => {
-  multipleAuthSelect.value = val ;
+const multipleRegisterSelect = ref<AuthClientRegister[]>([])
+
+const handleAuthRegisterSelectChange = (val: AuthClientRegister[]) => {
+  multipleRegisterSelect.value = val ;
   selectAuthId.splice(0, selectAuthId.length);
-  for(let i of multipleAuthSelect.value) {
+  for(let i of multipleRegisterSelect.value) {
+    selectAuthId.push(i.clientId);
+  }
+}
+
+const multipleClientSelect = ref<AuthClient[]>([])
+
+const handleClientSelectChange = (val: AuthClient[]) => {
+  multipleClientSelect.value = val ;
+  selectAuthId.splice(0, selectAuthId.length);
+  for(let i of multipleClientSelect.value) {
     selectAuthId.push(i.clientId);
   }
 }
@@ -697,6 +992,7 @@ function expiredTimestamp(row:AuthClient) {
 }
 
 defineExpose({
-  authClientList
+  authClientList,
+  authClientRegisterList
 })
 </script>

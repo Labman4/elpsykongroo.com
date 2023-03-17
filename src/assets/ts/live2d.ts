@@ -22,64 +22,69 @@ const app = new PIXI.Application({
     backgroundAlpha: 0,
 });
 
-const Rintaro_URL = "https://raw.githubusercontent.com/Labman4/live2d/main/%E5%86%BB%E4%BA%AC/Rintaro/Rintaro.model3.json";
-const Christina_URL = "https://raw.githubusercontent.com/Labman4/live2d/main/%E5%86%BB%E4%BA%AC/Christina/Christina.model3.json";
-const Mayuri_URL = "https://raw.githubusercontent.com/Labman4/live2d/main/%E5%86%BB%E4%BA%AC/Mayuri/Mayuri.model3.json";
-
-const models = await Promise.all([
+const Rintaro_URL = "/Rintaro/Rintaro.model3.json";
+const Christina_URL = "/Christina/Christina.model3.json";
+const Mayuri_URL = "/Mayuri/Mayuri.model3.json";
+load();
+let models;
+async function load() {
+    models = await Promise.all([
     Live2DModel.from(Christina_URL),
     Live2DModel.from(Rintaro_URL),
     Live2DModel.from(Mayuri_URL),
-  ]);
+    ]);
+    models.forEach((model) => {
+        app.stage.addChild(model);
+
+        // resize();
+
+        // fit the window
+        const scaleX = (innerWidth * 0.4) / model.width;
+        const scaleY = (innerHeight * 0.8) / model.height;
+
+        // fit the window
+        model.scale.set(Math.min(scaleX, scaleY));
+
+        model.y = innerHeight * 0.1;
+        // model[0].anchor.set(0.5, 0.5);
+        // draggable(model);
+        model.on('pointertap', () => {
+            models[0].motion('tap')
+        });
+        model.on('pointerleave', () => {
+            models[0].motion('Idle')
+        });
+        model.on('pointertap', () => {
+            models[0].motion('tap')
+        });
+        model.on('pointerupoutside', () => {
+            models[0].motion('pose')
+        });
+    })
+    const Mayuri = models[2];
+    const Rintaro = models[1];
+    const Christina = models[0];
+
+    Christina.x = (innerWidth - Mayuri.width - Rintaro.width- Christina.width) / 3;
+    Rintaro.x =  Christina.x + Christina.width;
+    Mayuri.x = Rintaro.x + Rintaro.width;
+    draggable(models[0]);
+    // const hit = new HitAreaFrames();
+    // models[0].addChild(hit);
+    // hit.visible = true;
+
+    models[0].on('pointertap', () => {
+        models[0].motion('tap')
+    });
+}
 
 // app.renderer.view.style.position = 'absolute';
 // app.renderer.view.style.left = '25%';
 // app.renderer.view.style.top = '6.8%';
 
-models.forEach((model) => {
-    app.stage.addChild(model);
 
-    // resize();
 
-    // fit the window
-    const scaleX = (innerWidth * 0.4) / model.width;
-    const scaleY = (innerHeight * 0.8) / model.height;
 
-    // fit the window
-    model.scale.set(Math.min(scaleX, scaleY));
-
-    model.y = innerHeight * 0.1;
-    // model[0].anchor.set(0.5, 0.5);
-    // draggable(model);
-    model.on('pointertap', () => {
-        models[0].motion('tap')
-    });
-    model.on('pointerleave', () => {
-        models[0].motion('Idle')
-    });
-    model.on('pointertap', () => {
-        models[0].motion('tap')
-    });
-    model.on('pointerupoutside', () => {
-        models[0].motion('pose')
-    });
-});
-
-const Mayuri = models[2];
-const Rintaro = models[1];
-const Christina = models[0];
-
-Christina.x = (innerWidth - Mayuri.width - Rintaro.width- Christina.width) / 3;
-Rintaro.x =  Christina.x + Christina.width;
-Mayuri.x = Rintaro.x + Rintaro.width;
-draggable(models[0]);
-// const hit = new HitAreaFrames();
-// models[0].addChild(hit);
-// hit.visible = true;
-
-models[0].on('pointertap', () => {
-    models[0].motion('tap')
-});
 
 
 var scaleInit;
@@ -155,7 +160,7 @@ document.addEventListener('touchmove', function (event) {
 
     });
 
-function resize() {
+function resize(models) {
     if (window.innerWidth < window.innerHeight) {
         // app.renderer.resize(window.innerWidth, window.innerHeight + (((((window.innerWidth * 100) / window.innerHeight) / 100) - 0.5) * window.innerWidth)); 
         scaleInit = 0.3;
@@ -174,7 +179,7 @@ function resize() {
 }
 
 window.onresize = function() {
-    resize();
+    resize(models);
 };
 
 function draggable(model) {

@@ -44,11 +44,12 @@ import { toggleDark } from '~/composables';
 
 const callbackUrl = window.location.href;
 const code = new URL(callbackUrl).searchParams.get('code');
+const state = new URL(callbackUrl).searchParams.get('state');
 
 const timeCount= ref(0);
 const dialogFormVisible = ref(false);
 
-if (code != null) {
+if (code != null && state != null) {
   if (code.length > 20) {
      access.grant_type = 'access_token';
   } else {
@@ -146,7 +147,7 @@ function oauth() {
       }
     })      
   } else if (access.grant_type == "authorization_code") {
-    window.open(env.apiUrl+"/oauth2/authorization/spring");
+    window.location.href=env.authUrl+"/oauth2/authorization/spring";
   } else if (access.grant_type == "access_token") {
       auth();
   } else if (access.grant_type == "github") {
