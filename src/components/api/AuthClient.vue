@@ -183,7 +183,7 @@
         <el-input v-model="registerForm.userInfoUri" />
       </el-form-item>
 
-      <el-form-item label="authenticationMethod" :label-width=visible.authClientFormWidth>
+      <el-form-item label="authenticationMethod" :label-width=visible.authClientFormWidth :required=true>
         <el-input v-model="registerForm.authenticationMethod" />
       </el-form-item>
 
@@ -776,42 +776,43 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
 }
 
 const registerAdd = (formEl: FormInstance | undefined)  => {
+    const userInfoEndpoint: UserInfoEndpoint = {
+      uri: registerForm.userInfoUri,
+      authenticationMethod: registerForm.authenticationMethod,
+      userNameAttributeName: registerForm.userNameAttributeName
+    }
+    const provider: ProviderDetails = {
+      authorizationUri: registerForm.authorizationUri,
+      tokenUri: registerForm.tokenUri,
+      jwkSetUri: registerForm.jwkSetUri,
+      issuerUri: registerForm.issuerUri,
+      configurationMetadata: new Map<string, object>,
+      userInfoEndpoint: userInfoEndpoint
+    }
+    let scope;
+    if(registerForm.scopes != "") {
+      if(registerForm.scopes.includes(",")) {
+        scope = registerForm.scopes.split(",");
+      } else {
+        scope = registerForm.scopes;
+      }
+    }
+    const authRegister: AuthClientRegister = {
+      registrationId: registerForm.registrationId,
+      clientId: registerForm.clientId,
+      clientSecret: registerForm.clientSecret,
+      clientAuthenticationMethod: registerForm.clientAuthenticationMethod,
+      authorizationGrantType: registerForm.authorizationGrantType,
+      scopes: scope,
+      redirectUri: registerForm.redirectUri,
+      clientName: registerForm.clientName,
+      providerDetails: provider
+    };
+
+  
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      let scopes;
-      if(registerForm.scopes != "") {
-        if(registerForm.scopes.includes(",")) {
-          scopes = registerForm.scopes.split(",");
-        } else {
-          scopes = registerForm.scopes.split(" ");
-        }
-      }
-      const userInfoEndpoint: UserInfoEndpoint = {
-        uri: registerForm.userInfoUri,
-        authenticationMethod: registerForm.authenticationMethod,
-        userNameAttributeName: registerForm.userNameAttributeName
-      }
-      const provider: ProviderDetails = {
-        authorizationUri: registerForm.authorizationUri,
-        tokenUri: registerForm.tokenUri,
-        jwkSetUri: registerForm.jwkSetUri,
-        issuerUri: registerForm.issuerUri,
-        configurationMetadata: new Map<string, object>,
-        userInfoEndpoint: userInfoEndpoint
-      }
-      const authRegister: AuthClientRegister = {
-        registrationId: registerForm.registrationId,
-        clientId: registerForm.clientId,
-        clientSecret: registerForm.clientSecret,
-        clientAuthenticationMethod: registerForm.clientAuthenticationMethod,
-        authorizationGrantType: registerForm.authorizationGrantType,
-        scopes: scopes,
-        redirectUri: registerForm.redirectUri,
-        clientName: registerForm.clientName,
-        providerDetails: provider
-      };
-      console.log(JSON.stringify(authRegister));
       const option = {
         baseURL: env.apiUrl,
         url: "/auth/register/add",
@@ -925,7 +926,6 @@ const openRegisterAdd = (formEl: FormInstance | undefined)  =>  {
     ElMessageBox.alert("dont support batch update")
   } else if (selectAuthId.length == 1){
     const authRegister = multipleRegisterSelect.value[0];
-    console.log(authRegister);
     registerForm.authorizationUri=authRegister.providerDetails.authorizationUri;
     registerForm.tokenUri=authRegister.providerDetails.tokenUri;
     registerForm.issuerUri=authRegister.providerDetails.issuerUri;

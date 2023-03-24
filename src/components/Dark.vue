@@ -1,5 +1,5 @@
 <template>
-    <el-button id="darkMode" size=small @click="openAuth()" v-if = "access.expires_in == 0">
+    <el-button id="darkMode" size=small @click="dialogFormVisible = true" v-if = "access.expires_in == 0">
     </el-button>
     <el-dialog v-model="dialogFormVisible" width="65%">
       <el-form 
@@ -41,7 +41,6 @@ import { access } from '~/assets/ts/access';
 import { ElButton, ElDialog, ElForm, ElFormItem, ElSelect, ElOption, ElInput } from 'element-plus';
 import { toggleDark } from '~/composables';
 
-
 const callbackUrl = window.location.href;
 const code = new URL(callbackUrl).searchParams.get('code');
 const state = new URL(callbackUrl).searchParams.get('state');
@@ -55,10 +54,6 @@ if (code != null && state != null) {
   } else {
     access.grant_type = 'github';
   }
-  openAuth();
-}
-
-function openAuth() {
   dialogFormVisible.value = true
 }
 
@@ -152,7 +147,7 @@ function oauth() {
       auth();
   } else if (access.grant_type == "github") {
       github();
-  } 
+  }
 }
 
 const countDown = () => {
@@ -177,12 +172,8 @@ const clearAcess = () => {
 
 <style scoped>
   #darkMode {
-    position:absolute;right: 20px; top:10px;
+    position:absolute;right: 50%; top:10px;
     border: 0px;
-  }
-  .darkbutton2 {
-    height: 10px;
-    position:absolute;right: 40px;top: 10px;
   }
 
   .el-button--text {

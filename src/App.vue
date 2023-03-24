@@ -1,6 +1,7 @@
 <template>
   <Bootstrap/>
   <Dark/>
+  <White/>
 </template>
 
 <style>

@@ -51,6 +51,7 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     SvgIcon: typeof import('./components/Svg/SvgIcon.vue')['default']
     Tabs: typeof import('./components/layouts/Tabs.vue')['default']
+    White: typeof import('./components/White.vue')['default']
   }
 }
 
