@@ -60,7 +60,10 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 15173,
-    cors: false
+    cors: {
+      origin: "https://elpsykongroo.com",
+      credential: true
+    }
     // proxy: {
     //   "/": {
     //   target: "http://localhost:8443",
