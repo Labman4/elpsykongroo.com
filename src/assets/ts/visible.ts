@@ -12,5 +12,6 @@ export const visible = reactive(
     "authClientRegisterForm": false,
     "authClientFormWidth": "100px",
     "authClientRegisterFormWidth": "100px",
-    "webauthnFormVisible": false
+    "webauthnFormVisible": false,
+    "dialogFormVisible": false
 })

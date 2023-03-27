@@ -1,28 +1,28 @@
-import { axios, countDown } from '~/assets/ts/axio';
+import { axios } from '~/assets/ts/axio';
 import jsSHA from "jssha";
-import { toggleDark } from "~/composables";
 import { access } from "./access";
 import { env } from "./env";
-import { code } from "./handleAuthCode";
 
-function generateCodeVerifier() {
+async function generateCodeVerifier() {
     var codeVerifier = "";
     var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
     var charLength = characters.length;
     for (var i = 0; i < 128; i++) {
       codeVerifier += characters.charAt(Math.floor(Math.random() * charLength));
     }
-    access.codeVerifier = codeVerifier;
-  }
+    window.localStorage.setItem("code_verifier", codeVerifier);
+    
+    console.log(codeVerifier);
+    console.log(    window.localStorage.getItem("code_verifier")    )
+    // fs.writeFileSync('/codeVerifier.txt', codeVerifier);
+    const sha256 = new jsSHA("SHA-256", "TEXT");
+    sha256.update(codeVerifier);
+    access.code_challenge = sha256.getHash("B64");
+}
   
-  function generateCodeChallenge(codeVerifier) {
-    var sha256 = new jsSHA("SHA-256", "TEXT");
-    sha256.update(access.codeVerifier);
-    var codeChallenge = sha256.getHash("B64");
-    return codeChallenge;
-  }
   
   const pkce = () => {
+    generateCodeVerifier();
     const pkceOption = {
         baseURL: env.authUrl,
         url: "oauth2/authorize",
@@ -30,7 +30,7 @@ function generateCodeVerifier() {
         data: {
           response_type: "code",
           code_challenge_method: "S256",
-          code_challenge: generateCodeChallenge(access.codeVerifier),
+          code_challenge: access.code_challenge,
           redirect_uri: env.redirectUrl,
           scope: "openid",
           client_id: "spring"
@@ -38,16 +38,20 @@ function generateCodeVerifier() {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         }, 
-        withCredentials: true                     
+        withCredentials: true,     
+        // validateStatus: function (status) {
+        //   return status >= 200 && status < 500; // default
+        // },                
       }
-      axios(pkceOption).then(function (response) {
-        if(response.data.access_token != "") {
-          access.refresh_token = response.data.refresh_token;
-          access.update(response.data.access_token, response.data.expires_in);
-          toggleDark();
-          // countDown();
+      axios(pkceOption).catch(function (error) {
+        if (error.response.status === 404 && error.response.request.responseURL) {
+          // handle redirect 404 error
+          window.location.href = error.response.request.responseURL;
+        } else {
+          // handle other errors
+          console.error(error);
         }
-      }) 
+      })
   }
 
 

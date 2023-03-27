@@ -132,7 +132,6 @@ async function  webauthnLogin() {
             withCredentials: true               
         }
         axios(loginOption).then(async function (response) {
-            console.log(response.data);
             if(response.data == 200) {
                 pkce();        
             } else {
@@ -154,7 +153,7 @@ async function  webauthnLogin() {
                     if(response.data == 200) {
                         loading.value = false;
                         visible.webauthnFormVisible = false
-                        if (document.domain == "localhost" || document.domain == env.redirectUrl) {
+                        if (document.domain == "localhost" || document.domain == "elpsykongroo.com") {
                             pkce();        
                         } else if (idp != "" && idp != undefined ) {
                             window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
