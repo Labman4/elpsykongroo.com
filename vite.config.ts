@@ -60,7 +60,7 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 15173,
-    cors: true, // 默认启用并允许任何源
+    cors: false
     // proxy: {
     //   "/": {
     //   target: "http://localhost:8443",

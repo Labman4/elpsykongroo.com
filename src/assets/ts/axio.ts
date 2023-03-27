@@ -1,6 +1,8 @@
 import axios from 'axios';
+import { toggleDark } from '~/composables';
 import { access } from './access';
 import { env } from './env';
+const timeCount= ref(0);
 
 axios.interceptors.response.use(function (response) {
     return response;
@@ -35,6 +37,24 @@ axios.interceptors.response.use(function (response) {
     }
   }
 
+  const countDown = () => {
+    timeCount.value = window.setInterval(() => {
+      access.expires_in--;
+      if(access.expires_in == 10) {
+        refreshToken();
+      } else if(access.expires_in == 0) {
+        clearAcess();
+        toggleDark();
+        clearInterval(timeCount.value);
+      }
+    }, 1000)
+  }
+  
+  const clearAcess = () => {
+      access.refresh_token = "";
+      access.access_token = "";
+  }
+
   // const csrf = () => {
   //   const csrfhOption = {
   //     baseURL: env.authUrl,
@@ -59,4 +79,4 @@ axios.interceptors.response.use(function (response) {
   //   }) 
   // }
   
-export { refreshToken, axios }
+export { refreshToken, axios , countDown }

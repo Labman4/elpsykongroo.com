@@ -45,6 +45,7 @@ declare module '@vue/runtime-core' {
     Kibana: typeof import('./components/dashboard/Kibana.vue')['default']
     Kubernetes: typeof import('./components/dashboard/Kubernetes.vue')['default']
     Linkerd: typeof import('./components/dashboard/Linkerd.vue')['default']
+    Loading: typeof import('element-plus/es')['ElLoadingDirective']
     Minio: typeof import('./components/dashboard/Minio.vue')['default']
     Record: typeof import('./components/api/Record.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

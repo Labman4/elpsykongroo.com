@@ -1,5 +1,7 @@
 <template>
-    <el-button id="darkMode" size=small @click="dialogFormVisible = true" v-if = "access.expires_in == 0">
+    <el-button id="darkMode" size=small @click="dialogFormVisible = true" 
+    v-if = "access.expires_in == 0"
+    >
     </el-button>
     <el-dialog v-model="dialogFormVisible" width="65%">
       <el-form 
@@ -9,9 +11,11 @@
          <el-form-item label="type">
           <el-select v-model="access.grant_type" placeholder="grant type">
             <!-- <el-option label="-----------" value="" /> -->
-            <el-option label="client credentials" value="client_credentials" />
-            <el-option label="authorization code" value="authorization_code" />
-            <el-option label="access token" value="access_token" />
+            <el-option label="Authorization Code" value="code" />
+            <el-option label="Implicit" value="token" />
+            <el-option label="Resource Owner Password Credentials" value="password" />
+            <el-option label="Client Credentials" value="client_credentials" />
+            <!-- <el-option label="pkce" value="pkce" /> -->
             <el-option label="github" value="github" />
           </el-select>
         </el-form-item>
@@ -35,31 +39,21 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { axios, refreshToken }  from '~/assets/ts/axio';
+import { axios, countDown }  from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
 import { ElButton, ElDialog, ElForm, ElFormItem, ElSelect, ElOption, ElInput } from 'element-plus';
 import { toggleDark } from '~/composables';
+import { code } from '~/assets/ts/handleAuthCode';
 
-const callbackUrl = window.location.href;
-const code = new URL(callbackUrl).searchParams.get('code');
-const state = new URL(callbackUrl).searchParams.get('state');
 
-const timeCount= ref(0);
+
 const dialogFormVisible = ref(false);
 
-if (code != null && state != null) {
-  if (code.length > 20) {
-     access.grant_type = 'access_token';
-  } else {
-    access.grant_type = 'github';
-  }
-  dialogFormVisible.value = true
-}
 
 const github = () => {
   const githubOption = {
-      baseURL: "https://github.com/login/oauth/access_token",
+      baseURL: "https://github.com/login/",
       url: "oauth/access_token",
       method: "POST",
       data: {
@@ -70,11 +64,7 @@ const github = () => {
       },
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
-      },  
-      // auth : { 
-      //     username : access.client_id , 
-      //     password : access.client_secret 
-      // } ,           
+      }          
     }
     axios(githubOption).then(function (response) {
       if(response.data.access_token != "") {
@@ -86,23 +76,21 @@ const github = () => {
       }
     }) 
 }
-function auth() {
+
+
+const implicit = () => {
   const authOption = {
       baseURL: env.authUrl,
       url: "/oauth2/token",
       method: "POST",
       data: {
-        grant_type: 'authorization_code',
-        code: code,
+        response_type: 'token',
+        client_id: access.client_id,
         redirect_uri: env.redirectUrl,
       },
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
-      },  
-      auth : { 
-          username : access.client_id , 
-          password : access.client_secret 
-      } ,           
+      },            
     }
     axios(authOption).then(function (response) {
       if(response.data.access_token != "") {
@@ -115,15 +103,113 @@ function auth() {
     }) 
 }
 
-function oauth() {  
-  dialogFormVisible.value = false;
-  if (access.grant_type == "client_credentials") {
-    const option = {
+const authorizationCode = () => {
+  const authOption = {
       baseURL: env.authUrl,
       url: "/oauth2/token",
       method: "POST",
       data: {
-        grant_type: access.grant_type
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: env.redirectUrl,
+        // clientId: access.client_id
+      },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },  
+      auth : { 
+          username : access.client_id , 
+          password : access.client_secret 
+      },   
+      withCredentials: true                  
+    }
+    axios(authOption).then(function (response) {
+      if(response.data.access_token != "") {
+        access.refresh_token = response.data.refresh_token;
+        access.grant_type = "authorization_code";
+        access.update(response.data.access_token, response.data.expires_in);
+        // userInfo();
+        toggleDark();
+        countDown();
+      }
+    }) 
+}
+
+
+const userInfo = () => {
+  const authOption = {
+      baseURL: env.authUrl,
+      url: "/userinfo",
+      method: "POST",
+      headers: {
+      'Authorization': 'Bearer '+ access.access_token
+      },  
+      // auth : { 
+      //     username : access.client_id , 
+      //     password : access.client_secret 
+      // } , 
+      withCredentials: true                 
+    }
+    axios(authOption).then(function (response) {
+        console.log(response.data)
+    }) 
+}
+
+const oidc = () => {
+  const authOption = {
+      baseURL: env.authUrl,
+      url: "/userinfo",
+      method: "POST",
+      headers: {
+      'Authorization': 'Bearer '+ access.access_token
+      },  
+      // auth : { 
+      //     username : access.client_id , 
+      //     password : access.client_secret 
+      // } , 
+      withCredentials: true                 
+    }
+    axios(authOption).then(function (response) {
+        console.log(response.data)
+    }) 
+}
+
+const passowrd = () => {
+  const authOption = {
+      baseURL: env.authUrl,
+      url: "/oauth2/token",
+      method: "POST",
+      data: {
+        grant_type: 'password',
+        username: "",
+        password: "",
+      },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }, 
+      auth : { 
+          username : access.client_id , 
+          password : access.client_secret 
+      } ,            
+    }
+    axios(authOption).then(function (response) {
+      if(response.data.access_token != "") {
+        access.refresh_token = response.data.refresh_token;
+        access.grant_type = "authorization_code";
+        access.update(response.data.access_token, response.data.expires_in);
+        toggleDark();
+        countDown();
+      }
+    }) 
+}
+
+const clientCredentials = () => {
+  const option = {
+      baseURL: env.authUrl,
+      url: "/oauth2/token",
+      method: "POST",
+      data: {
+        grant_type: "client_credentials"
       },
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
@@ -140,32 +226,22 @@ function oauth() {
         toggleDark();
         countDown();
       }
-    })      
-  } else if (access.grant_type == "authorization_code") {
-    window.location.href=env.authUrl+"/oauth2/authorization/spring";
-  } else if (access.grant_type == "access_token") {
-      auth();
+    })   
+}
+
+const oauth = () =>{  
+  dialogFormVisible.value = false;
+  if (access.grant_type == "client_credentials") {
+      clientCredentials();   
+  } else if (access.grant_type == "password") {
+      passowrd();
+  } else if (access.grant_type == "code") {
+      authorizationCode();
+  } else if (access.grant_type == "token") {
+      implicit();
   } else if (access.grant_type == "github") {
       github();
-  }
-}
-
-const countDown = () => {
-  timeCount.value = window.setInterval(() => {
-    access.expires_in--;
-    if(access.expires_in == 10) {
-      refreshToken();
-    } else if(access.expires_in == 0) {
-      clearAcess();
-      toggleDark();
-      clearInterval(timeCount.value);
-    }
-  }, 1000)
-}
-
-const clearAcess = () => {
-    access.refresh_token = "";
-    access.access_token = "";
+  } 
 }
 
 </script>

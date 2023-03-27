@@ -2,12 +2,7 @@ import '~/assets/js/live2d/live2d.min';
 import '~/assets/js/live2d/live2dcubismcore';
 import * as PIXI from 'pixi.js';
 import { Live2DModel } from 'pixi-live2d-display';
-import '../ts/wechat';
-// import  * as Wechat from 'wechat4u';
 
-// let bot = new Wechat();
-// console.log(bot);
-// bot.start();
 
 // import { HitAreaFrames } from 'pixi-live2d-display/extra';
 
