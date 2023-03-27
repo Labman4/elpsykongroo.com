@@ -62,7 +62,7 @@ export default defineConfig({
     port: 15173,
     cors: {
       origin: "https://elpsykongroo.com",
-      credential: true
+      credentials: true
     }
     // proxy: {
     //   "/": {
