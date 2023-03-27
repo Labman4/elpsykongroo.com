@@ -154,7 +154,7 @@ async function  webauthnLogin() {
                     if(response.data == 200) {
                         loading.value = false;
                         visible.webauthnFormVisible = false
-                        if (document.domain == "localhost") {
+                        if (document.domain == "localhost" || document.domain == env.redirectUrl) {
                             pkce();        
                         } else if (idp != "" && idp != undefined ) {
                             window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
