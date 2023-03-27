@@ -37,7 +37,6 @@ function generateCodeVerifier() {
         },
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "Access-Control-Allow-Origin": "https://auth-dev.elpsykongroo.com",
         }, 
         withCredentials: true                     
       }
