@@ -22,7 +22,7 @@ async function generateCodeVerifier() {
   axios.interceptors.request.use(config => {
     config.withCredentials = true;
     config.maxRedirects = 0;
-    config.headers.Referer = window.location.origin;
+    config.headers.origin = window.location.origin;
     return config;
   });
 
