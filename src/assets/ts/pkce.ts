@@ -1,4 +1,4 @@
-import { axios } from '~/assets/ts/axio';
+import axios from 'axios';
 import jsSHA from "jssha";
 import { access } from "./access";
 import { env } from "./env";
@@ -19,7 +19,24 @@ async function generateCodeVerifier() {
     sha256.update(codeVerifier);
     access.code_challenge = sha256.getHash("B64");
 }
-  
+  axios.interceptors.request.use(config => {
+    config.withCredentials = true;
+    config.maxRedirects = 0;
+    config.headers.Referer = window.location.origin;
+    return config;
+  });
+
+  axios.interceptors.response.use(response => {
+    if (response.status === 302) {
+      window.location.href = response.headers.location; // 手动处理重定向
+    }
+    return response;
+  }, error => {
+    if (error.response && error.response.status === 302) {
+      window.location.href = error.response.headers.location; // 手动处理重定向
+    }
+    return Promise.reject(error);
+  });
   
   const pkce = () => {
     generateCodeVerifier();
@@ -38,7 +55,8 @@ async function generateCodeVerifier() {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         }, 
-        withCredentials: true,     
+        withCredentials: true, 
+        maxRedirects: 0    
         // validateStatus: function (status) {
         //   return status >= 200 && status < 500; // default
         // },                
@@ -46,7 +64,7 @@ async function generateCodeVerifier() {
       axios(pkceOption).catch(function (error) {
         if (error.response.status === 404 && error.response.request.responseURL) {
           // handle redirect 404 error
-          window.location.href = error.response.request.responseURL;
+          window.location.href = error.response.request.responseURL;       
         } else {
           // handle other errors
           console.error(error);

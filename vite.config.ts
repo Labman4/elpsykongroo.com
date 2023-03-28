@@ -7,7 +7,7 @@ import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
 import ElementPlus from 'unplugin-element-plus/vite';
-import topLevelAwait from "vite-plugin-top-level-await";
+// import topLevelAwait from "vite-plugin-top-level-await";
 import Unocss from 'unocss/vite'
 // import nodePolyfills from 'rollup-plugin-node-polyfills';
 // import commonjs from '@rollup/plugin-commonjs';
@@ -132,12 +132,12 @@ export default defineConfig({
     //     "fs": true
     //   },
     // ),
-    topLevelAwait({
-      // The export name of top-level await promise for each chunk module
-      promiseExportName: "__tla",
-      // The function to generate import names of top-level await promise in each chunk module
-      promiseImportName: i => `__tla_${i}`
-    }),
+    // topLevelAwait({
+    //   // The export name of top-level await promise for each chunk module
+    //   promiseExportName: "__tla",
+    //   // The function to generate import names of top-level await promise in each chunk module
+    //   promiseImportName: i => `__tla_${i}`
+    // }),
     ElementPlus({
 
     }),
