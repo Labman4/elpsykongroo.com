@@ -19,24 +19,18 @@ async function generateCodeVerifier() {
     sha256.update(codeVerifier);
     access.code_challenge = sha256.getHash("B64");
 }
-  axios.interceptors.request.use(config => {
-    config.withCredentials = true;
-    config.maxRedirects = 0;
-    config.headers.origin = window.location.origin;
-    return config;
-  });
+ 
 
-  axios.interceptors.response.use(response => {
-    if (response.status === 302) {
-      window.location.href = response.headers.location; // 手动处理重定向
-    }
-    return response;
-  }, error => {
-    if (error.response && error.response.status === 302) {
-      window.location.href = error.response.headers.location; // 手动处理重定向
-    }
-    return Promise.reject(error);
-  });
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
+    console.log(error);
+    // window.location.href = error.response.request.responseURL;       
+  } 
+  return Promise.reject(error);
+});
+
   
   const pkce = () => {
     generateCodeVerifier();
@@ -48,7 +42,7 @@ async function generateCodeVerifier() {
           response_type: "code",
           code_challenge_method: "S256",
           code_challenge: access.code_challenge,
-          redirect_uri: env.redirectUrl,
+          redirect_uri: document.referrer,
           scope: "openid",
           client_id: "spring"
         },

@@ -153,10 +153,10 @@ async function  webauthnLogin() {
                     if(response.data == 200) {
                         loading.value = false;
                         visible.webauthnFormVisible = false
-                        if (document.domain == "localhost" || document.domain == "elpsykongroo.com") {
-                            pkce();        
-                        } else if (idp != "" && idp != undefined ) {
+                        if (idp != "" && idp != undefined ) {
                             window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
+                        } else if (document.domain == "localhost" || document.domain == "elpsykongroo.com") {
+                            pkce();        
                         } else if (idp == "") {
                             pkce();        
                         }
