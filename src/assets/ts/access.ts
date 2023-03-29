@@ -10,8 +10,9 @@ export const access = reactive(
     client_secret: "",
     username: "",
     nickname: "",
-    codeVerifier: "",
+    code_verifier: "",
     code_challenge: "",
+    redirect_uri: "",
     update(token:string, expires_in:number) {
       this.access_token = token;
       this.expires_in = expires_in;

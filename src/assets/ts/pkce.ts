@@ -34,6 +34,12 @@ axios.interceptors.response.use(function (response) {
   
   const pkce = () => {
     generateCodeVerifier();
+    if (document.referrer != "" ) {
+      access.redirect_uri = document.referrer
+    } else {
+      access.redirect_uri = window.location.href
+    }
+    
     const pkceOption = {
         baseURL: env.authUrl,
         url: "oauth2/authorize",
@@ -42,7 +48,7 @@ axios.interceptors.response.use(function (response) {
           response_type: "code",
           code_challenge_method: "S256",
           code_challenge: access.code_challenge,
-          redirect_uri: document.referrer,
+          redirect_uri: access.redirect_uri,
           scope: "openid",
           client_id: "spring"
         },
