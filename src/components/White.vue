@@ -133,7 +133,7 @@ async function  webauthnLogin() {
         }
         axios(loginOption).then(async function (response) {
             if(response.data == 200) {
-                pkce();        
+                window.location.href = "https://login.elpsykongroo.com"
             } else {
                 const publicKeyCredential = await webauthnJson.get(response.data);
                 const indexOption = {
@@ -156,9 +156,11 @@ async function  webauthnLogin() {
                         if (idp != "" && idp != undefined ) {
                             window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
                         } else if (document.domain == "localhost" || document.domain == "elpsykongroo.com") {
-                            pkce();        
+                            window.location.href = "https://login.elpsykongroo.com"
+                            // pkce();        
                         } else if (idp == "") {
-                            pkce();        
+                            window.location.href = "https://login.elpsykongroo.com"
+                            // pkce();        
                         }
                     }
                 });
