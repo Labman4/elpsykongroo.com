@@ -7,6 +7,7 @@ const timeCount= ref(0);
 axios.interceptors.response.use(function (response) {
     return response;
   }, function (error) {
+    console.log(error)
       refreshToken();
     return Promise.reject(error);
   });

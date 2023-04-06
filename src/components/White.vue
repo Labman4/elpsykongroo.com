@@ -141,7 +141,7 @@ async function  webauthnLogin() {
                     // loading.value = false;
                     // access.grant_type = "code";
                     // visible.webauthnFormVisible = false;
-                    // visible.dialogFormVisible = true;
+                    // visible.authFormVisible = true;
                 }
             } else {
                 const publicKeyCredential = await webauthnJson.get(response.data);

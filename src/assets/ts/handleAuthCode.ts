@@ -51,7 +51,7 @@ if (code != null && state != null) {
   }
 
   if (code != null && state == null) {
-    visible.dialogFormVisible = true
+    visible.authFormVisible = true
     access.grant_type = 'pkce';
 
 }
