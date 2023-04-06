@@ -1,9 +1,9 @@
 <template>
-    <el-button id="darkMode" size=small @click="dialogFormVisible = true" 
+    <el-button id="darkMode" size=small @click="visible.authFormVisible = true" 
     v-if = "access.expires_in == 0"
     >
     </el-button>
-    <el-dialog v-model="dialogFormVisible" width="65%">
+    <el-dialog v-model="visible.authFormVisible" width="65%">
       <el-form 
         label-position="left"
         label-width="auto" 
@@ -28,7 +28,7 @@
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">Cancel</el-button>
+          <el-button @click="visible.authFormVisible = false">Cancel</el-button>
           <el-button type="primary" @click="oauth()" >
             Confirm
           </el-button>
@@ -38,18 +38,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
 import { axios, countDown }  from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
 import { ElButton, ElDialog, ElForm, ElFormItem, ElSelect, ElOption, ElInput } from 'element-plus';
 import { toggleDark } from '~/composables';
 import { code, pkceCode } from '~/assets/ts/handleAuthCode';
-
-
-
-const dialogFormVisible = ref(false);
-
+import { visible } from '~/assets/ts/visible';
 
 const github = () => {
   const githubOption = {
@@ -121,7 +116,7 @@ const authorizationCode = () => {
           username : access.client_id , 
           password : access.client_secret 
       },   
-      withCredentials: true                  
+      // withCredentials: true                  
     }
     axios(authOption).then(function (response) {
       if(response.data.access_token != "") {
@@ -230,7 +225,7 @@ const clientCredentials = () => {
 }
 
 const oauth = () =>{  
-  dialogFormVisible.value = false;
+  visible.authFormVisible = false;
   if (access.grant_type == "client_credentials") {
       clientCredentials();   
   } else if (access.grant_type == "password") {

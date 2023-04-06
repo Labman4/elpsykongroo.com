@@ -117,3 +117,4 @@
 //     })
 // }
 // initLive2d ();
+export {}

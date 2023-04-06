@@ -1,5 +1,5 @@
 <template>
-    <el-dialog v-model="visible.recordTable" title="records" width="70%">
+    <el-dialog v-model="recordTable" title="records" width="70%">
     <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
     <el-table :data="data.records" @selection-change="handleRecordSelectChange">
       <el-table-column type="selection"/>
@@ -33,9 +33,10 @@ import { axios } from '~/assets/ts/axio';
 import { dayjs } from 'element-plus';
 import { access } from '~/assets/ts/access';
 import { env } from '~/assets/ts/env';
-import { visible } from '~/assets/ts/visible';
 
 const records:Record[]= [];
+
+const recordTable =ref(false);
 
 const data = reactive({records})
 
@@ -140,7 +141,7 @@ function recordTimestamp(row:Record) {
   
   
 function recordList(order:string) {
-  visible.recordTable = true;
+  recordTable.value = true;
   recordPage.order = order;
   const option = {
     baseURL: env.apiUrl,

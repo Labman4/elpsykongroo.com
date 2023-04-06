@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible.authClientForm" title="">
+  <el-dialog v-model="authClientForm" title="">
     <el-form 
     ref="clientformRef"
     :model="clientForm" 
@@ -64,7 +64,7 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="visible.authClientForm = false">Cancel</el-button>
+        <el-button @click="authClientForm = false">Cancel</el-button>
         <el-button type="primary" @click="clientAdd(clientformRef)" >
           Confirm
         </el-button>
@@ -72,7 +72,7 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="visible.authClientTable" title="client" width="95%">
+  <el-dialog v-model="authClientTable" title="client" width="95%">
     <el-button type="" @click="openClientAdd(clientformRef)">Add</el-button>
     <!-- <el-button type="danger" click="DeleteSelect">DeleteSelect</el-button> -->
     <el-table :data="data.authclient" @selection-change="handleClientSelectChange">
@@ -109,7 +109,7 @@
       @update:page-size="authClientPageSizeChange"/>
   </el-dialog>
 
-  <el-dialog v-model="visible.authClientRegisterForm" title="">
+  <el-dialog v-model="authClientRegisterForm" title="">
     <el-form 
     ref="registerformRef"
     :model="registerForm" 
@@ -198,7 +198,7 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="visible.authClientRegisterForm = false">Cancel</el-button>
+        <el-button @click="authClientRegisterForm = false">Cancel</el-button>
         <el-button type="primary" @click="registerAdd(registerformRef)" >
           Confirm
         </el-button>
@@ -206,7 +206,7 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="visible.authClientRegisterTable" title="client" width="95%">
+  <el-dialog v-model="authClientRegisterTable" title="client" width="95%">
     <el-button type="" @click="openRegisterAdd(registerformRef)">Add</el-button>
     <!-- <el-button type="danger" click="DeleteSelect">DeleteSelect</el-button> -->
     <el-table :data="data.authclientRegister" @selection-change="handleAuthRegisterSelectChange">
@@ -253,6 +253,11 @@ import { visible } from '~/assets/ts/visible';
 
 const clientformRef = ref<FormInstance>()
 const registerformRef = ref<FormInstance>()
+
+const authClientForm = ref(false);
+const authClientRegisterForm = ref(false);
+const authClientRegisterTable =ref(false);
+const authClientTable =ref(false);
 
 const authclient = [{}];
 const authclientRegister = [{}]
@@ -719,7 +724,7 @@ const DeleteClient = (index: number, row: AuthClient) => {
 const DeleteReigster = (index: number, row: AuthClientRegister) => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/auth/register/delete",
+    url: "/auth/client/register/delete",
     method: "DELETE",
     params: {
       "registerId": row.registrationId
@@ -755,7 +760,7 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
           clientForm.clientSecret = '{bcrypt}' + hash ;
           axios(option).then(function (response) {
             if(response.data > 0) {
-              visible.authClientForm = false ;
+              authClientForm.value = false;
               authClientList();
             }
           })
@@ -763,7 +768,7 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
       } else {
           axios(option).then(function (response) {
             if(response.data > 0) {
-              visible.authClientForm = false ;
+              authClientForm.value = false;
               authClientList();
             }
           })
@@ -815,7 +820,7 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
     if (valid) {
       const option = {
         baseURL: env.apiUrl,
-        url: "/auth/register/add",
+        url: "/auth/client/register/add",
         method: "POST",
         data: authRegister,
         headers: {
@@ -828,7 +833,7 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
           authRegister.clientSecret = '{bcrypt}' + hash ;
           axios(option).then(function (response) {
             if(response.data > 0) {
-              visible.authClientRegisterForm = false ;
+              authClientRegisterForm.value = false ;
               authClientRegisterList();
             } 
           })
@@ -836,7 +841,7 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
       } else {
           axios(option).then(function (response) {
             if(response.data > 0) {
-              visible.authClientRegisterForm = false ;
+              authClientRegisterForm.value = false ;
               authClientRegisterList();
             } 
           })
@@ -848,10 +853,10 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
   
 }
 const authClientRegisterList = () => {
-  visible.authClientRegisterTable = true;
+  authClientRegisterTable.value = true;
   const option = {
     baseURL: env.apiUrl,
-    url: "/auth/register/list",
+    url: "/auth/client/register/list",
     method: "GET",
     // params: {
     //   "param": search.value,
@@ -869,7 +874,7 @@ const authClientRegisterList = () => {
 }
 
 const authClientList = () =>  {
-  visible.authClientTable = true;
+  authClientTable.value = true;
   const option = {
     baseURL: env.apiUrl,
     url: "/auth/client/list",
@@ -909,14 +914,14 @@ const openClientAdd = (formEl: FormInstance | undefined)  =>  {
     clientSecretExpiresString.value = dayjs.unix(parseInt(authClient.clientSecretExpiresAt, 10)).format("YYYY-MM-DDTHH:mm:ss[Z]");    
     authorizationGrantTypes.value = authClient.authorizationGrantTypes.split(",");
     Object.assign(clientForm, multipleClientSelect.value[0]);
-    visible.authClientForm = true ;
+    authClientForm.value = true ;
   } else {
     Object.assign(clientForm, initClientForm());
     authorizationGrantTypes.value = [];
     clientSettingList.value = [];
     clientSecretExpiresString.value = "";
     tokenSettingList.value = [];
-    visible.authClientForm = true ;
+    authClientForm.value = true ;
   }
 }
 
@@ -934,10 +939,10 @@ const openRegisterAdd = (formEl: FormInstance | undefined)  =>  {
     registerForm.userInfoUri=authRegister.providerDetails.userInfoEndpoint.uri;
     registerForm.authenticationMethod=authRegister.providerDetails.userInfoEndpoint.authenticationMethod;
     Object.assign(registerForm, multipleRegisterSelect.value[0]);
-    visible.authClientRegisterForm = true ;
+    authClientRegisterForm.value = true ;
   } else {
     Object.assign(registerForm, initRegisterForm());
-    visible.authClientRegisterForm = true ;
+    authClientRegisterForm.value = true ;
   }
 }
 

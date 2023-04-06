@@ -28,24 +28,20 @@ import {
 // import { builtinModules } from 'node:module';
 
 // const builtins = builtinModules.filter(m => !m.startsWith('_')); builtins.push(...builtins.map(m => `node:${m}`));
-// console.log(builtins);
 const pathSrc = path.resolve(__dirname, 'src')
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // optimizeDeps: {
-  //   include: ['axios'],
-  // },
   define: {
     'process.env': {},
     'process.versions.electron': {},
     "global.TYPED_ARRAY_SUPPORT": {},
   },
   build: {
-    rollupOptions: {
-      external: ["fs", "path", "stream"],
+    // rollupOptions: {
+    //   external: ["fs", "path", "stream"],
    
-    },
+    // },
   
     commonjsOptions: {
       include: [/node_modules/],
@@ -60,10 +56,10 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 15173,
-    cors: {
-      origin: ["null","http://localhost:15173","http://localhost:9000","https://elpsykongroo.com","http://127.0.0.1:15173","https://elpsykongroo.com","https://auth-dev.elpsykongroo.com","https://labman4.github.io","https://github.io"],
-      credentials: true
-    }
+    // cors: {
+    //   origin: ["null","http://localhost:15173","http://localhost:9000","https://elpsykongroo.com","http://127.0.0.1:15173","https://elpsykongroo.com","https://auth-dev.elpsykongroo.com","https://labman4.github.io","https://github.io"],
+    //   credentials: true
+    // }
     // proxy: {
     //   "/": {
     //   target: "http://localhost:8443",

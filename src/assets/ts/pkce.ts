@@ -36,9 +36,11 @@ axios.interceptors.response.use(function (response) {
     generateCodeVerifier();
     if (document.referrer != "" ) {
       access.redirect_uri = document.referrer
+    } else if (document.domain = "localhost") {
+      access.redirect_uri = env.redirectUrl
     } else {
-      access.redirect_uri = window.location.href
-    }
+      access.redirect_uri = window.location.origin
+    } 
     
     const pkceOption = {
         baseURL: env.authUrl,

@@ -49,6 +49,12 @@
               <el-menu-item index="2-3-1" @click="openAuthClient()" >client</el-menu-item>
               <el-menu-item index="2-3-2" @click="openAuthClientRegister()" >register</el-menu-item>
             </el-sub-menu>
+            <el-sub-menu index="2-4" >
+              <template #title><span>permissions</span></template>
+              <el-menu-item index="2-4-1" @click="openUser()">user</el-menu-item>
+              <el-menu-item index="2-4-2" @click="openGroup()">group</el-menu-item>
+              <el-menu-item index="2-4-3" @click="openAuthority()">authority</el-menu-item>
+            </el-sub-menu>
           </el-sub-menu>
           <el-menu-item index="3" >
             <el-icon @click="upload()"><UploadFilled /></el-icon>
@@ -72,6 +78,9 @@
       <IP ref="ip"></IP>
       <Record ref="record"></Record>
       <AuthClient ref="authClient"></AuthClient>
+      <User ref="user"></User>
+      <Group ref="group"></Group>
+      <Authority ref="authority"></Authority>
       <el-container>
         <el-main>
           <router-view ref="iframeView"/>
@@ -99,6 +108,7 @@
   </template>
   
 <script lang="ts" setup>
+
 import { axios } from '~/assets/ts/axio';
 import { access } from '~/assets/ts/access';
 import { env } from '~/assets/ts/env';
@@ -108,10 +118,16 @@ import { ElMessage } from 'element-plus';
 import IP from '~/components/api/IP.vue';
 import Record from '~/components/api/Record.vue';
 import AuthClient from '~/components/api/AuthClient.vue';
+import User from '~/components/api/User.vue';
+import Group from '~/components/api/Group.vue';
+import Authority from '~/components/api/Authority.vue';
 
 const ip = ref<InstanceType<typeof IP> | null>(null)
 const record = ref<InstanceType<typeof Record> | null>(null)
 const authClient = ref<InstanceType<typeof AuthClient> | null>(null)
+const user = ref<InstanceType<typeof User> | null>(null)
+const group = ref<InstanceType<typeof Group> | null>(null)
+const authority = ref<InstanceType<typeof Authority> | null>(null)
 
 const openIp = () => {
   ip.value?.ipList();
@@ -132,6 +148,19 @@ const openAuthClient = () => {
 const openAuthClientRegister = () => {
   authClient.value?.authClientRegisterList();
 }
+
+const openUser = () => {
+  user.value?.userList();
+}
+
+const openGroup = () => {
+  group.value?.groupList();
+}
+
+const openAuthority = () => {
+  authority.value?.authorityList();
+}
+
 
 const logout = () => {
   ElMessage('you will logout in 3s');

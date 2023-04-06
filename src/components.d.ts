@@ -7,6 +7,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Argocd: typeof import('./components/dashboard/Argocd.vue')['default']
     AuthClient: typeof import('./components/api/AuthClient.vue')['default']
+    Authority: typeof import('./components/api/Authority.vue')['default']
     Bootstrap: typeof import('./components/layouts/Bootstrap.vue')['default']
     Clock: typeof import('./components/Clock.vue')['default']
     Dark: typeof import('./components/Dark.vue')['default']
@@ -39,6 +40,8 @@ declare module '@vue/runtime-core' {
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
+    ElTransfer: typeof import('element-plus/es')['ElTransfer']
+    Group: typeof import('./components/api/Group.vue')['default']
     Harbor: typeof import('./components/dashboard/Harbor.vue')['default']
     Home: typeof import('./components/Home.vue')['default']
     IP: typeof import('./components/api/IP.vue')['default']
@@ -52,6 +55,7 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     SvgIcon: typeof import('./components/Svg/SvgIcon.vue')['default']
     Tabs: typeof import('./components/layouts/Tabs.vue')['default']
+    User: typeof import('./components/api/User.vue')['default']
     White: typeof import('./components/White.vue')['default']
   }
 }

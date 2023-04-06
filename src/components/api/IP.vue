@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible.ipTable" title="address" width="75%">
+  <el-dialog v-model="ipTable" title="address" width="75%">
     <el-button type="" @click="openIpAdd">Add</el-button>
     <el-table :data="data.ips">
       <el-table-column property="address" label="address" width="auto"/>
@@ -20,22 +20,22 @@
       @update:current-page="ipPageChange"
       @update:page-size="ipPageSizeChange"/>
   </el-dialog>
-  <el-dialog v-model="visible.ipForm" title="">
-    <el-form :model="ipForm">
+  <el-dialog v-model="ipForm" title="">
+    <el-form :model="ipFormData">
         <el-form-item label="type" :label-width="visible.ipFormLabelWidth">
-        <el-select v-model="ipForm.black" placeholder="">
+        <el-select v-model="ipFormData.black" placeholder="">
           <el-option label="white" value="false" />
           <el-option label="black" value="true" />
         </el-select>
       </el-form-item>
       <el-form-item label="address" :label-width="visible.ipFormLabelWidth">
-        <el-input v-model="ipForm.address" autocomplete="off" @keyup.enter="ipListAdd" />
+        <el-input v-model="ipFormData.address" autocomplete="off" @keyup.enter="addIp" />
       </el-form-item>
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="visible.ipForm = false">Cancel</el-button>
-        <el-button type="primary" @click="ipListAdd" >
+        <el-button @click="ipForm = false">Cancel</el-button>
+        <el-button type="primary" @click="addIp" >
           Confirm
         </el-button>
       </span>
@@ -50,7 +50,10 @@ import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
 import { visible } from '~/assets/ts/visible';
 import { axios } from '~/assets/ts/axio';
-import { ElDialog, ElButton, ElTable, ElTableColumn, ElPagination, ElForm, ElFormItem, ElSelect, ElOption, ElInput } from 'element-plus';
+import { ElDialog, ElButton, ElTable, ElTableColumn, ElPagination, ElForm, ElFormItem, ElSelect, ElInput } from 'element-plus';
+
+const ipForm = ref(false);
+const ipTable =ref(false);
 
 const ips = [{}];
 const data = reactive({ips});
@@ -66,24 +69,24 @@ const ipPage = {
   "pageSize": 20,
 };
 
-const ipForm =  reactive({
+const ipFormData =  reactive({
   "address": "",
   "black": ""
 })
 
 function openIpAdd() {
-  visible.ipForm = true ;
+  ipForm.value = true ;
 }
 
-function ipListAdd() {
-    visible.ipForm = false ;
+function addIp() {
+    ipForm.value = false ;
     const option = {
     baseURL: env.apiUrl,
     url: "/ip/manage/add",
     method: "PUT",
     params: {
-      black: ipForm.black,
-      address: ipForm.address,
+      black: ipFormData.black,
+      address: ipFormData.address,
     },
     headers: {
     'Authorization': 'Bearer '+ access.access_token
@@ -98,7 +101,7 @@ function ipListAdd() {
 }
 
 const ipList = () => {
-  visible.ipTable = true;
+  ipTable.value = true;
   const option = {
     baseURL: env.apiUrl,
     url: "/ip/manage/list",
