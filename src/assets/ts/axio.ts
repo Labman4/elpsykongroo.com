@@ -7,6 +7,9 @@ const timeCount= ref(0);
 axios.interceptors.response.use(function (response) {
     return response;
   }, function (error) {
+    if (error.response.status === 401 || error.response.data === 'no access') {
+        ElMessageBox.alert("no access, please ensure and retry")
+    }
       refreshToken();
     return Promise.reject(error);
   });
