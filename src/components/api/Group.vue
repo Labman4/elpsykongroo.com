@@ -54,7 +54,7 @@
                 <span>{{ option.label }}</span>
             </template> -->
             <template #left-footer>
-            <el-button class="transfer-footer" size="small">unlock</el-button>
+                <el-button class="transfer-footer" size="small" @click="resetSelect()">reset</el-button>
             <!-- <el-checkbox :indeterminate="isIndeterminate" v-model="isAllSelected" @change="handleAllSelectedChange">全选</el-checkbox> -->
             </template>
             <template #right-footer>
@@ -71,9 +71,7 @@ import { access } from '~/assets/ts/access';
 import { axios } from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 import { visible } from '~/assets/ts/visible';
-// import User from '~/components/api/User.vue';
 
-// const user = ref<InstanceType<typeof User> | null>(null)
 
 // const renderFunc = (
 //   h: (type: string, props: VNodeProps | null, children?: string) => VNode,
@@ -104,6 +102,9 @@ interface User {
 }
 
 const array = ref([""])
+
+let groupsIds = ref("")
+let Ids = ref("")
 const initTransfer = () => ([{
     key: "",
     label: "",
@@ -112,11 +113,9 @@ const initTransfer = () => ([{
 }])
 
 const transfer = reactive(initTransfer());
-
 const groups = ref([{}])
 const left = ref([""])
-const right = ref([""])
-const datas = reactive({array, groups, transfer, left, right})
+const datas = reactive({array, groups, transfer, left})
 const groupForm = ref(false);
 const groupTable = ref(false);
 const groupTransfer = ref(false);
@@ -138,13 +137,14 @@ const  isIndeterminate = computed(() => {
       return selectedCount > 0 && selectedCount < datas.transfer.length;
     })
 
-let groupsIds = ref("")
-let Ids = ref("")
+
 
 const openUser = (row: Group) => {
     groupTransfer.value = true
     datas.transfer = initTransfer()
     datas.transfer.splice(0,1);
+    datas.left = []
+    datas.array = []
     groupsIds.value = row.groupName
     userOrAuth.value = true
     Ids.value = ""
@@ -154,7 +154,8 @@ const openUser = (row: Group) => {
 const openAuthority = (row: Group) => {
     datas.transfer = initTransfer()
     datas.transfer.splice(0,1);
-    datas.array.splice(0,1);
+    datas.left = []
+    datas.array = []
     groupsIds.value = row.id
     Ids.value = ""
     userOrAuth.value = false
@@ -476,6 +477,17 @@ const groupPageChange = (newPage: number) => {
 const groupPageSizeChange = (newPage: number) => {
   groupPage.pageSize = newPage;
   groupList();
+}
+
+const resetSelect = () => {
+    const transfer = datas.transfer
+    for (let key in transfer) {
+        if(transfer[key].disabled) {
+            transfer[key].disabled = false
+            // transfer[key].checked = true
+        }
+    }
+    console.log(datas.transfer)
 }
 
 defineExpose({
