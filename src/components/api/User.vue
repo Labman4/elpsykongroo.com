@@ -1,6 +1,6 @@
 <template>
   <el-dialog v-model="userTable" title="User" width="75%">
-    <el-button type="" @click="userForm = true">update</el-button>
+    <el-button type="" @click="loadUser()">update</el-button>
     <el-table :data="datas.users" @selection-change="handleUserSelectChange" >
       <el-table-column type="selection"/>
       <el-table-column property="username" label="username"/>
@@ -362,7 +362,7 @@ const loadUserInfo = (row: User) => {
 const updateUserInfo = () => {
   const newclaimMap = new Map<string, object>();
   for (let key in dynamicClaimForm.value) { 
-    if(Object.keys(userInfoTableData).indexOf(key) >= 0 && key != "claim") {
+    if(Object.keys(userInfoTableData).indexOf(key) >= 0 && key != "claim" && key != "username") {
       userInfoTableData[key] = dynamicClaimForm.value[key]
     } else if (key != "claims" && dynamicClaimForm.value.hasOwnProperty(key)) {
       newclaimMap.set(key, dynamicClaimForm.value[key])
@@ -465,14 +465,18 @@ const lockUser = (row: User) => {
     }
   }) 
 }
+const loadUser = () => {
+  if (selectUserName.length < 1) {
+      ElMessageBox.alert("please select someone to update") 
+  } else if (selectUserName.length > 1) {
+      ElMessageBox.alert("dont support batch update")
+  } else {
+      userForm.value = true
+  }
+}
 
 const updateUser = () =>{
-  if (selectUserName.length > 1) {
-      ElMessageBox.alert("dont support batch update")
-     
-  } else {
     userFormData.username = selectUserName[0];
-    userForm.value = true ;
     const option = {
       baseURL: env.apiUrl,
       url: "auth/user/patch",
@@ -500,7 +504,6 @@ const updateUser = () =>{
           }
         })
     }
-  }
 }
 
 const userList = () => {

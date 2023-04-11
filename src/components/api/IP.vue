@@ -135,8 +135,7 @@ const DeleteIP = (index: number, row: IP) => {
     },
   }
   axios(option).then(function (response) {
-    var count = response.data.data;
-    if (count == "done") {
+    if (response.data.code == 200) {
       data.ips.splice(index, 1);
     }
   }) 

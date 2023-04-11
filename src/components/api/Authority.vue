@@ -125,8 +125,6 @@ const openUser = (row: Authority) => {
     datas.transfer.splice(0,1);
     datas.left = []
     datas.array = []
-    console.log(datas.left)
-    // datas.array.splice(0,1);
     authorityIds.value = row.authority
     userOrGroup.value = true
     Ids.value = ""
@@ -420,7 +418,7 @@ const resetSelect = () => {
             // transfer[key].checked = true
         }
     }
-    console.log(datas.transfer)
+
 }
 const handleChange = (
   value: number | string,
