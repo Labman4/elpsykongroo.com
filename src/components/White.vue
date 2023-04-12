@@ -162,26 +162,27 @@ async function  webauthnLogin() {
                     if(response.data == 200) {
                         loading.value = false;
                         visible.webauthnFormVisible = false
-                        console.log(idp);
-                        if (idp != "" && idp != undefined ) {
-                            window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                        } else if (document.domain == "localhost" || document.domain == "elpsykongroo.com") {
-                            if (document.domain != "localhost") {
-                                window.location.href = "https://login.elpsykongroo.com";
-                            } else {
-                                idp = "www";
-                                window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                            }
-                            // pkce();        
-                        } else if (idp == "") {
-                            if (document.domain != "localhost") {
-                                window.location.href = "https://login.elpsykongroo.com";
-                            } else {
-                                idp = "www";
-                                window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                            }                          
-                            // pkce();        
-                        }
+                        window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
+                        // console.log(idp);
+                        // if (idp != "" && idp != undefined ) {
+                        //     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
+                        // } else if (document.domain == "localhost" || document.domain == "elpsykongroo.com") {
+                        //     if (document.domain != "localhost") {
+                        //         window.location.href = "https://login.elpsykongroo.com";
+                        //     } else {
+                        //         idp = "www";
+                        //         window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
+                        //     }
+                        //     // pkce();        
+                        // } else if (idp == "") {
+                        //     if (document.domain != "localhost") {
+                        //         window.location.href = "https://login.elpsykongroo.com";
+                        //     } else {
+                        //         idp = "www";
+                        //         window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
+                        //     }                          
+                        //     // pkce();        
+                        // }
                     }
                 });
             }
