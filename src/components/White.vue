@@ -47,7 +47,12 @@ const svg = `
           A 15 15, 0, 1, 1, 27.99 7.5
           L 15 15
         " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
-        `
+      `
+
+const callbackUrl = window.location.href;
+const redirect = new URL(callbackUrl).searchParams.get('redirect_uri');
+const state = new URL(callbackUrl).searchParams.get('state');
+
 const referrer = document.referrer;
 var idp;
 const webauthnFormVisible = ref(false);
@@ -59,6 +64,10 @@ if (referrer != "" && referrer != undefined) {
     if (idp != "www" && document.domain != "localhost" && document.domain != "127.0.0.1") {
         webauthnFormVisible.value = true
     }
+}
+
+if (redirect != null && state != null) {
+    webauthnFormVisible.value = true
 }
 
 const webauthnRegister = () => {
@@ -134,7 +143,7 @@ async function  webauthnLogin() {
         axios(loginOption).then(async function (response) {
             if(response.data == 200) {
                 if (document.domain != "localhost") {
-                    window.location.href = "https://login.elpsykongroo.com";
+                    window.location.href = "https://www.elpsykongroo.com";
                 } else {
                     idp = "www";
                     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
@@ -162,27 +171,29 @@ async function  webauthnLogin() {
                     if(response.data == 200) {
                         loading.value = false;
                         visible.webauthnFormVisible = false
-                        window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
-                        // console.log(idp);
-                        // if (idp != "" && idp != undefined ) {
-                        //     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                        // } else if (document.domain == "localhost" || document.domain == "elpsykongroo.com") {
-                        //     if (document.domain != "localhost") {
-                        //         window.location.href = "https://login.elpsykongroo.com";
-                        //     } else {
-                        //         idp = "www";
-                        //         window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                        //     }
-                        //     // pkce();        
-                        // } else if (idp == "") {
-                        //     if (document.domain != "localhost") {
-                        //         window.location.href = "https://login.elpsykongroo.com";
-                        //     } else {
-                        //         idp = "www";
-                        //         window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                        //     }                          
-                        //     // pkce();        
-                        // }
+                       
+
+                        if (redirect != null && state != null) {
+                            window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
+                        } else if (idp != "" && idp != undefined ) {
+                            window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
+                        } else if (document.domain == "localhost" || document.domain == "elpsykongroo.com") {
+                            if (document.domain != "localhost") {
+                                window.location.href = "https://www.elpsykongroo.com";
+                            } else {
+                                idp = "www";
+                                window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
+                            }
+                            // pkce();        
+                        } else if (idp == "") {
+                            if (document.domain != "localhost") {
+                                window.location.href = "https://login.elpsykongroo.com";
+                            } else {
+                                idp = "www";
+                                window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
+                            }                          
+                            // pkce();        
+                        }
                     }
                 });
             }
