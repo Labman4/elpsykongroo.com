@@ -143,7 +143,7 @@ async function  webauthnLogin() {
         axios(loginOption).then(async function (response) {
             if(response.data == 200) {
                 if (document.domain != "localhost") {
-                    window.location.href = "https://oauth2-proxy.elpsykongroo.com";
+                    window.location.href = "https://oauth2-proxy.elpsykongroo.com/web";
                 } else {
                     idp = "www";
                     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
@@ -179,7 +179,7 @@ async function  webauthnLogin() {
                             window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
                         } else if (document.domain == "localhost" || document.domain == "elpsykongroo.com") {
                             if (document.domain != "localhost") {
-                                window.location.href = "https://oauth2-proxy.elpsykongroo.com";
+                                window.location.href = "https://oauth2-proxy.elpsykongroo.com/web";
                             } else {
                                 idp = "www";
                                 window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
