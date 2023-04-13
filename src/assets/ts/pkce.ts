@@ -1,26 +1,23 @@
 import axios from 'axios';
-import jsSHA from "jssha";
 import { access } from "./access";
 import { env } from "./env";
+import cryptoRandomString from 'crypto-random-string';
+import { sha256 } from 'crypto-hash';
+import { base64url } from 'rfc4648';
+
+
 
 async function generateCodeVerifier() {
-    var codeVerifier = "";
-    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
-    var charLength = characters.length;
-    for (var i = 0; i < 128; i++) {
-      codeVerifier += characters.charAt(Math.floor(Math.random() * charLength));
-    }
+    const codeVerifier = cryptoRandomString({ length: 128 });
+    const codeChallenge = base64url(await sha256(codeVerifier));
     window.localStorage.setItem("code_verifier", codeVerifier);
     
     console.log(codeVerifier);
     console.log(    window.localStorage.getItem("code_verifier")    )
     // fs.writeFileSync('/codeVerifier.txt', codeVerifier);
-    const sha256 = new jsSHA("SHA-256", "TEXT");
-    sha256.update(codeVerifier);
-    access.code_challenge = sha256.getHash("B64");
+    access.code_challenge = codeChallenge;
 }
  
-
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {

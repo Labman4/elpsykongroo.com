@@ -106,7 +106,7 @@ const authorizationCode = () => {
       data: {
         grant_type: 'authorization_code',
         code: code,
-        redirect_uri: env.redirectUrl,
+        redirect_uri: window.location.href.split("?")[0],
         // clientId: access.client_id
       },
       headers: {
