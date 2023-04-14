@@ -1,8 +1,8 @@
-import axios from 'axios';
 import { access } from "./access";
 import { env } from "./env";
 import cryptoRandomString from 'crypto-random-string';
 import jsSHA from 'jssha';
+import { axios } from "./axio";
 
 async function generateCodeVerifier() {
     const codeVerifier = cryptoRandomString({ length: 128 });
@@ -16,24 +16,8 @@ async function generateCodeVerifier() {
     codeChallenge = codeChallenge.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
     access.code_challenge = codeChallenge;
 }
- 
-axios.interceptors.response.use(function (response) {
-  console.log(response)
-  if (response.status === 302) {
-    console.log(response)
-    return axios.get(response.headers.location)
-  }
-  return response;
-}, function (error) {
-  if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
-    console.log(error);
-    // window.location.href = error.response.request.responseURL;       
-  } 
-  return Promise.reject(error);
-});
 
-  
-  async function pkce () {
+async function pkce () {
     await generateCodeVerifier();
     if (document.domain == "localhost") {
       access.redirect_uri = env.redirectUrl
@@ -42,6 +26,17 @@ axios.interceptors.response.use(function (response) {
     } else {
       access.redirect_uri = window.location.origin
     } 
+
+    // var xhr = new XMLHttpRequest();
+    // xhr.open('POST', env.authUrl + "/oauth2/authorize", true);
+    // xhr.setRequestHeader('Content-Type', 'application/json');
+    // xhr.onreadystatechange = function() {
+    //   if (xhr.readyState === 4 && xhr.status === 302) {
+    //     xhr.abort();
+    //     // do something
+    //   }
+    // };
+    // xhr.send();
     const pkceOption = {
         baseURL: env.authUrl,
         url: "oauth2/authorize",
@@ -63,7 +58,9 @@ axios.interceptors.response.use(function (response) {
         //   return status >= 200 && status < 500; // default
         // },                
       }
-      axios(pkceOption).catch(function (error) {
+      axios(pkceOption).then(function (response){
+          console.log(response)
+      }).catch(function (error) {
         console.log(error)
         if (error.response.status === 404 && error.response.request.responseURL) {
           // handle redirect 404 error

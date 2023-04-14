@@ -4,12 +4,31 @@ import { access } from './access';
 import { env } from './env';
 const timeCount= ref(0);
 
+// const source = axios.CancelToken.source();
+
+// axios.interceptors.request.use(config => {
+//   config.headers['X-Requested-With'] = 'XMLHttpRequest';
+//   // config.cancelToken = source.token;
+
+//   return config;
+// });
+
 axios.interceptors.response.use(function (response) {
+    console.log(response)
+    // if (response.status === 302) {
+    //   console.log(response)
+    //   return axios.get(response.headers.location)
+    // }
     return response;
   }, function (error) {
-    if (error.response.status === 401 || error.response.data === 'no access') {
-        ElMessageBox.alert("no access, please ensure and retry")
-    }
+    console.log(error)
+    // if (error.response.status === 401 || error.response.data === 'no access') {
+    //     ElMessageBox.alert("no access, please ensure and retry")
+    // }
+    // if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
+    //   console.log(error);
+    //   // window.location.href = error.response.request.responseURL;       
+    // } 
       refreshToken();
     return Promise.reject(error);
   });

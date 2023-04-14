@@ -59,7 +59,7 @@ export default defineConfig({
     cors: {
       // origin: ["null","http://localhost:15173","http://localhost:9000","https://elpsykongroo.com","http://127.0.0.1:15173","https://elpsykongroo.com","https://auth-dev.elpsykongroo.com","https://labman4.github.io","https://github.io"],
       credentials: true,
-      origin: ["null"]
+      // origin: ["null"]
     }
     // proxy: {
     //   "/": {
