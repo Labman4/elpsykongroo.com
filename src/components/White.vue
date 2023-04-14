@@ -146,7 +146,7 @@ async function  webauthnLogin() {
                     pkce();
                 }
                 else if (document.domain != "localhost") {
-                    window.location.href = "https://oauth2-proxy.elpsykongroo.com/";
+                    window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start";
                 } else {
                     idp = "www";
                     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
@@ -187,7 +187,9 @@ async function  webauthnLogin() {
                             //     idp = "www";
                             //     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
                             // }                          
-                        } 
+                        } else {
+                            window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start";
+                        }
                         // else if (document.domain == "localhost" || document.domain == "elpsykongroo.com") {
                         //     if (document.domain != "localhost") {
                         //         window.location.href = "https://oauth2-proxy.elpsykongroo.com/web";
