@@ -18,11 +18,15 @@ async function generateCodeVerifier() {
 }
  
 axios.interceptors.response.use(function (response) {
+  if (response.status === 302) {
+    console.log(response)
+    return axios.get(response.headers.location)
+  }
   return response;
 }, function (error) {
   if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
     console.log(error);
-    // window.location.href = error.response.request.responseURL;       
+    window.location.href = error.response.request.responseURL;       
   } 
   return Promise.reject(error);
 });
