@@ -18,6 +18,7 @@ async function generateCodeVerifier() {
 }
  
 axios.interceptors.response.use(function (response) {
+  console.log(response)
   if (response.status === 302) {
     console.log(response)
     return axios.get(response.headers.location)
@@ -26,7 +27,7 @@ axios.interceptors.response.use(function (response) {
 }, function (error) {
   if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
     console.log(error);
-    window.location.href = error.response.request.responseURL;       
+    // window.location.href = error.response.request.responseURL;       
   } 
   return Promise.reject(error);
 });
@@ -63,6 +64,7 @@ axios.interceptors.response.use(function (response) {
         // },                
       }
       axios(pkceOption).catch(function (error) {
+        console.log(error)
         if (error.response.status === 404 && error.response.request.responseURL) {
           // handle redirect 404 error
           window.location.href = error.response.request.responseURL;       
