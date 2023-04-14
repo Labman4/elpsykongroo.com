@@ -2,19 +2,18 @@ import axios from 'axios';
 import { access } from "./access";
 import { env } from "./env";
 import cryptoRandomString from 'crypto-random-string';
-import { sha256 } from 'crypto-hash';
-import { base64url } from 'rfc4648';
-
-
+import jsSHA from 'jssha';
 
 async function generateCodeVerifier() {
     const codeVerifier = cryptoRandomString({ length: 128 });
-    const codeChallenge = base64url(await sha256(codeVerifier));
     window.localStorage.setItem("code_verifier", codeVerifier);
-    
-    console.log(codeVerifier);
-    console.log(    window.localStorage.getItem("code_verifier")    )
+    var base64Str = btoa(codeVerifier); // 编码为base64字符串
+    console.log(window.localStorage.getItem("code_verifier")    )
     // fs.writeFileSync('/codeVerifier.txt', codeVerifier);
+    const sha256 = new jsSHA("SHA-256", "TEXT");
+    sha256.update(base64Str);
+    var codeChallenge = sha256.getHash("B64");
+    codeChallenge = codeChallenge.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
     access.code_challenge = codeChallenge;
 }
  
@@ -29,16 +28,15 @@ axios.interceptors.response.use(function (response) {
 });
 
   
-  const pkce = () => {
-    generateCodeVerifier();
-    if (document.referrer != "" ) {
-      access.redirect_uri = document.referrer
-    } else if (document.domain = "localhost") {
+  async function pkce () {
+    await generateCodeVerifier();
+    if (document.domain = "localhost") {
       access.redirect_uri = env.redirectUrl
+    } else if (document.referrer != "" ) {
+      access.redirect_uri = document.referrer
     } else {
       access.redirect_uri = window.location.origin
     } 
-    
     const pkceOption = {
         baseURL: env.authUrl,
         url: "oauth2/authorize",

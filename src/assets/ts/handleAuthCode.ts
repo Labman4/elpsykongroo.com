@@ -20,8 +20,11 @@ if (code != null && state != null) {
 
  function pkceCode() {
     // const code_verifier =  fs.readFileSync('/codeVerifier.txt', "utf8");
-    const code_verifier = window.localStorage.getItem("code_verifier");
-    console.log(code_verifier);
+    var codeVerifier;
+    if ( window.localStorage.getItem("code_verifier") != null) {
+        codeVerifier =  window.localStorage.getItem("code_verifier");
+    }
+    const code_verifier = btoa(codeVerifier);
     const authOption = {
         baseURL: env.authUrl,
         url: "/oauth2/token",
