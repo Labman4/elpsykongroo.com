@@ -30,7 +30,7 @@ axios.interceptors.response.use(function (response) {
   
   async function pkce () {
     await generateCodeVerifier();
-    if (document.domain = "localhost") {
+    if (document.domain == "localhost") {
       access.redirect_uri = env.redirectUrl
     } else if (document.referrer != "" ) {
       access.redirect_uri = document.referrer
