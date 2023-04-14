@@ -60,8 +60,7 @@ const loading = ref(false);
 
 if (referrer != "" && referrer != undefined) {   
     idp = referrer.split(".")[0].split("//")[1];
-    console.log(idp);
-    if (idp != "www" && document.domain != "localhost" && document.domain != "127.0.0.1") {
+    if (idp != "elpsykongroo" && document.domain != "localhost" && document.domain != "127.0.0.1") {
         webauthnFormVisible.value = true
     }
 }
@@ -148,7 +147,7 @@ async function  webauthnLogin() {
                     window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
                 }
                 else if (document.domain == "localhost") {
-                    // pkce();
+                    pkce();
                 } 
             } else {
                 const publicKeyCredential = await webauthnJson.get(response.data);
@@ -171,7 +170,6 @@ async function  webauthnLogin() {
                         visible.webauthnFormVisible = false
                         console.log(idp)
                         if (idp == undefined) {
-                            // pkce();
                             window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
 
                             // if (document.domain != "localhost") {
@@ -184,15 +182,9 @@ async function  webauthnLogin() {
                             window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
                         } else if (idp != "" && idp != undefined ) {
                             window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                        }
-                        // else if (document.domain == "localhost" || document.domain == "elpsykongroo.com") {
-                        //     if (document.domain != "localhost") {
-                        //         window.location.href = "https://oauth2-proxy.elpsykongroo.com/web";
-                        //     } else {
-                        //         idp = "www";
-                        //         window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                        //     }
-                        // } 
+                        } else if (document.domain == "localhost") {
+                            pkce();
+                        }  
                     }
                 });
             }

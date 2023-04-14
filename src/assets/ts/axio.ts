@@ -14,14 +14,12 @@ const timeCount= ref(0);
 // });
 
 axios.interceptors.response.use(function (response) {
-    console.log(response)
     // if (response.status === 302) {
     //   console.log(response)
     //   return axios.get(response.headers.location)
     // }
     return response;
   }, function (error) {
-    console.log(error)
     // if (error.response.status === 401 || error.response.data === 'no access') {
     //     ElMessageBox.alert("no access, please ensure and retry")
     // }

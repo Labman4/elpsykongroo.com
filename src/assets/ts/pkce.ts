@@ -5,11 +5,11 @@ import jsSHA from 'jssha';
 import { axios } from "./axio";
 
 async function generateCodeVerifier() {
-    // const codeVerifier = "841aa35355d86c55c1a948831ab90f23f80f71c65a08feb0dc4830a066fd55d36422c464bc58128edecf2f0bf5e0baadfda1168f8cb5883bd8ff6745454afe8b";
-    const codeVerifier = cryptoRandomString({ length: 128 });
-    window.localStorage.setItem("code_verifier", codeVerifier);
+    const codeVerifier = "841aa35355d86c55c1a948831ab90f23f80f71c65a08feb0dc4830a066fd55d36422c464bc58128edecf2f0bf5e0baadfda1168f8cb5883bd8ff6745454afe8b";
+    // const codeVerifier = cryptoRandomString({ length: 128 });
+    // window.sessionStorage.setItem("code_verifier", codeVerifier);
     var base64Str = btoa(codeVerifier); // 编码为base64字符串
-    console.log(window.localStorage.getItem("code_verifier")    )
+    // console.log(window.sessionStorage.getItem("code_verifier")    )
     // fs.writeFileSync('/codeVerifier.txt', codeVerifier);
     const sha256 = new jsSHA("SHA-256", "TEXT");
     sha256.update(base64Str);
@@ -27,17 +27,6 @@ async function pkce () {
     } else {
       access.redirect_uri = window.location.origin
     } 
-
-    // var xhr = new XMLHttpRequest();
-    // xhr.open('POST', env.authUrl + "/oauth2/authorize", true);
-    // xhr.setRequestHeader('Content-Type', 'application/json');
-    // xhr.onreadystatechange = function() {
-    //   if (xhr.readyState === 4 && xhr.status === 302) {
-    //     xhr.abort();
-    //     // do something
-    //   }
-    // };
-    // xhr.send();
     const pkceOption = {
         baseURL: env.authUrl,
         url: "oauth2/authorize",
@@ -48,7 +37,7 @@ async function pkce () {
           code_challenge: access.code_challenge,
           redirect_uri: access.redirect_uri,
           scope: "openid",
-          client_id: "spring"
+          client_id: "pkce"
         },
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -60,15 +49,12 @@ async function pkce () {
         // },                
       }
       axios(pkceOption).then(function (response){
-          console.log(response)
       }).catch(function (error) {
-        console.log(error)
         if (error.response.status === 404 && error.response.request.responseURL) {
           // handle redirect 404 error
           window.location.href = error.response.request.responseURL;       
         } else {
           // handle other errors
-          console.error(error);
         }
       })
   }

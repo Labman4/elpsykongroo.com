@@ -150,25 +150,6 @@ const userInfo = () => {
     }) 
 }
 
-const oidc = () => {
-  const authOption = {
-      baseURL: env.authUrl,
-      url: "/userinfo",
-      method: "POST",
-      headers: {
-      'Authorization': 'Bearer '+ access.access_token
-      },  
-      // auth : { 
-      //     username : access.client_id , 
-      //     password : access.client_secret 
-      // } , 
-      withCredentials: true                 
-    }
-    axios(authOption).then(function (response) {
-        console.log(response.data)
-    }) 
-}
-
 const passowrd = () => {
   const authOption = {
       baseURL: env.authUrl,

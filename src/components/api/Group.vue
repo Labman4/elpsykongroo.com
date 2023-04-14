@@ -487,7 +487,6 @@ const resetSelect = () => {
             // transfer[key].checked = true
         }
     }
-    console.log(datas.transfer)
 }
 
 defineExpose({
