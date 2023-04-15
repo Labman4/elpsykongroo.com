@@ -54,7 +54,9 @@ if (code != null && state != null) {
 
   (function getAccessToken() {
     var key = "";
+    console.log(document.cookie);
     var cookies = document.cookie.split(';');
+    console.log(cookies);
     for (var i = 0; i < cookies.length; i++) {
         var cookie = cookies[i].trim();
         if (cookie.indexOf("_oauth2_proxy=") == 0) {
