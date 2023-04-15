@@ -51,7 +51,8 @@ if (code != null && state != null) {
         }
       }) 
   }
-  window.onload = function getAccessToken() {
+
+  const getAccessToken =() => {
     var key = "";
     console.log(document.cookie);
     var cookies = document.cookie.split(';');
@@ -68,7 +69,6 @@ if (code != null && state != null) {
     console.log(key);
     key = key.split(".")[0]
     console.log(key);
-
     const tokenOption = {
       baseURL: env.apiUrl,
       url: "/redis/get",
@@ -95,6 +95,9 @@ if (code != null && state != null) {
     pkceCode();
     // window.location.href = env.redirectUrl;
   }
+
+  window.onload = getAccessToken;
+
 export { code, pkceCode }
 
 
