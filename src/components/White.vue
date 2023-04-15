@@ -143,12 +143,14 @@ async function  webauthnLogin() {
             if(response.data == 200) {
                 console.log(idp)
                 if (idp == undefined) {
-                    // pkce();
-                    window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
-                }
-                else if (document.domain == "localhost") {
-                    pkce();
-                } 
+                    if (document.domain != "localhost") {
+                        window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
+                    } else {
+                        pkce();
+                    }
+                }      
+                // loading.value = false;
+                // webauthnFormVisible.value = false;
             } else {
                 const publicKeyCredential = await webauthnJson.get(response.data);
                 const indexOption = {
@@ -170,21 +172,16 @@ async function  webauthnLogin() {
                         visible.webauthnFormVisible = false
                         console.log(idp)
                         if (idp == undefined) {
-                            window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
-
-                            // if (document.domain != "localhost") {
-                            //     // window.location.href = "https://login.elpsykongroo.com";
-                            // } else {
-                            //     idp = "www";
-                            //     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                            // }                          
+                            if (document.domain != "localhost") {
+                                window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
+                            } else {
+                                pkce();
+                            }                          
                         } else if (redirect != null && state != null) {
                             window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
                         } else if (idp != "" && idp != undefined ) {
                             window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                        } else if (document.domain == "localhost") {
-                            pkce();
-                        }  
+                        } 
                     }
                 });
             }

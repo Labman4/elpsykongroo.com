@@ -796,11 +796,7 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
     }
     let scope;
     if(registerForm.scopes != "") {
-      if(registerForm.scopes.includes(",")) {
         scope = registerForm.scopes.split(",");
-      } else {
-        scope = registerForm.scopes;
-      }
     }
     const authRegister: AuthClientRegister = {
       registrationId: registerForm.registrationId,
