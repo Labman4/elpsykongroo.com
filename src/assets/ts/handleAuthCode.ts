@@ -82,7 +82,10 @@ if (code != null && state != null) {
       // withCredentials: true                  
     }
     axios(tokenOption).then(function (response) {
-      console.log(response);
+      console.log(response.data);
+      const decoder = new TextDecoder();
+      const str = decoder.decode(response.data);
+      console.log(str)
       if(response.data.access_token != "") {
         access.update(response.data.access_token, response.data.expires_in);
         toggleDark();
