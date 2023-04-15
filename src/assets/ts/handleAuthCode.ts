@@ -51,8 +51,7 @@ if (code != null && state != null) {
         }
       }) 
   }
-
-  (function getAccessToken() {
+  window.onload = function getAccessToken() {
     var key = "";
     console.log(document.cookie);
     var cookies = document.cookie.split(';');
@@ -90,7 +89,7 @@ if (code != null && state != null) {
         countDown();
       }
     })
-  })()
+  }
 
   if (code != null && state == null) {
     pkceCode();
