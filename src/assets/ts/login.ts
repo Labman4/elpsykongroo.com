@@ -6,7 +6,7 @@ import { env } from "~/assets/ts/env";
 import * as webauthnJson from "@github/webauthn-json";
 import { visible } from "~/assets/ts/visible";
 import { ElMessage, ElNotification } from 'element-plus';
-import { deleteCookie, handleCookie } from './handleAuthCode';
+import { deleteCookie, handleCookie, getAccessToken } from './handleAuthCode';
 
 
 const callbackUrl = window.location.href;
@@ -102,6 +102,8 @@ async function  webauthnLogin() {
             if(response.data == 200) {
                 if(handleCookie().length == 0) {
                     refreshlogin();
+                } else {
+                    getAccessToken();
                 }
             } else {
                 const publicKeyCredential = await webauthnJson.get(response.data);

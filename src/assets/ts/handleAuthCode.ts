@@ -69,7 +69,11 @@ if (code != null && state != null) {
     document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   }
 
-  (function getAccessToken () {
+  (function access () {
+    getAccessToken ()
+  })()
+
+  function getAccessToken () {
     var key = handleCookie();
     if (key.length > 0) {
       key = atob(key.split("|")[0]);
@@ -94,7 +98,7 @@ if (code != null && state != null) {
         }
       })
     }
-  })()
+  }
 
   if (code != null && state == null) {
     pkceCode();
@@ -102,6 +106,6 @@ if (code != null && state != null) {
   }
  
 
-export { code, pkceCode, handleCookie, deleteCookie }
+export { code, pkceCode, handleCookie, deleteCookie, getAccessToken }
 
 
