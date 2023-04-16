@@ -2,6 +2,8 @@ import { access } from "./access";
 import { axios, countDown } from "./axio";
 import { toggleDark } from "~/composables";
 import { env } from "./env";
+import { webauthnLogin } from "./login";
+import { visible } from "./visible";
 
 const callbackUrl = window.location.href;
 const code = new URL(callbackUrl).searchParams.get('code');
@@ -53,10 +55,11 @@ if (code != null && state != null) {
   }
 
   const getAccessToken =() => {
-    var key = "";
-    console.log(document.cookie);
+    // ElMessageBox.alert("login success,please click to confirm access")
+    // visible.webauthnFormVisible = true;
+    // webauthnLogin();
     var cookies = document.cookie.split(';');
-    console.log(cookies);
+    var key = "";
     for (var i = 0; i < cookies.length; i++) {
         var cookie = cookies[i].trim();
         if (cookie.indexOf("_oauth2_proxy=") == 0) {
@@ -64,41 +67,36 @@ if (code != null && state != null) {
             break;
         }
     }
-    console.log(key);
-    key = atob(key.split("|")[0])
-    console.log(key);
-    key = key.split(".")[0]
-    console.log(key);
-    const tokenOption = {
-      baseURL: env.apiUrl,
-      url: "/redis/get",
-      method: "GET",
-      params: {
-        key: key
-      },
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },   
-      // withCredentials: true                  
-    }
-    axios(tokenOption).then(function (response) {
-      console.log(response.data);
-      const decoder = new TextDecoder();
-      const str = decoder.decode(response.data);
-      console.log(str)
-      if(response.data.access_token != "") {
-        access.update(response.data.access_token, response.data.expires_in);
-        toggleDark();
-        countDown();
+    key = atob(key.split("|")[0]);
+    if (key.length > 0) {
+      const tokenOption = {
+        baseURL: env.apiUrl,
+        url: "/redis/get/token",
+        method: "GET",
+        params: {
+          key: key
+        },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },   
+        withCredentials: true                  
       }
-    })
+      axios(tokenOption).then(function (response) {
+        if(response.data.at != "") {
+          access.update(response.data, 1200);
+          access.refresh_token = response.data.rt;
+          toggleDark();
+          countDown();
+        }
+      })
+    }
   }
 
   if (code != null && state == null) {
     pkceCode();
     // window.location.href = env.redirectUrl;
   }
-
+ 
   window.onload = getAccessToken;
 
 export { code, pkceCode }

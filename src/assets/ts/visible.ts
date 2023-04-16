@@ -4,6 +4,7 @@ export const visible = reactive(
 {
     "webauthnFormVisible": false,
     "authFormVisible": false,
+    "loading": false,
 
     "ipFormLabelWidth": "100px",
     "userFormLabelWidth": "100px",
