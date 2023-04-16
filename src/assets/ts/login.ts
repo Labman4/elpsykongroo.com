@@ -104,6 +104,8 @@ async function  webauthnLogin() {
                     refreshlogin();
                 } else {
                     getAccessToken();
+                    visible.loading = false;
+                    visible.webauthnFormVisible = false;
                 }
             } else {
                 const publicKeyCredential = await webauthnJson.get(response.data);
