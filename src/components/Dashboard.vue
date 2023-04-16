@@ -62,15 +62,12 @@
               storage
             </template>
           </el-menu-item>
-          <el-menu-item index="4" v-if="access.grant_type !='authorization_code'">
+          <el-menu-item index="4" v-if="access.expires_in > 0">
             <el-icon><Timer /></el-icon>
-            <template #title v-if="access.grant_type =='client_credentials'">{{access.expires_in}}s</template>
+            <template #title>{{access.expires_in}}s</template>
           </el-menu-item>
-          <el-menu-item index="4-1" v-if="access.grant_type =='authorization_code'" >
+          <el-menu-item index="4-1" v-if="access.refresh_token != '' " >
             <el-icon @click="logout()"><SwitchButton /></el-icon>
-            <template #title >
-              Logout
-            </template>
           </el-menu-item>
         
         </el-menu>
