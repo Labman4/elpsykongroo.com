@@ -161,7 +161,7 @@ const openAuthority = () => {
 
 const logout = () => {
   ElMessage('you will logout in 3s');
-  if(access.grant_type == 'authorization_code') {
+  if(access.refresh_token != "") {
     const option = {
       baseURL: env.authUrl,
       url: "/logout",
