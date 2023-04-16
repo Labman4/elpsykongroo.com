@@ -123,7 +123,7 @@ async function  webauthnLogin() {
                         visible.loading = false;
                         visible.webauthnFormVisible = false
                         console.log(idp)
-                        if (idp == undefined) {
+                        if (idp == undefined || idp == "elpsykongroo") {
                             if (document.domain != "localhost") {
                                 window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
                             } else {
@@ -131,7 +131,7 @@ async function  webauthnLogin() {
                             }                          
                         } else if (redirect != null && state != null) {
                             window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
-                        } else if (idp != "elpsykongroo" && idp != "" && idp != undefined ) {
+                        } else if (idp != "") {
                             window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
                         } 
                     }
