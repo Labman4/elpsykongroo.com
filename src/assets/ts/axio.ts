@@ -29,11 +29,13 @@ axios.interceptors.response.use(function (response) {
     // } 
     if (error.response.status === 401 || error.response.data === 'no access') {
       if(handleCookie().length != 0) {
-        ElMessageBox.alert("token expired, will redirect to refresh it")
+        ElMessageBox.alert("cookie expired, will redirect to refresh it")
         refreshlogin();
+        return;
       }
       ElMessageBox.alert("no access, please ensure and retry")
       refreshToken();
+    
     }
     return Promise.reject(error);
   });
@@ -61,7 +63,11 @@ axios.interceptors.response.use(function (response) {
           access.update(response.data.access_token, response.data.expires_in);
         } 
       }).catch(function(error){
+        if(handleCookie().length == 0) {
           ElMessageBox.alert("session expired, please login agian");
+        } else {
+          ElMessageBox.alert("cookie expired, will redirect to refresh it")
+        }
       })
     }
   }
