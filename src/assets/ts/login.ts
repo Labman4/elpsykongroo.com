@@ -14,23 +14,21 @@ const state = new URL(callbackUrl).searchParams.get('state');
 
 const referrer = document.referrer;
 var idp;
-const webauthnFormVisible = ref(false);
-const loading = ref(false);
 
 if (referrer != "" && referrer != undefined) {   
     idp = referrer.split(".")[0].split("//")[1];
     if (idp != "elpsykongroo" && document.domain != "localhost" && document.domain != "127.0.0.1") {
-        webauthnFormVisible.value = true
+        visible.webauthnFormVisible = true
     }
 }
 
 if (redirect != null && state != null) {
-    webauthnFormVisible.value = true
+    visible.webauthnFormVisible = true
 }
 
 const webauthnRegister = () => {
     if (access.username.length > 0) {
-        loading.value = true;
+        visible.loading = true;
         const registerOption = {
             baseURL: env.authUrl,
             url: "/register",
@@ -65,7 +63,7 @@ const webauthnRegister = () => {
                 // withCredentials: true                        
             }
             axios(option).then(function (response) {
-                loading.value = false;
+                visible.loading = false;
                 if (response.data == 200) {
                     ElNotification({
                         title: 'Register success',
@@ -86,7 +84,7 @@ const webauthnRegister = () => {
 
 async function  webauthnLogin() {
     if (access.username.length > 0) {
-        loading.value = true;
+        visible.loading = true;
         const loginOption = {
             baseURL: env.authUrl,
             url: "/login",
