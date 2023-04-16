@@ -83,7 +83,7 @@ if (code != null && state != null) {
       }
       axios(tokenOption).then(function (response) {
         if(response.data.at != "") {
-          access.update(response.data, 1200);
+          access.update(response.data.at, 1200);
           access.refresh_token = response.data.rt;
           toggleDark();
           countDown();
