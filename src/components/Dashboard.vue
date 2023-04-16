@@ -66,7 +66,7 @@
             <el-icon><Timer /></el-icon>
             <template #title>{{access.expires_in}}s</template>
           </el-menu-item>
-          <el-menu-item index="4-1" v-if="access.refresh_token != '' " >
+          <el-menu-item index="4-1">
             <el-icon @click="logout()"><SwitchButton /></el-icon>
           </el-menu-item>
         
@@ -161,22 +161,20 @@ const openAuthority = () => {
 
 const logout = () => {
   ElMessage('you will logout in 3s');
-  if(access.refresh_token != "") {
-    const option = {
-      baseURL: env.authUrl,
-      url: "/logout",
-      method: "POST",
-      headers: {
-        'Authorization': 'Bearer '+ access.access_token
-      },
-    }
-    axios(option).then(function (response) {
-      access.grant_type = "";
-      access.expires_in = 5;
-      access.access_token = "";
-      access.refresh_token = "";
-    })
+  const option = {
+    baseURL: env.authUrl,
+    url: "/logout",
+    method: "POST",
+    headers: {
+      'Authorization': 'Bearer '+ access.access_token
+    },
   }
+  axios(option).then(function (response) {
+    access.grant_type = "";
+    access.expires_in = 5;
+    access.access_token = "";
+    access.refresh_token = "";
+  })
 }
 
 let isCollapse = ref(true)
