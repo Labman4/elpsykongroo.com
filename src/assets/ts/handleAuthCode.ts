@@ -67,7 +67,7 @@ if (code != null && state != null) {
     return key;
   }
 
-  const getAccessToken = () => {
+  (function getAccessToken () {
     var key = handleCookie();
     if (key.length > 0) {
       key = atob(key.split("|")[0]);
@@ -92,14 +92,13 @@ if (code != null && state != null) {
         }
       })
     }
-  }
+  })()
 
   if (code != null && state == null) {
     pkceCode();
     // window.location.href = env.redirectUrl;
   }
  
-  window.onload = getAccessToken;
 
 export { code, pkceCode, handleCookie }
 

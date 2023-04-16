@@ -67,6 +67,8 @@ axios.interceptors.response.use(function (response) {
           ElMessageBox.alert("session expired, please login agian");
         } else {
           ElMessageBox.alert("cookie expired, will redirect to refresh it")
+          refreshlogin();
+          return;
         }
       })
     }
