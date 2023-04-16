@@ -20,14 +20,15 @@ axios.interceptors.response.use(function (response) {
     // }
     return response;
   }, function (error) {
-    // if (error.response.status === 401 || error.response.data === 'no access') {
-    //     ElMessageBox.alert("no access, please ensure and retry")
-    // }
+   
     // if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
     //   console.log(error);
     //   // window.location.href = error.response.request.responseURL;       
     // } 
-      refreshToken();
+    if (error.response.status === 401 || error.response.data === 'no access') {
+        ElMessageBox.alert("no access, please ensure and retry")
+        refreshToken();
+    }
     return Promise.reject(error);
   });
 

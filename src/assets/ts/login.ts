@@ -137,7 +137,7 @@ async function  webauthnLogin() {
                             }                          
                         } else if (redirect != null && state != null) {
                             window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
-                        } else if (idp != "" && idp != undefined ) {
+                        } else if (idp != "elpsykongroo" && idp != "" && idp != undefined ) {
                             window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
                         } 
                     }
