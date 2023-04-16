@@ -70,8 +70,8 @@ if (code != null && state != null) {
     key = atob(key.split("|")[0]);
     if (key.length > 0) {
       const tokenOption = {
-        baseURL: env.apiUrl,
-        url: "/redis/get/token",
+        baseURL: env.authUrl,
+        url: "/access",
         method: "GET",
         params: {
           key: key
