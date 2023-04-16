@@ -53,6 +53,8 @@ axios.interceptors.response.use(function (response) {
       axios(refreshOption).then(function (response) {
         if(response.data.access_token != "") {
           access.update(response.data.access_token, response.data.expires_in);
+        } else {
+          ElMessageBox.alert("session expired, please login agian");
         }
       }) 
     }

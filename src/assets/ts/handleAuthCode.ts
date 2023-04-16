@@ -55,9 +55,6 @@ if (code != null && state != null) {
   }
 
   const getAccessToken =() => {
-    // ElMessageBox.alert("login success,please click to confirm access")
-    // visible.webauthnFormVisible = true;
-    // webauthnLogin();
     var cookies = document.cookie.split(';');
     var key = "";
     for (var i = 0; i < cookies.length; i++) {
