@@ -420,6 +420,10 @@ const tokenSettings = [
           label: "Duration",
           children: [
             {
+              value: 60,
+              label: "1min"
+            },
+            {
               value: 3600,
               label: "1h"
             },
@@ -565,12 +569,12 @@ const clientSettings = [
     label: "jwkSetUrl",
     children: [
       {
-        value: "http://127.0.0.1:9000",
-        label: "http://127.0.0.1:9000",
+        value: "https://auth.elpsykongroo.com",
+        label: "https://auth.elpsykongroo.com",
       },
       {
-        value: "http://127.0.0.1:9000",
-        label: "http://127.0.0.1:9000",
+        value: "https://auth-dev.elpsykongroo.com",
+        label: "https://auth-dev.elpsykongroo.com",
       }
     ]
   },
