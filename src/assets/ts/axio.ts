@@ -2,6 +2,8 @@ import axios from 'axios';
 import { toggleDark } from '~/composables';
 import { access } from './access';
 import { env } from './env';
+import { handleCookie } from './handleAuthCode';
+import { refreshlogin } from './login';
 const timeCount= ref(0);
 
 // const source = axios.CancelToken.source();
@@ -26,8 +28,12 @@ axios.interceptors.response.use(function (response) {
     //   // window.location.href = error.response.request.responseURL;       
     // } 
     if (error.response.status === 401 || error.response.data === 'no access') {
-        ElMessageBox.alert("no access, please ensure and retry")
-        refreshToken();
+      if(handleCookie().length != 0) {
+        ElMessageBox.alert("token expired, will redirect to refresh it")
+        refreshlogin();
+      }
+      ElMessageBox.alert("no access, please ensure and retry")
+      refreshToken();
     }
     return Promise.reject(error);
   });
@@ -53,10 +59,10 @@ axios.interceptors.response.use(function (response) {
       axios(refreshOption).then(function (response) {
         if(response.data.access_token != "") {
           access.update(response.data.access_token, response.data.expires_in);
-        } else {
+        } 
+      }).catch(function(error){
           ElMessageBox.alert("session expired, please login agian");
-        }
-      }) 
+      })
     }
   }
 

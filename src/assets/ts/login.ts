@@ -101,12 +101,8 @@ async function  webauthnLogin() {
         axios(loginOption).then(async function (response) {
             if(response.data == 200) {
                 if(handleCookie().length == 0) {
-                    if (document.domain != "localhost") {
-                        window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
-                    } else {
-                        pkce();
-                    }
-                } 
+                    refreshlogin();
+                }
             } else {
                 const publicKeyCredential = await webauthnJson.get(response.data);
                 const indexOption = {
@@ -145,4 +141,12 @@ async function  webauthnLogin() {
     }
 }
 
-export { webauthnLogin, webauthnRegister }
+const refreshlogin = () => {
+    if (document.domain != "localhost") {
+        window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
+    } else {
+        pkce();
+    }
+}
+
+export { webauthnLogin, webauthnRegister, refreshlogin }
