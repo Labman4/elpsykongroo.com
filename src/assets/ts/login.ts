@@ -6,6 +6,7 @@ import { env } from "~/assets/ts/env";
 import * as webauthnJson from "@github/webauthn-json";
 import { visible } from "~/assets/ts/visible";
 import { ElNotification } from 'element-plus';
+import { handleCookie } from './handleAuthCode';
 
 
 const callbackUrl = window.location.href;
@@ -99,16 +100,13 @@ async function  webauthnLogin() {
         }
         axios(loginOption).then(async function (response) {
             if(response.data == 200) {
-                console.log(idp)
-                if (idp == undefined) {
+                if(handleCookie().length == 0) {
                     if (document.domain != "localhost") {
                         window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
                     } else {
                         pkce();
                     }
-                }      
-                // loading.value = false;
-                // webauthnFormVisible.value = false;
+                } 
             } else {
                 const publicKeyCredential = await webauthnJson.get(response.data);
                 const indexOption = {

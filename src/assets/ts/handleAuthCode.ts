@@ -54,7 +54,7 @@ if (code != null && state != null) {
       }) 
   }
 
-  const getAccessToken =() => {
+  const handleCookie = () => {
     var cookies = document.cookie.split(';');
     var key = "";
     for (var i = 0; i < cookies.length; i++) {
@@ -64,8 +64,13 @@ if (code != null && state != null) {
             break;
         }
     }
-    key = atob(key.split("|")[0]);
+    return key;
+  }
+
+  const getAccessToken = () => {
+    var key = handleCookie();
     if (key.length > 0) {
+      key = atob(key.split("|")[0]);
       const tokenOption = {
         baseURL: env.authUrl,
         url: "/access",
@@ -96,6 +101,6 @@ if (code != null && state != null) {
  
   window.onload = getAccessToken;
 
-export { code, pkceCode }
+export { code, pkceCode, handleCookie }
 
 
