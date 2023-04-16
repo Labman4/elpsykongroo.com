@@ -5,8 +5,8 @@ import { env } from "~/assets/ts/env";
 // const attestation:AttestationConveyancePreference = "direct";
 import * as webauthnJson from "@github/webauthn-json";
 import { visible } from "~/assets/ts/visible";
-import { ElNotification } from 'element-plus';
-import { handleCookie } from './handleAuthCode';
+import { ElMessage, ElNotification } from 'element-plus';
+import { deleteCookie, handleCookie } from './handleAuthCode';
 
 
 const callbackUrl = window.location.href;
@@ -149,4 +149,24 @@ const refreshlogin = () => {
     }
 }
 
-export { webauthnLogin, webauthnRegister, refreshlogin }
+
+const logout = () => {
+    ElMessage('you will logout in 3s');
+    const option = {
+      baseURL: env.authUrl,
+      url: "/logout",
+      method: "POST",
+      headers: {
+        'Authorization': 'Bearer '+ access.access_token
+      },
+    }
+    axios(option).then(function (response) {
+      access.grant_type = "";
+      access.expires_in = 5;
+      access.access_token = "";
+      access.refresh_token = "";
+      deleteCookie("_oauth2_proxy");
+    })
+  }
+
+export { webauthnLogin, webauthnRegister, refreshlogin, logout }

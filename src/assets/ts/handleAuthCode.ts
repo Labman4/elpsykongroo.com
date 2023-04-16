@@ -2,8 +2,6 @@ import { access } from "./access";
 import { axios, countDown } from "./axio";
 import { toggleDark } from "~/composables";
 import { env } from "./env";
-import { webauthnLogin } from "./login";
-import { visible } from "./visible";
 
 const callbackUrl = window.location.href;
 const code = new URL(callbackUrl).searchParams.get('code');
@@ -67,6 +65,10 @@ if (code != null && state != null) {
     return key;
   }
 
+  function deleteCookie(name) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  }
+
   (function getAccessToken () {
     var key = handleCookie();
     if (key.length > 0) {
@@ -100,6 +102,6 @@ if (code != null && state != null) {
   }
  
 
-export { code, pkceCode, handleCookie }
+export { code, pkceCode, handleCookie, deleteCookie }
 
 
