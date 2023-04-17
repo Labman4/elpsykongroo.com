@@ -186,7 +186,7 @@ const logout = () => {
             headers: {
               'Authorization': 'Bearer '+ access.access_token
             },
-            withCredentials: true                
+            // withCredentials: true                
         }
         axios(option).then(function (response) {
             access.grant_type = "";
