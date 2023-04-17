@@ -183,10 +183,10 @@ const logout = () => {
             baseURL: env.authUrl,
             url: "/logout",
             method: "POST",
-            headers: {
-              'Authorization': 'Bearer '+ access.access_token
-            },
-            // withCredentials: true                
+            // headers: {
+            //   'Authorization': 'Bearer '+ access.access_token
+            // },
+            withCredentials: true                
         }
         axios(option).then(function (response) {
             access.grant_type = "";

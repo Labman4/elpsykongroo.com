@@ -771,7 +771,7 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
         });
       } else {
           axios(option).then(function (response) {
-            if(response.data > 0) {
+            if(response.data.length > 0) {
               authClientForm.value = false;
               authClientList();
             }
@@ -832,7 +832,7 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
         bcrypt.hash(registerForm.clientSecret, 10).then(function(hash) {
           authRegister.clientSecret = '{bcrypt}' + hash ;
           axios(option).then(function (response) {
-            if(response.data > 0) {
+            if(response.data.length > 0) {
               authClientRegisterForm.value = false ;
               authClientRegisterList();
             } 
