@@ -182,7 +182,7 @@ const logout = () => {
         const option = {
             baseURL: env.authUrl,
             url: "/logout",
-            method: "POST",
+            method: "GET",
             // headers: {
             //   'Authorization': 'Bearer '+ access.access_token
             // },
