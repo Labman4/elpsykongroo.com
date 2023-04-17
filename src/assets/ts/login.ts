@@ -156,21 +156,47 @@ const refreshlogin = () => {
 
 const logout = () => {
     ElMessage('you will logout in 3s');
-    const option = {
-      baseURL: env.authUrl,
-      url: "/logout",
-      method: "POST",
-      headers: {
-        'Authorization': 'Bearer '+ access.access_token
-      },
-    }
-    axios(option).then(function (response) {
-      access.grant_type = "";
-      access.expires_in = 5;
-      access.access_token = "";
-      access.refresh_token = "";
-      deleteCookie("_oauth2_proxy");
-    })
+    revoke();
+    // const option = {
+    //   baseURL: env.authUrl,
+    //   url: "/logout",
+    //   method: "POST",
+    //   headers: {
+    //     'Authorization': 'Bearer '+ access.access_token
+    //   },
+    // }
+    // axios(option).then(function (response) {
+    //     access.grant_type = "";
+    //     access.expires_in = 5;
+    //     access.access_token = "";
+    //     access.refresh_token = "";
+    //     deleteCookie("_oauth2_proxy");
+    // })
   }
+
+  const revoke = () => {
+    const option = {
+        baseURL: env.authUrl,
+        url: "/oauth2/revoke",
+        method: "POST",
+        data: {
+          token: access.access_token,
+          token_type_hint: "access_token"
+        },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }, 
+        withCredentials: true                
+        // auth : { 
+        //     username : "pkce", 
+        //     password : "" 
+        // } ,
+        
+      }
+      axios(option).then(function (response) {
+        console.log(response.data);
+      })   
+  }
+
 
 export { webauthnLogin, webauthnRegister, refreshlogin, logout }
