@@ -157,21 +157,6 @@ const refreshlogin = () => {
 const logout = () => {
     ElMessage('you will logout in 3s');
     revoke();
-    const option = {
-      baseURL: env.authUrl,
-      url: "/logout",
-      method: "POST",
-      headers: {
-        'Authorization': 'Bearer '+ access.access_token
-      },
-    }
-    axios(option).then(function (response) {
-        access.grant_type = "";
-        access.expires_in = 5;
-        access.access_token = "";
-        access.refresh_token = "";
-        deleteCookie("_oauth2_proxy");
-    })
   }
 
   const revoke = () => {
@@ -191,12 +176,25 @@ const logout = () => {
         // auth : { 
         //     username : "pkce", 
         //     password : "" 
-        // } ,
-        
-      }
-      axios(option).then(function (response) {
-        console.log(response.data);
-      })   
+        // } ,      
+    }
+    axios(option).then(function (response) {
+        const option = {
+            baseURL: env.authUrl,
+            url: "/logout",
+            method: "POST",
+            headers: {
+              'Authorization': 'Bearer '+ access.access_token
+            },
+          }
+          axios(option).then(function (response) {
+              access.grant_type = "";
+              access.expires_in = 5;
+              access.access_token = "";
+              access.refresh_token = "";
+              deleteCookie("_oauth2_proxy");
+          })     
+    })   
   }
 
 
