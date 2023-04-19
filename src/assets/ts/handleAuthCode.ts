@@ -94,6 +94,7 @@ if (code != null && state != null) {
         if(response.data.at != "") {
           access.update(response.data.at, 1200);
           access.refresh_token = response.data.rt;
+          access.id_token = response.data.it;
           toggleDark();
           countDown();
         }

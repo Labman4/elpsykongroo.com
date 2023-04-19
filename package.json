@@ -20,6 +20,7 @@
     "element-plus": "^2.2.32",
     "jquery": "^3.6.3",
     "jssha": "^3.3.0",
+    "jwt-decode": "^3.1.2",
     "lodash-es": "^4.17.21",
     "openai": "^3.1.0",
     "path-browserify": "^1.0.1",
