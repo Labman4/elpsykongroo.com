@@ -4,6 +4,7 @@ export const access = reactive(
 {
     access_token: "",
     refresh_token: "",
+    id_token: "",
     expires_in: 0,
     grant_type: "",
     client_id: "",

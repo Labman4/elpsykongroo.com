@@ -156,7 +156,8 @@ const refreshlogin = () => {
 
 const logout = () => {
     ElMessage('you will logout in 3s');
-    revoke();
+    oidclogout()
+    // revoke();
   }
 
   const revoke = () => {
@@ -179,24 +180,32 @@ const logout = () => {
         // } ,      
     }
     axios(option).then(function (response) {
-        const option = {
-            baseURL: env.authUrl,
-            url: "/logout",
-            method: "GET",
-            // headers: {
-            //   'Authorization': 'Bearer '+ access.access_token
-            // },
-            // withCredentials: true                
-        }
-        axios(option).then(function (response) {
-            access.grant_type = "";
-            access.expires_in = 5;
-            access.access_token = "";
-            access.refresh_token = "";
-            deleteCookie("_oauth2_proxy");
-        })     
+    
     })   
   }
 
+const oidclogout = () => {
+    const option = {
+        baseURL: env.authUrl,
+        url: "/connect/logout",
+        method: "POST",
+        data: {
+          id_token_hint: access.id_token,
+            // client_id:
+            // post_logout_redirect_uri:
+        },
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          }, 
+        // withCredentials: true                
+    }
+    axios(option).then(function (response) {
+        // access.grant_type = "";
+        // access.expires_in = 5;
+        // access.access_token = "";
+        // access.refresh_token = "";
+        // deleteCookie("_oauth2_proxy");
+    })    
+}
 
 export { webauthnLogin, webauthnRegister, refreshlogin, logout }

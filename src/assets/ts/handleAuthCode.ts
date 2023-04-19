@@ -44,6 +44,7 @@ if (code != null && state != null) {
         if(response.data.access_token != "") {
           access.refresh_token = response.data.refresh_token;
           access.grant_type = "authorization_code";
+          access.id_token = response.data.id_token;
           access.update(response.data.access_token, response.data.expires_in);
           // userInfo();
           toggleDark();
