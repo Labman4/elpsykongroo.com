@@ -156,6 +156,7 @@ const refreshlogin = () => {
 
 const logout = () => {
     ElMessage('you will logout in 3s');
+    revoke()
     oidclogout()
   }
 
@@ -199,7 +200,6 @@ const oidclogout = () => {
         // withCredentials: true                
     }
     axios(option).then(function (response) {
-        revoke();
     })    
 }
 
