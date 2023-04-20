@@ -192,7 +192,7 @@ const oidclogout = () => {
         data: {
           id_token_hint: access.id_token,
             // client_id:
-            // post_logout_redirect_uri:
+          post_logout_redirect_uri: env.redirectUrl
         },
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"

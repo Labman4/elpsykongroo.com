@@ -24,6 +24,9 @@
       <el-form-item label="redirectUris" :label-width=visible.authClientFormWidth>
         <el-input v-model="clientForm.redirectUris" />
       </el-form-item>
+      <el-form-item label="logoutRedirectUris" :label-width=visible.authClientFormWidth>
+        <el-input v-model="clientForm.postLogoutRedirectUris" />
+      </el-form-item>
       <el-form-item label="clientName" :label-width=visible.authClientFormWidth>
         <el-input v-model="clientForm.clientName" />
       </el-form-item>
@@ -81,6 +84,7 @@
       <el-table-column property="clientSecret" label="Secret" />
       <el-table-column property="clientName" label="name" />
       <el-table-column property="redirectUris" label="redirectUris" width="100px" />
+      <el-table-column property="postLogoutRedirectUris" label="postLogoutRedirectUris" width="100px" />
       <el-table-column property="scopes" label="scopes" width="70px"/>
       <el-table-column property="clientAuthenticationMethods" label="Methods" width="60px"/>
       <el-table-column property="authorizationGrantTypes" label="type" width="70px"/>
@@ -281,6 +285,7 @@ let initClientForm  = () => ({
   clientSecretExpiresAt: "",
   scopes: "",
   redirectUris: "",
+  postLogoutRedirectUris: "",
   clientName: "",
   clientSettings: "",
   tokenSettings: "",
@@ -318,6 +323,7 @@ interface AuthClient {
   clientSecretExpiresAt: string
   scopes: string
   redirectUris: string
+  postLogoutRedirectUris: string
   clientName: string
   clientSettings: string
   tokenSettings: string
@@ -763,7 +769,7 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
         bcrypt.hash(clientForm.clientSecret, 10).then(function(hash) {
           clientForm.clientSecret = '{bcrypt}' + hash ;
           axios(option).then(function (response) {
-            if(response.data > 0) {
+            if(response.status == 200) {
               authClientForm.value = false;
               authClientList();
             }
@@ -771,7 +777,7 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
         });
       } else {
           axios(option).then(function (response) {
-            if(response.data.length > 0) {
+            if(response.status == 200) {
               authClientForm.value = false;
               authClientList();
             }
