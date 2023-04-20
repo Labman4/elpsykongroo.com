@@ -157,7 +157,8 @@ const refreshlogin = () => {
 const logout = () => {
     ElMessage('you will logout in 3s');
     oidclogout()
-    // revoke();
+    revoke();
+    sessionlogout()
   }
 
   const revoke = () => {
@@ -208,4 +209,19 @@ const oidclogout = () => {
     })    
 }
 
+const sessionlogout = () => {
+    const option = {
+        baseURL: env.authUrl,
+        url: "/logout",
+        method: "POST", 
+        withCredentials: true                
+    }
+    axios(option).then(function (response) {
+        access.grant_type = "";
+        access.expires_in = 5;
+        access.access_token = "";
+        access.refresh_token = "";
+        deleteCookie("_oauth2_proxy");
+    })    
+}
 export { webauthnLogin, webauthnRegister, refreshlogin, logout }
