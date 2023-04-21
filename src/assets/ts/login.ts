@@ -156,7 +156,7 @@ const refreshlogin = () => {
 
 const logout = () => {
     ElMessage('you will logout in 3s');
-    oidclogout()
+    revoke()
 }
 
   const revoke = () => {
