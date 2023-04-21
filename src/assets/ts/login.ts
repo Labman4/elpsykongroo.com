@@ -156,8 +156,8 @@ const refreshlogin = () => {
 
 const logout = () => {
     ElMessage('you will logout in 3s');
-    revoke()
     oidclogout()
+
   }
 
   const revoke = () => {
@@ -199,7 +199,7 @@ const oidclogout = () => {
         withCredentials: true                
     }
     axios(option).then(function (response) {
-      
+        revoke()
     })    
 }
 
@@ -215,6 +215,7 @@ const sessionlogout = () => {
         access.expires_in = 5;
         access.access_token = "";
         access.refresh_token = "";
+        access.id_token = "";
         deleteCookie("_oauth2_proxy");
     })    
 }
