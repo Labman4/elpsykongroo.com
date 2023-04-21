@@ -196,14 +196,10 @@ const oidclogout = () => {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
           }, 
-        // withCredentials: true                
+        withCredentials: true                
     }
     axios(option).then(function (response) {
-        access.grant_type = "";
-        access.expires_in = 5;
-        access.access_token = "";
-        access.refresh_token = "";
-        deleteCookie("_oauth2_proxy");
+      
     })    
 }
 
@@ -215,7 +211,11 @@ const sessionlogout = () => {
         withCredentials: true                
     }
     axios(option).then(function (response) {
-      
+        access.grant_type = "";
+        access.expires_in = 5;
+        access.access_token = "";
+        access.refresh_token = "";
+        deleteCookie("_oauth2_proxy");
     })    
 }
 export { webauthnLogin, webauthnRegister, refreshlogin, logout }
