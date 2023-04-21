@@ -27,15 +27,15 @@ axios.interceptors.response.use(function (response) {
     //   console.log(error);
     //   // window.location.href = error.response.request.responseURL;       
     // } 
-    if (error.response.status === 401 || error.response.data === 'no access') {
-      if(handleCookie().length != 0) {
+    if (error.response.status === 401) {
+      if (error.response.data === 'no access') {
+        ElMessageBox.alert("no access, please ensure and retry")
+      } else if (handleCookie().length != 0) {
         ElMessageBox.alert("cookie expired, will redirect to refresh it")
         refreshlogin();
-        return;
+      } else {
+        refreshToken();   
       }
-      ElMessageBox.alert("no access, please ensure and retry")
-      refreshToken();
-    
     }
     return Promise.reject(error);
   });
@@ -67,9 +67,7 @@ axios.interceptors.response.use(function (response) {
           ElMessageBox.alert("session expired, please login agian");
         } else {
           ElMessageBox.alert("cookie expired, will redirect to refresh it")
-          refreshlogin();
-          return;
-        }
+          refreshlogin();        }
       })
     }
   }

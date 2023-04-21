@@ -466,6 +466,10 @@ const tokenSettings = [
             {
               value: "self-contained",
               label: "self-contained"
+            },
+            {
+              value: "reference",
+              label: "reference"
             }
           ]
         },

@@ -167,7 +167,6 @@ const logout = () => {
         method: "POST",
         data: {
           token: access.access_token,
-          token_type_hint: "access_token",
           client_id: "pkce"
         },
         headers: {
