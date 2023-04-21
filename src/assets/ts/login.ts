@@ -212,7 +212,7 @@ const sessionlogout = () => {
         baseURL: env.authUrl,
         url: "/logout",
         method: "POST", 
-        // withCredentials: true                
+        withCredentials: true                
     }
     axios(option).then(function (response) {
       
