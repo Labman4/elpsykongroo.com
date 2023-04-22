@@ -47,42 +47,45 @@ const webauthnRegister = () => {
         }
         axios(registerOption).then(async function (response) {
             const publicKeyCredential = await webauthnJson.create(response.data);
-            const option = {
-                baseURL: env.authUrl,
-                url: "/finishauth",
-                method: "POST",
-                data: {
-                    credname: access.username,
-                    username: access.username,
-                    credential: JSON.stringify(publicKeyCredential),
-                },
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    // "Access-Control-Allow-Origin": "*",
-                    // "Access-Control-Allow-Credentials": "true"
-                }, 
-                // withCredentials: true                        
-            }
-            axios(option).then(function (response) {
-                visible.loading = false;
-                if (response.data == 200) {
-                    ElNotification({
-                        title: 'Register success',
-                        message: 'have fun with login',
-                        duration: 5000,
-                    })
-                } else {
-                  ElNotification({
-                        title: 'Register failed',
-                        message: 'this user already exist',
-                        duration: 5000,
-                  })
-                }
-            });
+            finishauth(publicKeyCredential)
         });
     }
 }
 
+const finishauth = (publicKeyCredential) => {
+    const option = {
+        baseURL: env.authUrl,
+        url: "/finishauth",
+        method: "POST",
+        data: {
+            credname: access.username,
+            username: access.username,
+            credential: JSON.stringify(publicKeyCredential),
+        },
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            // "Access-Control-Allow-Origin": "*",
+            // "Access-Control-Allow-Credentials": "true"
+        }, 
+        // withCredentials: true                        
+    }
+    axios(option).then(function (response) {
+        visible.loading = false;
+        if (response.data == 200) {
+            ElNotification({
+                title: 'Register success',
+                message: 'have fun with login',
+                duration: 5000,
+            })
+        } else {
+          ElNotification({
+                title: 'Register failed',
+                message: 'this user already exist',
+                duration: 5000,
+          })
+        }
+    });
+}
 async function  webauthnLogin() {
     if (access.username.length > 0) {
         visible.loading = true;
@@ -107,39 +110,56 @@ async function  webauthnLogin() {
                     visible.loading = false;
                     visible.webauthnFormVisible = false;
                 }
-            } else {
-                const publicKeyCredential = await webauthnJson.get(response.data);
-                const indexOption = {
-                    baseURL: env.authUrl,
-                    url: "/welcome",
-                    method: "POST",
-                    data: {
-                        username: access.username,
-                        credential: JSON.stringify(publicKeyCredential),
-                    },
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },   
-                    withCredentials: true      
-                }
-                axios(indexOption).then(function (response) {
-                    if(response.data == 200) {
-                        visible.loading = false;
-                        visible.webauthnFormVisible = false
-                        console.log(idp)
-                        if (idp == undefined || idp == "elpsykongroo") {
-                            if (document.domain != "localhost") {
-                                window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
-                            } else {
-                                pkce();
-                            }                          
-                        } else if (redirect != null && state != null) {
-                            window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
-                        } else if (idp != "") {
-                            window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                        } 
+            } else {    
+                var publicKeyCredential;
+                publicKeyCredential = await webauthnJson.get(response.data).catch((error) => {console.log(error)});
+                if (publicKeyCredential != null) {
+                    const indexOption = {
+                        baseURL: env.authUrl,
+                        url: "/welcome",
+                        method: "POST",
+                        data: {
+                            username: access.username,
+                            credential: JSON.stringify(publicKeyCredential),
+                        },
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },   
+                        withCredentials: true      
                     }
-                });
+                    axios(indexOption).then(function (response) {
+                        if(response.data == 200) {
+                            visible.loading = false;
+                            visible.webauthnFormVisible = false
+                            console.log(idp)
+                            if (idp == undefined || idp == "elpsykongroo") {
+                                if (document.domain != "localhost") {
+                                    window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
+                                } else {
+                                    pkce();
+                                }                          
+                            } else if (redirect != null && state != null) {
+                                window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
+                            } else if (idp != "") {
+                                window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
+                            } 
+                        }
+                    });
+                } else {
+                    ElMessageBox.alert("send email to add new cred?")
+                    const option = {
+                        baseURL: env.authUrl,
+                        url: "/welcome",
+                        method: "POST",
+                        data: {
+                            username: access.username,
+                            credential: JSON.stringify(publicKeyCredential),
+                        },
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },   
+                    }
+                }
             }
         })
     }
