@@ -178,7 +178,13 @@ const logout = () => {
         // } ,      
     }
     axios(option).then(function (response) {
-        oidclogout()
+        access.grant_type = "";
+        access.expires_in = 5;
+        access.access_token = "";
+        access.refresh_token = "";
+        access.id_token = "";
+        deleteCookie("_oauth2_proxy");
+        oidclogout();
     })   
   }
 
@@ -198,12 +204,7 @@ const oidclogout = () => {
         withCredentials: true                
     }
     axios(option).then(function (response) {
-        access.grant_type = "";
-        access.expires_in = 5;
-        access.access_token = "";
-        access.refresh_token = "";
-        access.id_token = "";
-        deleteCookie("_oauth2_proxy");
+       
     })    
 }
 

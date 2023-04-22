@@ -51,9 +51,9 @@
     <el-form-item label="password" :label-width=visible.userFormLabelWidth>
       <el-input v-model="userFormData.password" />
     </el-form-item>
-    <el-form-item label="username" :label-width=visible.userFormLabelWidth>
+    <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
       <el-input v-model="userFormData.username" />
-    </el-form-item> 
+    </el-form-item>  -->
     </el-form>
     <template #footer>
       <span class="dialog-footer">
