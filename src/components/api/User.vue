@@ -30,7 +30,7 @@
          <span v-if="scope.row.locked == 'false'">lock</span>
          <span v-if="scope.row.locked == 'true'">unlock</span>
         </el-button>
-        <el-button size="small" type="primary" @click="addAuthenticator(scope.row)"></el-button>
+        <el-button size="small" type="primary" @click="addAuthenticator(scope.row)">authenticator</el-button>
 
       </template>
       </el-table-column>
@@ -489,8 +489,8 @@ const addAuthenticator = (row: User) => {
         url: "/finishauth",
         method: "POST",
         data: {
-            credname: access.username,
-            username: access.username,
+            credname: row.username,
+            username: row.username,
             credential: JSON.stringify(publicKeyCredential),
         },
         headers: {
