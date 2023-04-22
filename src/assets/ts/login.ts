@@ -18,7 +18,7 @@ var idp;
 
 if (referrer != "" && referrer != undefined) {   
     idp = referrer.split(".")[0].split("//")[1];
-    if (idp != "elpsykongroo" && document.domain != "localhost" && document.domain != "127.0.0.1") {
+    if (idp != "elpsykongroo" && idp != "auth" && document.domain != "localhost" && document.domain != "127.0.0.1") {
         visible.webauthnFormVisible = true
     }
 }
