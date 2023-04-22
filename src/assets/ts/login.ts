@@ -68,7 +68,7 @@ const webauthnRegister = () => {
                 if (response.data == 200) {
                     ElNotification({
                         title: 'Register success',
-                        message: 'have fun but you need to concact admin to verify email before login',
+                        message: 'have fun with login',
                         duration: 5000,
                     })
                 } else {
