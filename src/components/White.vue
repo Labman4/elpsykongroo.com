@@ -31,9 +31,11 @@
     <el-dialog v-model="userForm" title="user">
       <el-button type="primary" @click="addAuthenticator()">add authenticator</el-button>
     <el-form :model="userFormData">
-      <el-form-item label="email" :label-width=visible.userFormLabelWidth>
-      <el-input v-model="userFormData.email" />
-    </el-form-item>
+      <el-form-item label="email" :label-width=visible.userFormLabelWidth :inline="true">
+        <el-input v-model="userFormData.email"/>       
+        <el-button type="primary" @click="validateEmail()">validate</el-button>
+
+      </el-form-item>
     <el-form-item label="nickName" :label-width=visible.userFormLabelWidth>
       <el-input v-model="userFormData.nickName" />
     </el-form-item>
@@ -53,16 +55,34 @@
       </span>
     </template>
   </el-dialog>
+
+  <el-dialog
+    v-model="visible.tmpLogin"
+    title="Warning"
+    width="30%"
+    align-center
+  >
+    <span>send email to add cred for new Device?</span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="visible.tmpLogin = false">Cancel</el-button>
+        <el-button type="primary" @click="tmpLogin()">
+          Confirm
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup >
 import { User } from '@element-plus/icons-vue';
-import { webauthnRegister, webauthnLogin } from '~/assets/ts/login';
+import { webauthnRegister, webauthnLogin, tmpLogin } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
 import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
 import axios from 'axios';
 import * as webauthnJson from "@github/webauthn-json";
+import bcrypt from 'bcryptjs';
 
 let inituserFormData  = () => ({
   email: "",
@@ -100,6 +120,24 @@ const loadUser = () => {
       userForm.value = true
   })
 }
+
+const validateEmail = () => {
+  const option = {
+      baseURL: env.authUrl,
+      url: "/email/verify" ,
+      method: "POST",
+      data: {
+        username: access.username
+      },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        'Authorization': 'Bearer '+ access.access_token
+      },
+  }
+  axios(option).then(function(response){
+  })
+}
+
 
 const addAuthenticator = () => {
   const option = {
@@ -140,7 +178,32 @@ const addAuthenticator = () => {
 }
 
 const updateUser = () =>{
-  
+  userFormData.username = access.username;
+  const option = {
+      baseURL: env.apiUrl,
+      url: "auth/user/patch",
+      method: "PATCH",
+      data: userFormData,
+      headers: {
+      'Authorization': 'Bearer '+ access.access_token
+      },
+    }
+    if (!userFormData.password.startsWith("{bcrypt}")){
+        bcrypt.hash(userFormData.password, 10).then(function(hash) {
+          userFormData.password = '{bcrypt}' + hash ;
+          axios(option).then(function (response) {
+            if(response.status == 200) {
+              userForm.value = false;
+            }
+          })
+        });
+    } else {
+        axios(option).then(function (response) {
+          if(response.status == 200) {
+            userForm.value = false;
+          }
+        })
+    }
 }
 
 </script>

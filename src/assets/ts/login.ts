@@ -146,22 +146,12 @@ async function  webauthnLogin() {
                             } else if (idp != "") {
                                 window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
                             } 
+                        } else if(response.data == 401) { 
+                            ElMessageBox.alert("authentication failed or your account is locked")
                         }
                     });
                 } else {
-                    ElMessageBox.alert("send email to add new cred?")
-                    const option = {
-                        baseURL: env.authUrl,
-                        url: "/welcome",
-                        method: "POST",
-                        data: {
-                            username: access.username,
-                            credential: JSON.stringify(publicKeyCredential),
-                        },
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },   
-                    }
+                    visible.tmpLogin = true
                 }
             }
         })
@@ -176,6 +166,22 @@ const refreshlogin = () => {
     }
 }
 
+const tmpLogin = () => {
+    const option = {
+        baseURL: env.authUrl,
+        url: "/email/tmp",
+        method: "POST",
+        data: {
+            username: access.username,
+        },
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },   
+    }
+    axios(option).then(function(response){
+        console.log(response.data)
+    })
+}
 
 const logout = () => {
     ElMessage('you will logout in 3s');
@@ -246,4 +252,4 @@ const sessionlogout = () => {
         deleteCookie("_oauth2_proxy");
     })    
 }
-export { webauthnLogin, webauthnRegister, refreshlogin, logout }
+export { webauthnLogin, webauthnRegister, refreshlogin, logout, tmpLogin }
