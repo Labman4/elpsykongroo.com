@@ -15,7 +15,7 @@
             <el-option label="Implicit" value="token" />
             <el-option label="Resource Owner Password Credentials" value="password" />
             <el-option label="Client Credentials" value="client_credentials" />
-            <el-option label="pkce" value="pkce" />
+            <!-- <el-option label="pkce" value="pkce" /> -->
             <el-option label="github" value="github" />
           </el-select>
         </el-form-item>
