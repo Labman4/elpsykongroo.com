@@ -42,7 +42,7 @@ async function pkce () {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         }, 
-        // withCredentials: true, 
+        withCredentials: true, 
         maxRedirects: 0    
         // validateStatus: function (status) {
         //   return status >= 200 && status < 500; // default
