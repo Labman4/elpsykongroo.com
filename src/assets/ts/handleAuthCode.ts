@@ -2,6 +2,7 @@ import { access } from "./access";
 import { axios, countDown } from "./axio";
 import { toggleDark } from "~/composables";
 import { env } from "./env";
+import jwt_decode from "jwt-decode";
 
 const callbackUrl = window.location.href;
 const code = new URL(callbackUrl).searchParams.get('code');
@@ -20,8 +21,8 @@ if (code != null && state != null) {
     // const code_verifier =  fs.readFileSync('/codeVerifier.txt', "utf8");
     var codeVerifier;
     codeVerifier = "841aa35355d86c55c1a948831ab90f23f80f71c65a08feb0dc4830a066fd55d36422c464bc58128edecf2f0bf5e0baadfda1168f8cb5883bd8ff6745454afe8b";
-    if ( window.localStorage.getItem("code_verifier") != null) {
-        codeVerifier =  window.localStorage.getItem("code_verifier");
+    if (window.sessionStorage.getItem("code_verifier") != null) {
+        codeVerifier =  window.sessionStorage.getItem("code_verifier");
     }
     const code_verifier = btoa(codeVerifier);
     const authOption = {
@@ -46,7 +47,11 @@ if (code != null && state != null) {
           access.grant_type = "authorization_code";
           access.id_token = response.data.id_token;
           access.update(response.data.access_token, response.data.expires_in);
-          // userInfo();
+          const decoded = jwt_decode(access.id_token);
+          const jwtString = (JSON.stringify(decoded));
+          const jwt = JSON.parse(jwtString);
+          access.permission = jwt["permission"]
+          access.username = jwt["sub"]
           toggleDark();
           countDown();
         }
@@ -95,6 +100,11 @@ if (code != null && state != null) {
           access.update(response.data.at, 1200);
           access.refresh_token = response.data.rt;
           access.id_token = response.data.it;
+          const decoded = jwt_decode(access.id_token);
+          const jwtString = (JSON.stringify(decoded));
+          const jwt = JSON.parse(jwtString);
+          access.permission = jwt["permission"]
+          access.username = jwt["sub"]
           toggleDark();
           countDown();
         }

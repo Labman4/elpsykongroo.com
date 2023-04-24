@@ -30,8 +30,6 @@
          <span v-if="scope.row.locked == 'false'">lock</span>
          <span v-if="scope.row.locked == 'true'">unlock</span>
         </el-button>
-        <el-button size="small" type="primary" @click="addAuthenticator(scope.row)">authenticator</el-button>
-
       </template>
       </el-table-column>
     </el-table>
@@ -85,7 +83,7 @@
       <span class="dialog-footer">
         <el-button @click="userInfoForm = false">Cancel</el-button>
         <el-button type="primary" @click="updateUserInfo()" >Confirm</el-button>
-        <el-button type="primary" @click="resetUseInfo()" >Reset</el-button> 
+        <el-button type="primary" @click="resetUseInfo(userInfoTableData.username)" >Reset</el-button> 
       </span>
     </template>
   </el-dialog>
@@ -154,7 +152,6 @@ import { ElDialog, ElButton, ElTable, ElTableColumn, ElPagination, ElForm, ElFor
 import bcrypt from 'bcryptjs';
 import Group from '~/components/api/Group.vue';
 import Authority from '~/components/api/Authority.vue';
-import * as webauthnJson from "@github/webauthn-json";
 
 const group = ref<InstanceType<typeof Group> | null>(null)
 const authority = ref<InstanceType<typeof Authority> | null>(null)
@@ -383,7 +380,7 @@ const updateUserInfo = () => {
     },
   }
   axios(option).then(function(response){
-    if(response.data == "done") {
+    if(response.status == 200) {
       userInfoForm.value = false;
     }
   })
@@ -434,17 +431,18 @@ const deleteClaim = (rmkey:string) => {
       },
     }
     axios(option).then(function(response){
-      if (response.data == "done") {
+      if (response.status == 200) {
         ElMessageBox.alert("delete success")
       }
     })
   }
 }
 
-const resetUseInfo = () => {
+const resetUseInfo = (username:string) => {
   dynamicClaimForm.value = inituserInfoTable()
   Object.assign(dynamicClaimForm, inituserInfoTable());
   Object.assign(userInfoTableData, inituserInfoTable());
+  userInfoTableData.username = username;
 }
 
 const lockUser = (row: User) => {
@@ -463,48 +461,10 @@ const lockUser = (row: User) => {
     },
   }
   axios(option).then(function (response) {
-    if (response.data == "done") {
+    if (response.status == 200) {
       userList()
     }
   }) 
-}
-
-const addAuthenticator = (row: User) => {
-  const option = {
-    baseURL: env.authUrl,
-    url: "auth/user/authenticator/add",
-    method: "POST",
-    data: {
-      username: row.username
-    },
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      'Authorization': 'Bearer '+ access.access_token
-    },
-  }
-  axios(option).then(async function (response) {
-    const publicKeyCredential = await webauthnJson.create(response.data);
-    const finishOption = {
-        baseURL: env.authUrl,
-        url: "/finishauth",
-        method: "POST",
-        data: {
-            credname: row.username,
-            username: row.username,
-            credential: JSON.stringify(publicKeyCredential),
-        },
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            // "Access-Control-Allow-Origin": "*",
-            // "Access-Control-Allow-Credentials": "true"
-        }, 
-        // withCredentials: true                        
-    }
-    axios(finishOption).then(function (response) { 
-      console.log(response.data);
-    })
-
-  })
 }
 
 const loadUser = () => {
@@ -513,12 +473,15 @@ const loadUser = () => {
   } else if (selectUserName.length > 1) {
       ElMessageBox.alert("dont support batch update")
   } else {
+      userFormData.email = selectUserName[0].email
+      userFormData.nickName = selectUserName[0].nickName
+      userFormData.password = selectUserName[0].password
       userForm.value = true
   }
 }
 
 const updateUser = () =>{
-    userFormData.username = selectUserName[0];
+    userFormData.username = selectUserName[0].username;
     const option = {
       baseURL: env.apiUrl,
       url: "auth/user/patch",
@@ -532,7 +495,7 @@ const updateUser = () =>{
         bcrypt.hash(userFormData.password, 10).then(function(hash) {
           userFormData.password = '{bcrypt}' + hash ;
           axios(option).then(function (response) {
-            if(response.data == "done") {
+            if(response.status == 200) {
               userForm.value = false;
               userList();
             }
@@ -540,7 +503,7 @@ const updateUser = () =>{
         });
     } else {
         axios(option).then(function (response) {
-          if(response.data == "done") {
+          if(response.status == 200) {
             userForm.value = false;
             userList();
           }
@@ -594,7 +557,7 @@ const authorityPageSizeChange = (newPage: number) => {
   authorityPage.pageSize = newPage;
 }
 
-const selectUserName:string[] = [];
+const selectUserName:User[] = [];
 
 const multipleUserSelect = ref<User[]>([])
 
@@ -602,7 +565,7 @@ const handleUserSelectChange = (val: User[]) => {
   multipleUserSelect.value = val ;
   selectUserName.splice(0, selectUserName.length);
   for(let i of multipleUserSelect.value) {
-    selectUserName.push(i.username);
+    selectUserName.push(i);
   }
 }
 

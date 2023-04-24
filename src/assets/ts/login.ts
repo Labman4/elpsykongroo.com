@@ -110,6 +110,9 @@ async function  webauthnLogin() {
                     visible.loading = false;
                     visible.webauthnFormVisible = false;
                 }
+            } else if(response.data == 202) {
+                ElMessageBox.alert("already login with other user")
+                visible.loading = false;
             } else {    
                 var publicKeyCredential;
                 publicKeyCredential = await webauthnJson.get(response.data).catch((error) => {console.log(error)});

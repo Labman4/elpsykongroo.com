@@ -176,7 +176,7 @@ const addGroup = () => {
         },
     }
     axios(option).then(function (response) {
-        if (response.data == "done") {
+        if (response.status == 200) {
             groupList()
             groupForm.value = false
         }
@@ -197,7 +197,7 @@ const deleteGroup = (index: number, row: Group) => {
         },
     }
     axios(option).then(function (response) {
-        if (response.data == "done") {
+        if (response.status == 200) {
             datas.groups.splice(index, 1);
         }
     }) 
@@ -420,7 +420,7 @@ const updateGroup = (groupsIds: string, Ids: string, userOrAuth: boolean) => {
     }
     if (userOrAuth) {
         axios(userOption).then(function (response) {
-            if(response.data == "done") {
+            if(response.status == 200) {
                 groupTransfer.value = false
             }
         }) 
@@ -444,7 +444,7 @@ const updateGroupAuthority = () => {
         },
     }
     axios(Authorityoption).then(function (response) {
-        if(response.data == "done") {
+        if(response.status == 200) {
                 groupTransfer.value = false
         }
     }) 

@@ -45,6 +45,7 @@ import { ElButton, ElDialog, ElForm, ElFormItem, ElSelect, ElOption, ElInput } f
 import { toggleDark } from '~/composables';
 import { code, pkceCode } from '~/assets/ts/handleAuthCode';
 import { visible } from '~/assets/ts/visible';
+import { pkce } from '~/assets/ts/pkce';
 
 const github = () => {
   const githubOption = {
@@ -218,7 +219,7 @@ const oauth = () =>{
   } else if (access.grant_type == "github") {
       github();
   } else if (access.grant_type == "pkce") {
-     pkceCode();
+     pkce();
   } 
 }
 

@@ -203,7 +203,7 @@ const addAuthority = () => {
         },
     }
     axios(option).then(function (response) {
-        if (response.data == "done") {
+        if (response.status = 200) {
             authorityList()
             authorityForm.value = false
         }
@@ -224,7 +224,7 @@ const deleteAuthority = (index: number, row: Authority) => {
         },
     }
     axios(option).then(function (response) {
-        if (response.data == "done") {
+        if (response.status == 200) {
             datas.authorities.splice(index, 1);
         }
     }) 
@@ -256,7 +256,7 @@ const updateAuthority = (authorities: string, ids: string, userOrGroup: boolean)
     }
     if (userOrGroup) {
         axios(userOption).then(function (response) {
-            if (response.data == "done") {
+            if (response.status == 200) {
                 authorityTransfer.value = false
             }
         }) 
@@ -280,7 +280,7 @@ const updateGroupAuthority = (authorities: string, ids: string) => {
         },
     }
     axios(Authorityoption).then(function (response) {
-        if (response.data == "done") {
+        if (response.status == 200) {
             authorityTransfer.value = false
         }
     }) 
