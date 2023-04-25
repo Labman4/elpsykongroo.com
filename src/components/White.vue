@@ -36,16 +36,16 @@
         <el-button type="primary" @click="validateEmail()">validate</el-button>
 
       </el-form-item>
-    <el-form-item label="nickName" :label-width=visible.userFormLabelWidth>
-      <el-input v-model="userFormData.nickName" />
-    </el-form-item>
-    <el-form-item label="password" :label-width=visible.userFormLabelWidth>
-      <el-input v-model="userFormData.password" />
-    </el-form-item>
-    <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
-      <el-input v-model="userFormData.username" />
-    </el-form-item>  -->
-    </el-form>
+      <el-form-item label="nickName" :label-width=visible.userFormLabelWidth>
+        <el-input v-model="userFormData.nickName" />
+      </el-form-item>
+      <el-form-item label="password" :label-width=visible.userFormLabelWidth>
+        <el-input v-model="userFormData.password" />
+      </el-form-item>
+      <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
+        <el-input v-model="userFormData.username" />
+      </el-form-item>  -->
+      </el-form>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="userForm = false">Cancel</el-button>
@@ -116,7 +116,9 @@ const loadUser = () => {
       },
   }
   axios(option).then(function(response){
-      userFormData = response.data
+      userFormData.email = response.data.email
+      userFormData.nickName = response.data.nickName
+      userFormData.password = response.data.passowrd
       userForm.value = true
   })
 }
