@@ -33,7 +33,7 @@
     <el-form :model="userFormData">
       <el-form-item label="email" :label-width=visible.userFormLabelWidth :inline="true">
         <el-input v-model="userFormData.email"/>       
-        <el-button type="primary" @click="validateEmail()">validate</el-button>
+        <el-button type="primary" @click="validateEmail()" v-if="userFormData.email !=null ">validate</el-button>
 
       </el-form-item>
       <el-form-item label="nickName" :label-width=visible.userFormLabelWidth>
@@ -62,7 +62,7 @@
     width="30%"
     align-center
   >
-    <span>send email to add cred for new Device?</span>
+    <span>send email to add authenticator for new Device?</span>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="visible.tmpLogin = false">Cancel</el-button>
