@@ -491,23 +491,27 @@ const updateUser = () =>{
       'Authorization': 'Bearer '+ access.access_token
       },
     }
-    if (!userFormData.password.startsWith("{bcrypt}")){
+    if (userFormData.password == "" || userFormData.password == undefined){
+        axios(option).then(function (response) {
+          if(response.status == 200) {
+            userForm.value = false;
+          }
+        })
+    } else if (userFormData.password.startsWith("{bcrypt}")) {
+        axios(option).then(function (response) {
+          if(response.status == 200) {
+            userForm.value = false;
+          }
+        })
+    } else {
         bcrypt.hash(userFormData.password, 10).then(function(hash) {
           userFormData.password = '{bcrypt}' + hash ;
           axios(option).then(function (response) {
             if(response.status == 200) {
               userForm.value = false;
-              userList();
             }
           })
         });
-    } else {
-        axios(option).then(function (response) {
-          if(response.status == 200) {
-            userForm.value = false;
-            userList();
-          }
-        })
     }
 }
 
