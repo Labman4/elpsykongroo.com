@@ -86,7 +86,7 @@ const finishauth = (publicKeyCredential) => {
         }
     });
 }
-async function  webauthnLogin() {
+async function webauthnLogin() {
     if (access.username.length > 0) {
         visible.loading = true;
         const loginOption = {

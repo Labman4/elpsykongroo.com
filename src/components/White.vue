@@ -45,6 +45,8 @@
       <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
         <el-input v-model="userFormData.username" />
       </el-form-item>  -->
+      <el-button type="primary" @click="u?.loadUserInfo(userr)">userInfo</el-button>
+
       </el-form>
     <template #footer>
       <span class="dialog-footer">
@@ -72,6 +74,9 @@
       </span>
     </template>
   </el-dialog>
+
+  <user ref="u"></user>
+
 </template>
 
 <script lang="ts" setup >
@@ -84,6 +89,30 @@ import axios from 'axios';
 import * as webauthnJson from "@github/webauthn-json";
 import bcrypt from 'bcryptjs';
 import { ElNotification } from 'element-plus';
+import user from '~/components/api/User.vue';
+const u = ref<InstanceType<typeof user> | null>(null)
+
+const userr:User = {
+  id: "",
+  email: "",
+  nickName: "",
+  username: "",
+  password: "",
+  createTime: "",
+  updateTime: "",
+  locked: ""
+}
+
+interface User {
+  id: string
+  email: string
+  nickName: string
+  username: string
+  password: string
+  createTime: string
+  updateTime: string
+  locked: string
+}
 
 let inituserFormData  = () => ({
   email: "",
@@ -120,6 +149,7 @@ const loadUser = () => {
       userFormData.email = response.data.email
       userFormData.nickName = response.data.nickName
       userFormData.password = response.data.passowrd
+      userr.username = response.data.username
       userForm.value = true
   })
 }

@@ -66,7 +66,7 @@
   </el-dialog>
 
 
-  <el-dialog v-model="userInfoForm" title="userInfo">
+  <el-dialog v-model="visible.userInfoForm" title="userInfo">
     <el-button type="" @click="claimForm = true">Add</el-button>
     <el-form ref="userinfoRef" :model="dynamicClaimForm" >
       <el-form-item v-for="(value, key) in dynamicClaimForm"
@@ -81,12 +81,13 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="userInfoForm = false">Cancel</el-button>
+        <el-button @click="visible.userInfoForm = false">Cancel</el-button>
         <el-button type="primary" @click="updateUserInfo()" >Confirm</el-button>
         <el-button type="primary" @click="resetUseInfo(userInfoTableData.username)" >Reset</el-button> 
       </span>
     </template>
   </el-dialog>
+
   <el-dialog v-model="claimForm" title="claim">
     <el-form>
       <el-form-item label="claimName" :label-width="visible.userFormLabelWidth">
@@ -174,7 +175,6 @@ const authorityPage = {
 
 const claimForm = ref(false);
 const userForm = ref(false);
-const userInfoForm = ref(false);
 const userTable = ref(false);
 const authorityTable = ref(false);
 const groupTable = ref(false);
@@ -333,7 +333,7 @@ const loadUserInfo = (row: User) => {
   axios(option).then(function(response){
     if (response.data == null) {
         dynamicClaimForm.value = inituserInfoTable();
-        userInfoForm.value = true;
+        visible.userInfoForm = true;
     } else {
       const userinfo = response.data
       for (var key in userinfo) {
@@ -354,7 +354,7 @@ const loadUserInfo = (row: User) => {
         } 
       }
       dynamicClaimForm.value = userinfo;
-      userInfoForm.value = true;
+      visible.userInfoForm = true;
     }
   })
 }
@@ -381,7 +381,7 @@ const updateUserInfo = () => {
   }
   axios(option).then(function(response){
     if(response.status == 200) {
-      userInfoForm.value = false;
+      visible.userInfoForm = false;
     }
   })
 
@@ -574,7 +574,7 @@ const handleUserSelectChange = (val: User[]) => {
 }
 
 defineExpose({
-  userList
+  userList, loadUserInfo
 })
 
 </script> 
