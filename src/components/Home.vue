@@ -1,7 +1,7 @@
 <template>
     <Clock/>
     <div class="hidden-md-and-up"> 
-        <Dashboard  v-if = "access.expires_in > 0"/>
+        <Dashboard  v-if = "access.permission != undefined && access.permission.includes('admin')"/>
     </div>
 </template>
 

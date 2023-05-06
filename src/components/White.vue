@@ -54,6 +54,9 @@
         <el-button type="primary" @click="updateUser()" >
           Confirm
         </el-button>
+        <el-button type="danger" @click="logout()" >
+          logout
+        </el-button>
       </span>
     </template>
   </el-dialog>
@@ -61,7 +64,7 @@
   <el-dialog
     v-model="visible.tmpLogin"
     title="Warning"
-    width="30%"
+    width="auto"
     align-center
   >
     <span>send email to add authenticator for new Device?</span>
@@ -81,7 +84,7 @@
 
 <script lang="ts" setup >
 import { User } from '@element-plus/icons-vue';
-import { webauthnRegister, webauthnLogin, tmpLogin } from '~/assets/ts/login';
+import { webauthnRegister, webauthnLogin, tmpLogin, logout } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
 import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';

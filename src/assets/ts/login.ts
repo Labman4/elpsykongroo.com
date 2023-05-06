@@ -188,7 +188,7 @@ const tmpLogin = () => {
         },   
     }
     axios(option).then(function(response){
-        console.log(response.data)
+        visible.tmpLogin = false
     })
 }
 
@@ -197,17 +197,17 @@ const logout = () => {
     revoke()
 }
 
-  const revoke = () => {
+const revoke = () => {
     const option = {
         baseURL: env.authUrl,
         url: "/oauth2/revoke",
         method: "POST",
         data: {
-          token: access.access_token,
-          client_id: "pkce"
+            token: access.access_token,
+            client_id: "pkce"
         },
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded"
         }, 
         withCredentials: true                
         // auth : { 
@@ -224,7 +224,7 @@ const logout = () => {
         deleteCookie("_oauth2_proxy");
         oidclogout();
     })   
-  }
+}
 
 const oidclogout = () => {
     const option = {
