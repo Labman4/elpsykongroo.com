@@ -176,6 +176,7 @@ const refreshlogin = () => {
 }
 
 const tmpLogin = () => {
+    visible.tmpLogin = false
     const option = {
         baseURL: env.authUrl,
         url: "/email/tmp",
@@ -187,9 +188,7 @@ const tmpLogin = () => {
             "Content-Type": "application/x-www-form-urlencoded"
         },   
     }
-    axios(option).then(function(response){
-        visible.tmpLogin = false
-    })
+    axios(option);
 }
 
 const logout = () => {
