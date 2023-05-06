@@ -65,8 +65,7 @@
     </template>
   </el-dialog>
 
-
-  <el-dialog v-model="visible.userInfoForm" title="userInfo">
+  <el-dialog v-model="visible.userInfoForm" title="userInfo"  width="80%">
     <el-button type="" @click="claimForm = true">Add</el-button>
     <el-form ref="userinfoRef" :model="dynamicClaimForm" >
       <el-form-item v-for="(value, key) in dynamicClaimForm"

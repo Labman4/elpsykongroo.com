@@ -52,6 +52,7 @@ if (code != null && state != null) {
           const jwt = JSON.parse(jwtString);
           access.permission = jwt["permission"]
           access.username = jwt["sub"]
+          access.email_verified = jwt["email_verified"]
           toggleDark();
           countDown();
         }
@@ -100,11 +101,11 @@ if (code != null && state != null) {
           access.update(response.data.at, 1200);
           access.refresh_token = response.data.rt;
           access.id_token = response.data.it;
+          access.username = response.data.u;
           const decoded = jwt_decode(access.id_token);
           const jwtString = (JSON.stringify(decoded));
           const jwt = JSON.parse(jwtString);
           access.permission = jwt["permission"]
-          access.username = jwt["sub"]
           access.email_verified = jwt["email_verified"]
           toggleDark();
           countDown();

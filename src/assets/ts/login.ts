@@ -243,6 +243,7 @@ const oidclogout = () => {
     }
     axios(option).then(function (response) {
         access.id_token = "";
+        window.location.href = env.redirectUrl
     })    
 }
 

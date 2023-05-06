@@ -28,43 +28,42 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="userForm" title="user">
+    <el-dialog v-model="userForm" title="user" width="80%" >
       <el-button type="primary" @click="addAuthenticator()">add authenticator</el-button>
-    <el-form :model="userFormData">
-      <el-form-item label="email" :label-width=visible.userFormLabelWidth :inline="true">
-        <el-input v-model="userFormData.email"/>       
-        <el-button type="primary" @click="validateEmail()" v-if="!access.email_verified">validate</el-button>
+      <el-form :model="userFormData">
+        <el-form-item label="email" :label-width=visible.userFormLabelWidth :inline="true">
+          <el-input v-model="userFormData.email"/>       
+          <el-button type="primary" @click="validateEmail()" v-if="!access.email_verified && userFormData.email != 'null'">validate</el-button>
 
-      </el-form-item>
-      <el-form-item label="nickName" :label-width=visible.userFormLabelWidth>
-        <el-input v-model="userFormData.nickName" />
-      </el-form-item>
-      <el-form-item label="password" :label-width=visible.userFormLabelWidth>
-        <el-input v-model="userFormData.password" />
-      </el-form-item>
-      <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
-        <el-input v-model="userFormData.username" />
-      </el-form-item>  -->
-      <el-button type="primary" @click="u?.loadUserInfo(userr)">userInfo</el-button>
-
+        </el-form-item>
+        <el-form-item label="nickName" :label-width=visible.userFormLabelWidth>
+          <el-input v-model="userFormData.nickName" />
+        </el-form-item>
+        <el-form-item label="password" :label-width=visible.userFormLabelWidth>
+          <el-input v-model="userFormData.password" />
+        </el-form-item>
+        <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
+          <el-input v-model="userFormData.username" />
+        </el-form-item>  -->
+        <el-button type="primary" @click="u?.loadUserInfo(userr)">userInfo</el-button>
       </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="userForm = false">Cancel</el-button>
-        <el-button type="primary" @click="updateUser()" >
-          Confirm
-        </el-button>
-        <el-button type="danger" @click="logout()" >
-          logout
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="userForm = false">Cancel</el-button>
+          <el-button type="primary" @click="updateUser()" >
+            Confirm
+          </el-button>
+          <el-button type="danger" @click="logout()" >
+            logout
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
 
   <el-dialog
     v-model="visible.tmpLogin"
     title="Warning"
-    width="auto"
+    width="80%"
     align-center
   >
     <span>send email to add authenticator for new Device?</span>
