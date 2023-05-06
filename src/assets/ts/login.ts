@@ -55,7 +55,7 @@ const webauthnRegister = () => {
 const finishauth = (publicKeyCredential) => {
     const option = {
         baseURL: env.authUrl,
-        url: "/finishauth",
+        url: "/finishAuth",
         method: "POST",
         data: {
             credname: access.username,
@@ -113,6 +113,15 @@ async function  webauthnLogin() {
             } else if(response.data == 202) {
                 ElMessageBox.alert("already login with other user")
                 visible.loading = false;
+            } else if(response.data == 400) {
+                ElMessageBox.alert("admin need a authenticator, please check your email to add")
+                visible.loading = false;
+            } else if(response.data == 401) {
+                ElMessageBox.alert("your account may be locked")
+                visible.loading = false;
+            } else if(response.data == 404) {
+                ElMessageBox.alert("the user is not exist")
+                visible.loading = false;
             } else {    
                 var publicKeyCredential;
                 publicKeyCredential = await webauthnJson.get(response.data).catch((error) => {console.log(error)});
@@ -147,7 +156,7 @@ async function  webauthnLogin() {
                                 window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
                             } 
                         } else if(response.data == 401) { 
-                            ElMessageBox.alert("authentication failed or your account is locked")
+                            ElMessageBox.alert("authentication failed")
                         }
                     });
                 } else {
@@ -211,6 +220,7 @@ const logout = () => {
         access.expires_in = 5;
         access.access_token = "";
         access.refresh_token = "";
+        access.username= "";
         deleteCookie("_oauth2_proxy");
         oidclogout();
     })   
