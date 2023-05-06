@@ -53,7 +53,7 @@
           <el-button type="primary" @click="updateUser()" >
             Confirm
           </el-button>
-          <el-button type="danger" @click="logout()" >
+          <el-button type="danger" @click="logoutt()" >
             logout
           </el-button>
         </span>
@@ -252,6 +252,11 @@ const updateUser = () =>{
     }
 }
 
+const logoutt = () => {
+  userForm.value = false
+  access.username = ""
+  logout();
+}
 </script>
 
 <style scoped>
