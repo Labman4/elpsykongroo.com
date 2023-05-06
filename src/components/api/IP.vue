@@ -20,7 +20,7 @@
       @update:current-page="ipPageChange"
       @update:page-size="ipPageSizeChange"/>
   </el-dialog>
-  <el-dialog v-model="ipForm" title="">
+  <el-dialog v-model="ipForm" title="" width="75%">
     <el-form :model="ipFormData">
         <el-form-item label="type" :label-width="visible.ipFormLabelWidth">
         <el-select v-model="ipFormData.black" placeholder="">

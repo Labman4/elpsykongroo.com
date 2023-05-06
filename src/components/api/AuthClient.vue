@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="authClientForm" title="">
+  <el-dialog v-model="authClientForm" title="" width="75%">
     <el-form 
     ref="clientformRef"
     :model="clientForm" 
@@ -113,7 +113,7 @@
       @update:page-size="authClientPageSizeChange"/>
   </el-dialog>
 
-  <el-dialog v-model="authClientRegisterForm" title="">
+  <el-dialog v-model="authClientRegisterForm" title="" width="75%">
     <el-form 
     ref="registerformRef"
     :model="registerForm" 

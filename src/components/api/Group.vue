@@ -17,7 +17,7 @@
         @update:current-page="groupPageChange"
         @update:page-size="groupPageSizeChange"/>
     </el-dialog>
-    <el-dialog v-model="groupForm" title="group">
+    <el-dialog v-model="groupForm" title="group" width="75%">
         <el-form :model="groupFormData">
             <el-form-item label="name" :label-width=visible.groupFormLabelWidth>
                 <el-input v-model="groupFormData.name" />
@@ -32,7 +32,7 @@
     </el-dialog>
 
 
-    <el-dialog v-model="groupTransfer">
+    <el-dialog v-model="groupTransfer" width="75%">
         <el-transfer
             v-model="datas.array"
             style="text-align: left; display: inline-block"

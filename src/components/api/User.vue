@@ -40,7 +40,7 @@
       @update:page-size="userPageSizeChange"/>
   </el-dialog>
 
-  <el-dialog v-model="userForm" title="user">
+  <el-dialog v-model="userForm" title="user" width="75%">
     <el-form :model="userFormData">
       <el-form-item label="email" :label-width=visible.userFormLabelWidth>
       <el-input v-model="userFormData.email" />
@@ -87,7 +87,7 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="claimForm" title="claim">
+  <el-dialog v-model="claimForm" title="claim" width="75%">
     <el-form>
       <el-form-item label="claimName" :label-width="visible.userFormLabelWidth">
         <el-input v-model="claimFormData.key" />

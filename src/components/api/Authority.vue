@@ -17,7 +17,7 @@
         @update:current-page="authorityPageChange"
         @update:page-size="authorityPageSizeChange"/>
     </el-dialog>
-    <el-dialog v-model="authorityForm" title="authority">
+    <el-dialog v-model="authorityForm" title="authority" width="75%">
         <el-form :model="authorityFormData">
             <el-form-item label="name" :label-width=visible.authorityFormLabelWidth>
                 <el-input v-model="authorityFormData.name" />
@@ -32,7 +32,7 @@
         </span>
         </template>
     </el-dialog>
-    <el-dialog v-model="authorityTransfer">
+    <el-dialog v-model="authorityTransfer" width="75%">
         <el-transfer
             style="text-align: left; display: inline-block"
             v-model="datas.array"
