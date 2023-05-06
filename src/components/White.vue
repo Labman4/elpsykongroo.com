@@ -83,6 +83,7 @@ import { env } from '~/assets/ts/env';
 import axios from 'axios';
 import * as webauthnJson from "@github/webauthn-json";
 import bcrypt from 'bcryptjs';
+import { ElNotification } from 'element-plus';
 
 let inituserFormData  = () => ({
   email: "",
@@ -158,7 +159,7 @@ const addAuthenticator = () => {
     const publicKeyCredential = await webauthnJson.create(response.data);
     const finishOption = {
         baseURL: env.authUrl,
-        url: "/finishauth",
+        url: "/finishAuth",
         method: "POST",
         data: {
             credname: access.username,
@@ -173,9 +174,14 @@ const addAuthenticator = () => {
         // withCredentials: true                        
     }
     axios(finishOption).then(function (response) { 
-      console.log(response.data);
-    })
-
+      if (response.data == 200) {
+            ElNotification({
+                title: 'add authenticator success',
+                message: 'have fun',
+                duration: 5000,
+            })
+        }    
+      })
   })
 }
 
