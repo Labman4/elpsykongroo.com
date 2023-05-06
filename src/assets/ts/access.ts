@@ -14,6 +14,7 @@ export const access = reactive(
     code_verifier: "",
     code_challenge: "",
     permission: "",
+    email_verified: false,
     redirect_uri: "",
     update(token:string, expires_in:number) {
       this.access_token = token;

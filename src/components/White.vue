@@ -33,7 +33,7 @@
     <el-form :model="userFormData">
       <el-form-item label="email" :label-width=visible.userFormLabelWidth :inline="true">
         <el-input v-model="userFormData.email"/>       
-        <el-button type="primary" @click="validateEmail()" v-if="userFormData.email.length > 0 ">validate</el-button>
+        <el-button type="primary" @click="validateEmail()" v-if="!access.email_verified">validate</el-button>
 
       </el-form-item>
       <el-form-item label="nickName" :label-width=visible.userFormLabelWidth>

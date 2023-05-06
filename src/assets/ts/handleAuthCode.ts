@@ -105,6 +105,7 @@ if (code != null && state != null) {
           const jwt = JSON.parse(jwtString);
           access.permission = jwt["permission"]
           access.username = jwt["sub"]
+          access.email_verified = jwt["email_verified"]
           toggleDark();
           countDown();
         }
