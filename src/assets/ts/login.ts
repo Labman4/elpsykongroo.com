@@ -7,6 +7,7 @@ import * as webauthnJson from "@github/webauthn-json";
 import { visible } from "~/assets/ts/visible";
 import { ElMessage, ElNotification } from 'element-plus';
 import { deleteCookie, handleCookie, getAccessToken } from './handleAuthCode';
+import { toggleDark } from '~/composables';
 
 
 const callbackUrl = window.location.href;
@@ -226,6 +227,7 @@ const revoke = () => {
 }
 
 const oidclogout = () => {
+    toggleDark();
     const option = {
         baseURL: env.authUrl,
         url: "/connect/logout",
@@ -242,7 +244,6 @@ const oidclogout = () => {
     }
     axios(option).then(function (response) {
         access.id_token = "";
-        window.location.href = env.redirectUrl
     })    
 }
 
