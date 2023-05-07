@@ -14,17 +14,17 @@
           class="el-menu-vertical-demo"
           :collapse="isCollapse" 
           :router="true">
-          <el-sub-menu index="1" class="hidden-md-and-down">
+          <el-sub-menu index="1">
             <template #title>
               <el-icon><Menu/></el-icon>
               <span>Dashboard</span>
             </template>
             <el-menu-item-group>
               <el-menu-item index="1-1" route="kubernetes">dashboard</el-menu-item>
-              <el-menu-item index="1-2" route="linkerd">Linkerd</el-menu-item>
+              <!-- <el-menu-item index="1-2" route="linkerd">Linkerd</el-menu-item> -->
               <el-menu-item index="1-3" route="kibana">Kibana</el-menu-item>
               <el-menu-item index="1-4" route="harbor">Harbor</el-menu-item>
-              <el-menu-item index="1-5" route="minio">Minio</el-menu-item>
+              <!-- <el-menu-item index="1-5" route="minio">Minio</el-menu-item> -->
             </el-menu-item-group>
           </el-sub-menu>
         </el-menu>
