@@ -45,7 +45,7 @@
         <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
           <el-input v-model="userFormData.username" />
         </el-form-item>  -->
-        <el-button type="primary" @click="u?.loadUserInfo(userr)">userInfo</el-button>
+        <el-button type="primary" @click="loadInfo()">userInfo</el-button>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -154,6 +154,10 @@ const loadUser = () => {
       userr.username = response.data.username
       userForm.value = true
   })
+}
+
+const loadInfo = () => {
+  u.value?.loadUserInfo(userr)
 }
 
 const validateEmail = () => {
