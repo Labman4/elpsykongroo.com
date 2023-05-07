@@ -13,5 +13,5 @@ export const visible = reactive(
     "authorityFormLabelWidth": "100px",
     "authClientFormWidth": "100px",
     "authClientRegisterFormWidth": "100px",
-
+    "width": 0
 })

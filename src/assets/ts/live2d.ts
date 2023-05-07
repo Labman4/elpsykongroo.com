@@ -2,6 +2,7 @@ import '~/assets/js/live2d/live2d.min';
 import '~/assets/js/live2d/live2dcubismcore';
 import * as PIXI from 'pixi.js';
 import { Live2DModel } from 'pixi-live2d-display';
+import { visible } from './visible';
 
 
 // import { HitAreaFrames } from 'pixi-live2d-display/extra';
@@ -175,6 +176,7 @@ function resize(models) {
 
 window.onresize = function() {
     resize(models);
+    visible.width = window.innerWidth;
 };
 
 function draggable(model) {
