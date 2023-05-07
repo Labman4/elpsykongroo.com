@@ -6,7 +6,7 @@
       <el-tab-pane label="Blog" name="Blog"></el-tab-pane>
       <el-tab-pane label="Daily" name="Daily"></el-tab-pane>
       <el-tab-pane label="Else" name="Else"></el-tab-pane>
-      <el-tab-pane label="Dashboard" name="Dashboard" v-if = "access.permission != undefined && access.permission.includes('admin')" >
+      <el-tab-pane class="hidden-md-and-up" label="Dashboard" name="Dashboard" v-if = "access.permission != undefined && access.permission.includes('admin')" >
         <Dashboard class="hidden-sm-and-down"/>
         <span class="hidden-md-and-up">not support</span>
       </el-tab-pane>
