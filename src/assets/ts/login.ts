@@ -13,6 +13,7 @@ import { toggleDark } from '~/composables';
 const callbackUrl = window.location.href;
 const redirect = new URL(callbackUrl).searchParams.get('redirect_uri');
 const state = new URL(callbackUrl).searchParams.get('state');
+const username = new URL(callbackUrl).searchParams.get('username');
 
 const referrer = document.referrer;
 var idp;
@@ -26,6 +27,11 @@ if (referrer != "" && referrer != undefined) {
 
 if (redirect != null && state != null) {
     visible.webauthnFormVisible = true
+}
+
+if (username != null && username != undefined) {
+    access.username = username
+    webauthnLogin()
 }
 
 const webauthnRegister = () => {
@@ -87,6 +93,7 @@ const finishauth = (publicKeyCredential) => {
         }
     });
 }
+
 async function webauthnLogin() {
     if (access.username.length > 0) {
         visible.loading = true;
