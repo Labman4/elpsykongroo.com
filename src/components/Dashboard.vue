@@ -19,17 +19,20 @@
               <el-icon><Menu/></el-icon>
               <span>Dashboard</span>
             </template>
-            <el-menu-item-group>
-              <el-menu-item route="kubernetes">dashboard</el-menu-item>
-              <el-menu-item route="kafka">Kafka</el-menu-item>
-              <el-menu-item route="kibana">Kibana</el-menu-item>
-              <el-menu-item route="harbor">Harbor</el-menu-item>
-              <el-menu-item index=1-1 @click="href('linkerd')">Linkerd</el-menu-item>
-              <el-menu-item index=1-2 @click="href('minio')">Minio</el-menu-item>
-              <el-menu-item index=1-3 @click="href('argocd')">Argocd</el-menu-item>
-              <el-menu-item index=1-4 @click="href('vault')">Vault</el-menu-item>
-
-            </el-menu-item-group>
+            <el-sub-menu index="1-1">
+              <template #title><span>inside</span></template>
+                <el-menu-item index="1-1-1" route="kubernetes">Dash</el-menu-item>
+                <el-menu-item index="1-1-2" route="harbor">Harbor</el-menu-item>            
+                <el-menu-item index="1-1-3" route="kafka">Kafka</el-menu-item>
+                <el-menu-item index="1-1-4" route="kibana">Kibana</el-menu-item>
+            </el-sub-menu>
+            <el-sub-menu index="1-2">
+              <template #title><span>outside</span></template>
+              <el-menu-item index="1-2-1" @click="href('linkerd')">Linkerd</el-menu-item>
+              <el-menu-item index="1-2-2" @click="href('minio')">Minio</el-menu-item>
+              <el-menu-item index="1-2-3" @click="href('argocd')">Argocd</el-menu-item>
+              <el-menu-item index="1-2-4" @click="href('vault')">Vault</el-menu-item>
+            </el-sub-menu>
           </el-sub-menu>
         </el-menu>
         <el-menu    

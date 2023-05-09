@@ -5,7 +5,6 @@ import '@vue/runtime-core'
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    Argocd: typeof import('./components/dashboard/Argocd.vue')['default']
     AuthClient: typeof import('./components/api/AuthClient.vue')['default']
     Authority: typeof import('./components/api/Authority.vue')['default']
     Bootstrap: typeof import('./components/layouts/Bootstrap.vue')['default']
@@ -45,11 +44,10 @@ declare module '@vue/runtime-core' {
     Harbor: typeof import('./components/dashboard/Harbor.vue')['default']
     Home: typeof import('./components/Home.vue')['default']
     IP: typeof import('./components/api/IP.vue')['default']
+    Kafka: typeof import('./components/dashboard/Kafka.vue')['default']
     Kibana: typeof import('./components/dashboard/Kibana.vue')['default']
     Kubernetes: typeof import('./components/dashboard/Kubernetes.vue')['default']
-    Linkerd: typeof import('./components/dashboard/Linkerd.vue')['default']
     Loading: typeof import('element-plus/es')['ElLoadingDirective']
-    Minio: typeof import('./components/dashboard/Minio.vue')['default']
     Record: typeof import('./components/api/Record.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
