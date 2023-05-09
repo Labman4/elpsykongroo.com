@@ -7,11 +7,6 @@ const dashboard = {
             component: () => import('../components/dashboard/Kubernetes.vue'), 
         },
         {
-            path: "linkerd",
-            name: "linkerd",
-            component: () => import('../components/dashboard/Linkerd.vue'), 
-        },
-        {
             path: "kibana",
             name: "kibana",
             component: () => import('../components/dashboard/Kibana.vue'),
@@ -22,9 +17,9 @@ const dashboard = {
             component: () => import('../components/dashboard/Harbor.vue'),
         },
         {
-            path: "minio",
-            name: "minio",
-            component: () => import('../components/dashboard/Minio.vue'),
+            path: "kafka",
+            name: "kafka",
+            component: () => import('../components/dashboard/Kafka.vue'),
         }
     ]   
 }
