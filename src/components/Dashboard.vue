@@ -45,12 +45,12 @@
               <el-menu-item index="2-2-2" @click="openRecordDesc()" >Desc</el-menu-item>
             </el-sub-menu>
             <el-sub-menu index="2-3" >
-              <template #title><span>auth</span></template>
+              <template #title><span>oauth2</span></template>
               <el-menu-item index="2-3-1" @click="openAuthClient()" >client</el-menu-item>
               <el-menu-item index="2-3-2" @click="openAuthClientRegister()" >register</el-menu-item>
             </el-sub-menu>
             <el-sub-menu index="2-4" >
-              <template #title><span>permissions</span></template>
+              <template #title><span>permission</span></template>
               <el-menu-item index="2-4-1" @click="openUser()">user</el-menu-item>
               <el-menu-item index="2-4-2" @click="openGroup()">group</el-menu-item>
               <el-menu-item index="2-4-3" @click="openAuthority()">authority</el-menu-item>
