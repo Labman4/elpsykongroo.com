@@ -152,7 +152,7 @@ async function webauthnLogin() {
                             visible.loading = false;
                             visible.webauthnFormVisible = false
                             console.log(idp)
-                            if (idp == undefined || idp == "elpsykongroo") {
+                            if (idp == undefined || idp == "elpsykongroo" || idp == "labroom") {
                                 if (document.domain != "localhost") {
                                     window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
                                 } else {
