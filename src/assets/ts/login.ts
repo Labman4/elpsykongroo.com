@@ -165,6 +165,8 @@ async function webauthnLogin() {
                             } 
                         } else if(response.data == 401) { 
                             ElMessageBox.alert("authentication failed")
+                        } else {
+                            window.location.href = response.data;
                         }
                     });
                 } else {
