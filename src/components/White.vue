@@ -53,7 +53,7 @@
           <el-button type="primary" @click="updateUser()" >
             Confirm
           </el-button>
-          <el-button type="danger" @click="logoutt()" >
+          <el-button type="danger" @click="logout()" >
             logout
           </el-button>
         </span>
