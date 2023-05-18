@@ -160,9 +160,10 @@ async function webauthnLogin() {
                                 }                          
                             } else if (redirect != null && state != null) {
                                 window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
-                            } else if (idp != "") {
-                                window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                            } 
+                            }
+                            // else if (idp != "") {
+                            //     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
+                            // } 
                         } else if(response.data == 401) { 
                             ElMessageBox.alert("authentication failed")
                         } else {
