@@ -301,10 +301,10 @@ const loadAuthorities = (row: User) => {
   Ids.value = row.id
   const option = {
     baseURL: env.apiUrl,
-    url: "auth/authority/user/list",
+    url: "auth/user/authority/list",
     method: "GET",
     params: {
-      id: row.id
+      username: row.username
     },
     headers: {
     'Authorization': 'Bearer '+ access.access_token
