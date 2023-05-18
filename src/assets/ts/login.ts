@@ -233,8 +233,7 @@ async function revoke() {
         access.expires_in = 5;
         access.access_token = "";
         access.refresh_token = "";
-        access.username= "";
-        await deleteCookie("_oauth2_proxy");
+        access.sub= "";
     })   
 }
 

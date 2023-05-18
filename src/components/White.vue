@@ -1,6 +1,6 @@
 <template>
-    <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.username == '' ">  <User /></el-icon>
-    <el-icon class="whiteMode" v-if="access.username != '' " @click="loadUser()"> {{ access.username }} </el-icon>
+    <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.sub == '' ">  <User /></el-icon>
+    <el-icon class="whiteMode" v-if="access.sub != '' " @click="loadUser()"> {{ access.sub }} </el-icon>
 
     <el-dialog v-model="visible.webauthnFormVisible" width="65%">
       <el-form 
@@ -141,7 +141,7 @@ const svg = `
 const loadUser = () => {
   const option = {
       baseURL: env.apiUrl,
-      url: "auth/user/" + access.username,
+      url: "auth/user/" + access.sub,
       method: "GET",
       headers: {
       'Authorization': 'Bearer '+ access.access_token
@@ -166,7 +166,7 @@ const validateEmail = () => {
       url: "/email/verify" ,
       method: "POST",
       data: {
-        username: access.username
+        username: access.sub
       },
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -184,7 +184,7 @@ const addAuthenticator = () => {
     url: "authenticator/add",
     method: "POST",
     data: {
-      username: access.username
+      username: access.sub
     },
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -198,8 +198,8 @@ const addAuthenticator = () => {
         url: "/finishAuth",
         method: "POST",
         data: {
-            credname: access.username,
-            username: access.username,
+            credname: access.sub,
+            username: access.sub,
             credential: JSON.stringify(publicKeyCredential),
         },
         headers: {
@@ -222,7 +222,7 @@ const addAuthenticator = () => {
 }
 
 const updateUser = () =>{
-  userFormData.username = access.username;
+  userFormData.username = access.sub;
   const option = {
       baseURL: env.apiUrl,
       url: "auth/user/patch",
@@ -256,11 +256,6 @@ const updateUser = () =>{
     }
 }
 
-const logoutt = () => {
-  userForm.value = false
-  access.username = ""
-  logout();
-}
 </script>
 
 <style scoped>

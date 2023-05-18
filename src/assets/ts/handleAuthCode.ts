@@ -51,7 +51,7 @@ if (code != null && state != null) {
           const jwtString = (JSON.stringify(decoded));
           const jwt = JSON.parse(jwtString);
           access.permission = jwt["permission"]
-          access.username = jwt["sub"]
+          access.sub = jwt["sub"]
           access.email_verified = jwt["email_verified"]
           toggleDark();
           countDown();
@@ -101,7 +101,7 @@ async function deleteCookie(name) {
           access.update(response.data.at, 1200);
           access.refresh_token = response.data.rt;
           access.id_token = response.data.it;
-          access.username = response.data.u;
+          access.sub = response.data.u;
           const decoded = jwt_decode(access.id_token);
           const jwtString = (JSON.stringify(decoded));
           const jwt = JSON.parse(jwtString);
