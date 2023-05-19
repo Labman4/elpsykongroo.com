@@ -213,7 +213,7 @@ const addAuthenticator = () => {
       if (response.data == 200) {
             ElNotification({
                 title: 'add authenticator success',
-                message: 'have fun',
+                message: 'please logout and login again',
                 duration: 5000,
             })
         }    
