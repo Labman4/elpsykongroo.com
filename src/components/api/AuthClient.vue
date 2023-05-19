@@ -462,14 +462,14 @@ const tokenSettings = [
         {
           value: "value",
           label: "value",
-          children: [
-            {
-              value: "self-contained",
-              label: "self-contained"
-            },
+          children: [       
             {
               value: "reference",
               label: "reference"
+            },
+            {
+              value: "self-contained",
+              label: "self-contained"
             }
           ]
         },
@@ -478,14 +478,14 @@ const tokenSettings = [
     {
       value: "settings.token.reuse-refresh-tokens",
       label: "reuseRefreshTokens",
-      children: [
-        {
-          value: "reuse-refresh-tokens-true",
-          label: "true",
-        },
+      children: [    
         {
           value: "reuse-refresh-tokens-false",
           label: "false",
+        },
+        {
+          value: "reuse-refresh-tokens-true",
+          label: "true",
         }
       ]
     },
@@ -524,12 +524,12 @@ const clientSettings = [
     children: [    
       {
         value: "require-proof-key-true",
-        label: "true",
+        label: "false",
       },
       {
         value: "require-proof-key-false",
-        label: "false",
-      },
+        label: "true",
+      }
     ]
   },  
   {
@@ -577,28 +577,28 @@ const clientSettings = [
   {
     value: "settings.client.jwk-set-url",
     label: "jwkSetUrl",
-    children: [
-      {
-        value: "https://auth.elpsykongroo.com",
-        label: "https://auth.elpsykongroo.com",
-      },
+    children: [ 
       {
         value: "https://auth-dev.elpsykongroo.com",
         label: "https://auth-dev.elpsykongroo.com",
+      },
+      {
+        value: "https://auth.elpsykongroo.com",
+        label: "https://auth.elpsykongroo.com",
       }
     ]
   },
   {
     value: "settings.client.require-authorization-consent",
     label: "Consent",
-    children: [
-      {
-        value: "require-authorization-consent-true",
-        label: "true",
-      },
+    children: [ 
       {
         value: "require-authorization-consent-false",
         label: "false",
+      },
+      {
+        value: "require-authorization-consent-true",
+        label: "true",
       }
     ]
   },
