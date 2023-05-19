@@ -315,7 +315,7 @@ const loadAuthorities = (row: User) => {
   })
 }
 
-const loadUserInfo = (row: User) => {
+async function loadUserInfo (row: User) {
   Object.assign(dynamicClaimForm, inituserInfoTable())
   userInfoTableData.username = row.username
   const option = {

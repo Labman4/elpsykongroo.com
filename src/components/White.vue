@@ -156,8 +156,8 @@ const loadUser = () => {
   })
 }
 
-const loadInfo = () => {
-  u.value?.loadUserInfo(userr)
+async function loadInfo () {
+  await u.value?.loadUserInfo(userr)
 }
 
 const validateEmail = () => {
