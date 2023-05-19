@@ -110,7 +110,7 @@ async function deleteCookie(name) {
           toggleDark();
           countDown();
         }
-      })
+      }).catch()
     }
   }
 
