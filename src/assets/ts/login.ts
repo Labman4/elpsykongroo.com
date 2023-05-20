@@ -206,9 +206,9 @@ async function logout() {
     ElMessage('you will logout in 3s');
     await revoke()
     oidclogout();
+    toggleDark();
     access.id_token = ""
     window.location.href = env.redirectUrl
-    toggleDark();
 }
 
 async function revoke() {

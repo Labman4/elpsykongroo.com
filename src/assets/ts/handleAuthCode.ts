@@ -87,8 +87,8 @@ async function deleteCookie(name) {
       const tokenOption = {
         baseURL: env.authUrl,
         url: "/access",
-        method: "GET",
-        params: {
+        method: "POST",
+        data: {
           key: key
         },
         headers: {
