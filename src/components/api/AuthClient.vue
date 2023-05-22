@@ -524,11 +524,11 @@ const clientSettings = [
     children: [    
       {
         value: "require-proof-key-true",
-        label: "false",
+        label: "true",
       },
       {
         value: "require-proof-key-false",
-        label: "true",
+        label: "false",
       }
     ]
   },  
