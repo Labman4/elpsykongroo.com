@@ -30,6 +30,7 @@ if (redirect != null && state != null) {
 }
 
 if (username != null && username != undefined) {
+    access.sub = ""
     access.username = username
     webauthnLogin()
 }

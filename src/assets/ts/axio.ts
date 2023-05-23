@@ -23,10 +23,10 @@ axios.interceptors.response.use(function (response) {
     return response;
   }, function (error) {
    
-    // if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
-    //   console.log(error);
-    //   // window.location.href = error.response.request.responseURL;       
-    // } 
+    if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
+      console.log("cors error");
+      // window.location.href = error.response.request.responseURL;       
+    } 
     if (error.response.status === 401) {
       if (error.response.data === 'no access') {
         ElMessageBox.alert("no access, please ensure and retry")
