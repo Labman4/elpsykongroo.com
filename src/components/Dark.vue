@@ -1,6 +1,6 @@
 <template>
     <el-button id="darkMode" size=small @click="visible.authFormVisible = true" 
-    v-if = "access.expires_in == 0"
+    v-if = "1 == 1"
     >
     </el-button>
     <el-dialog v-model="visible.authFormVisible" width="65%">
@@ -17,6 +17,8 @@
             <el-option label="Client Credentials" value="client_credentials" />
             <!-- <el-option label="pkce" value="pkce" /> -->
             <el-option label="github" value="github" />
+            <el-option label="info" value="info" />
+
           </el-select>
         </el-form-item>
         <el-form-item label="client" label-width="auto"  v-if = "access.grant_type != 'authorization_code'">
@@ -220,7 +222,9 @@ const oauth = () =>{
       github();
   } else if (access.grant_type == "pkce") {
      pkce();
-  } 
+  } else if (access.grant_type == "info") {
+    userInfo()
+  }
 }
 
 </script>
