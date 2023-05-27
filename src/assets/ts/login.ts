@@ -217,7 +217,7 @@ function revoke() {
         method: "POST",
         data: {
             token: access.access_token,
-            client_id: "pkce"
+            // client_id: "pkce"
         },
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
