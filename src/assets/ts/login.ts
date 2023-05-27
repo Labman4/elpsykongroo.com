@@ -208,8 +208,6 @@ async function logout() {
     toggleDark();
     access.grant_type = "";
     access.expires_in = 5;
-    access.access_token = "";
-    access.refresh_token = "";
     access.sub = "";
     await oidclogout();
     access.id_token = "";
@@ -252,7 +250,9 @@ async function revoke() {
           }, 
         withCredentials: true                
     }
-    await revoke()
+    await revoke();
+    access.access_token = "";
+    access.refresh_token = "";
     axios(option);
 }
 
