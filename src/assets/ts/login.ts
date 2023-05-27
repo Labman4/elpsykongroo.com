@@ -205,9 +205,8 @@ const tmpLogin = () => {
 
 async function logout() {
     ElMessage('you will logout in 3s');
-    await revoke()
-    oidclogout();
     toggleDark();
+    await revoke()
     access.id_token = ""
     window.location.href = env.redirectUrl
 }
@@ -236,10 +235,11 @@ async function revoke() {
         access.access_token = "";
         access.refresh_token = "";
         access.sub = "";
+        await oidclogout();
     })   
 }
 
- function oidclogout() {
+ async function oidclogout() {
     const option = {
         baseURL: env.authUrl,
         url: "/connect/logout",
