@@ -107,6 +107,7 @@ async function deleteCookie(name) {
           const jwt = JSON.parse(jwtString);
           access.permission = jwt["permission"]
           access.email_verified = jwt["email_verified"]
+          access.client_id = jwt["azp"]
           toggleDark();
           countDown();
         }

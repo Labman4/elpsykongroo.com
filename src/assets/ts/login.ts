@@ -216,14 +216,14 @@ async function logout() {
     window.location.href = env.redirectUrl
 }
 
-function revoke() {
+async function revoke() {
     const option = {
         baseURL: env.authUrl,
         url: "/oauth2/revoke",
         method: "POST",
         data: {
             token: access.access_token,
-            // client_id: "pkce"
+            client_id: access.client_id
         },
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
@@ -252,8 +252,8 @@ function revoke() {
           }, 
         withCredentials: true                
     }
-    // revoke();
-    axios(option).catch(error => console.log("bye"))
+    await revoke()
+    axios(option);
 }
 
 const sessionlogout = () => {

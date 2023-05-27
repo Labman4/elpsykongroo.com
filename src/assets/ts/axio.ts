@@ -36,6 +36,8 @@ axios.interceptors.response.use(function (response) {
       } else {
         refreshToken();   
       }
+    } else {
+      console.error(error);
     }
     return Promise.reject(error);
   });
