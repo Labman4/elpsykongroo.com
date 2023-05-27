@@ -252,7 +252,7 @@ function revoke() {
           }, 
         withCredentials: true                
     }
-    revoke();
+    // revoke();
     axios(option).catch(error => console.log("bye"))
 }
 
