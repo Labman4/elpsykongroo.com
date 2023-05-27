@@ -123,7 +123,7 @@ async function webauthnLogin() {
                 ElMessageBox.alert("already login with other user")
                 visible.loading = false;
             } else if(response.data == 400) {
-                ElMessageBox.alert("admin need a authenticator, please check your email to add")
+                ElMessageBox.alert("you need a authenticator, please check your email to add")
                 visible.loading = false;
             } else if(response.data == 401) {
                 ElMessageBox.alert("your account may be locked")
@@ -203,10 +203,17 @@ const tmpLogin = () => {
     axios(option);
 }
 
-function logout() {
+async function logout() {
     ElMessage('you will logout in 3s');
     toggleDark();
     revoke();
+    access.grant_type = "";
+    access.expires_in = 5;
+    access.access_token = "";
+    access.refresh_token = "";
+    access.sub = "";
+    await oidclogout();
+    access.id_token = "";
     window.location.href = env.redirectUrl
 }
 
@@ -228,15 +235,7 @@ function revoke() {
         //     password : "" 
         // } ,      
     }
-    axios(option).then(async function (response) {
-        access.grant_type = "";
-        access.expires_in = 5;
-        access.access_token = "";
-        access.refresh_token = "";
-        access.sub = "";
-        await oidclogout();
-        access.id_token = "";
-    })   
+    axios(option);
 }
 
  async function oidclogout() {
