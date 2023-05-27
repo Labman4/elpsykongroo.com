@@ -206,7 +206,6 @@ const tmpLogin = () => {
 async function logout() {
     ElMessage('you will logout in 3s');
     toggleDark();
-    revoke();
     access.grant_type = "";
     access.expires_in = 5;
     access.access_token = "";
@@ -253,6 +252,7 @@ function revoke() {
           }, 
         withCredentials: true                
     }
+    revoke();
     axios(option).catch(error => console.log("bye"))
 }
 
