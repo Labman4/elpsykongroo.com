@@ -207,7 +207,6 @@ function logout() {
     ElMessage('you will logout in 3s');
     toggleDark();
     revoke();
-    access.id_token = ""
     window.location.href = env.redirectUrl
 }
 
@@ -236,6 +235,7 @@ function revoke() {
         access.refresh_token = "";
         access.sub = "";
         await oidclogout();
+        access.id_token = "";
     })   
 }
 
