@@ -203,15 +203,15 @@ const tmpLogin = () => {
     axios(option);
 }
 
-async function logout() {
+function logout() {
     ElMessage('you will logout in 3s');
     toggleDark();
-    await revoke()
+    revoke();
     access.id_token = ""
     window.location.href = env.redirectUrl
 }
 
-async function revoke() {
+function revoke() {
     const option = {
         baseURL: env.authUrl,
         url: "/oauth2/revoke",
