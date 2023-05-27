@@ -53,10 +53,7 @@ axios.interceptors.response.use(function (response) {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded"
         },  
-        auth : { 
-          username : access.client_id , 
-          password : access.client_secret 
-        } ,           
+        withCredentials: true           
       }
       axios(refreshOption).then(function (response) {
         if(response.data.access_token != "") {
