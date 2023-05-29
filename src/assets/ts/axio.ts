@@ -22,7 +22,9 @@ axios.interceptors.response.use(function (response) {
     // }
     return response;
   }, function (error) {
-   
+    if (axios.isCancel(error)) {
+      console.log('Request canceled', error.message);
+    } 
     if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
       console.log("cors error");
       // window.location.href = error.response.request.responseURL;       
