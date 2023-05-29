@@ -203,18 +203,21 @@ const tmpLogin = () => {
     axios(option);
 }
 
-async function logout() {
+ function logout() {
     ElMessage('you will logout in 3s');
     toggleDark();
     access.grant_type = "";
     access.expires_in = 5;
     access.sub = "";
-    await oidclogout();
+    oidclogout();
+    revoke();
     access.id_token = "";
+    access.access_token = "";
+    access.refresh_token = "";
     window.location.href = env.redirectUrl
 }
 
-async function revoke() {
+ function revoke() {
     const option = {
         baseURL: env.authUrl,
         url: "/oauth2/revoke",
@@ -235,7 +238,7 @@ async function revoke() {
     axios(option);
 }
 
- async function oidclogout() {
+ function oidclogout() {
     const option = {
         baseURL: env.authUrl,
         url: "/connect/logout",
@@ -250,11 +253,8 @@ async function revoke() {
           }, 
         withCredentials: true                
     }
-    await revoke();
-    access.access_token = "";
-    access.refresh_token = "";
     axios(option);
-}
+ }
 
 const sessionlogout = () => {
     const option = {
