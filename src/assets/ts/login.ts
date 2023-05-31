@@ -54,6 +54,11 @@ const webauthnRegister = () => {
             // withCredentials: true                        
         }
         axios(registerOption).then(async function (response) {
+            if (response.data == 409) {
+                ElMessageBox.alert("the user already exist")
+                visible.loading = false; 
+                return;
+            }
             const publicKeyCredential = await webauthnJson.create(response.data);
             finishauth(publicKeyCredential)
         });
