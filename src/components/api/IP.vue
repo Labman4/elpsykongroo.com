@@ -82,7 +82,7 @@ function addIp() {
     ipForm.value = false ;
     const option = {
     baseURL: env.apiUrl,
-    url: "/ip/manage/add",
+    url: "/ip",
     method: "PUT",
     params: {
       black: ipFormData.black,
@@ -104,7 +104,7 @@ const ipList = () => {
   ipTable.value = true;
   const option = {
     baseURL: env.apiUrl,
-    url: "/ip/manage/list",
+    url: "/ip",
     method: "GET",
     params: {
       black: "",
@@ -123,7 +123,7 @@ const ipList = () => {
 const DeleteIP = (index: number, row: IP) => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/ip/manage/patch",
+    url: "/ip",
     method: "PATCH",
     params: {
       "address": "",

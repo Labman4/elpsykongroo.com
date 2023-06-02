@@ -69,12 +69,8 @@ const selectRecord:string[] = [];
 const DeleteSelect= () => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/record/delete",
+    url: "/record" + selectRecord.toString(),
     method: "DELETE",
-    params: {
-      "sourceIP": "",
-      "id": selectRecord.toString(),
-    },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
     },
@@ -117,12 +113,8 @@ const DeleteSelect= () => {
 const DeleteRecord = (index: number, row: Record) => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/record/delete",
+    url: "/record/" + row.id,
     method: "DELETE",
-    params: {
-      "sourceIP": "",
-      "id": row.id,
-    },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
     },
@@ -145,7 +137,7 @@ function recordList(order:string) {
   recordPage.order = order;
   const option = {
     baseURL: env.apiUrl,
-    url: "/record/access",
+    url: "/record",
     method: "GET",
     params: {
       "pageNumber": recordPage.pageNumber-1,
@@ -183,7 +175,7 @@ const search = ref('')
 function filterByParam() {
   const option = {
     baseURL: env.apiUrl,
-    url: "/record/filter",
+    url: "/record",
     method: "POST",
     data: {
       "param": search.value,
