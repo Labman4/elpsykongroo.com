@@ -64,7 +64,7 @@
             </el-sub-menu>
           </el-sub-menu>
           <el-menu-item index="3" >
-            <el-icon @click="upload()"><UploadFilled /></el-icon>
+            <el-icon @click="openStorage()"><UploadFilled /></el-icon>
             <template #title >
               storage
             </template>
@@ -85,30 +85,13 @@
       <User ref="user"></User>
       <Group ref="group"></Group>
       <Authority ref="authority"></Authority>
+      <Storage ref="storage"></Storage>
       <el-container>
         <el-main>
           <router-view ref="iframeView"/>
         </el-main>
       </el-container>
     </el-container>
-
-    <!-- <el-upload
-    v-model:file-list="fileList"
-    class="upload-demo"
-    action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-    multiple
-    :on-preview="handlePreview"
-    :on-remove="handleRemove"
-    :before-remove="beforeRemove"
-    :limit="3"
-    :on-exceed="handleExceed"
-  >
-    <template #tip>
-      <div class="el-upload__tip">
-        jpg/png files with a size less than 500KB.
-      </div>
-    </template>
-  </el-upload> -->
   </template>
   
 <script lang="ts" setup>
@@ -122,8 +105,10 @@ import AuthClient from '~/components/api/AuthClient.vue';
 import User from '~/components/api/User.vue';
 import Group from '~/components/api/Group.vue';
 import Authority from '~/components/api/Authority.vue';
+import Storage from '~/components/api/Storage.vue';
 import { logout } from '~/assets/ts/login';
 
+const storage = ref<InstanceType<typeof Storage> | null>(null)
 const ip = ref<InstanceType<typeof IP> | null>(null)
 const record = ref<InstanceType<typeof Record> | null>(null)
 const authClient = ref<InstanceType<typeof AuthClient> | null>(null)
@@ -165,9 +150,8 @@ const openAuthority = () => {
 
 let isCollapse = ref(true)
 
-const upload = () => {
-
-
+const openStorage = () => {
+  storage.value?.listObject();
 }
 const expand = () => {
   isCollapse.value = false;
