@@ -106,7 +106,7 @@ import jwt_decode from "jwt-decode";
 
 let qrcodeUrl = ref("")
 let codeVerifier
-const timeCount= ref(0);
+let checkId;
 
 const qrcodeLogin = () => {
     visible.qrcode = true
@@ -119,7 +119,7 @@ const qrcodeLogin = () => {
         },   
     }
     axios(option).then(async function(response){
-      codeVerifier = response.data
+      codeVerifier = response.data.split("&")[0]
       qrcodeUrl.value = env.authUrl + "/login/qrcode?text=" + response.data
       check()
     });
@@ -127,11 +127,16 @@ const qrcodeLogin = () => {
 
 
 const check = () => {
-  timeCount.value = window.setInterval(() => {
+  var count = 0;
+  checkId = window.setInterval(() => {
+    count ++
     if(qrcodeCheck()) {
-      clearInterval(timeCount.value);
+      clearInterval(checkId);
     }
-  }, 10000)
+    if(count == 40) {
+      clearInterval(checkId);
+    }
+  }, 15000)
 }
 
 const qrcodeCheck = () => {
