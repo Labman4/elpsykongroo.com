@@ -120,7 +120,7 @@ const qrcodeLogin = () => {
     }
     axios(option).then(async function(response){
       codeVerifier = response.data.split("*")[0]
-      qrcodeUrl.value = env.authUrl + "/login/qrcode?text=" + codeVerifier
+      qrcodeUrl.value = env.authUrl + "/login/qrcode?text=" + response.data
       check()
     });
 }
