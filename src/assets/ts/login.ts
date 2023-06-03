@@ -8,7 +8,71 @@ import { visible } from "~/assets/ts/visible";
 import { ElMessage, ElNotification } from 'element-plus';
 import { deleteCookie, handleCookie, getAccessToken } from './handleAuthCode';
 import { toggleDark } from '~/composables';
+import jwt_decode from "jwt-decode";
 
+let checkId;
+
+const qrcodeLogin = () => {
+    visible.qrcode = true
+    const option = {
+        baseURL: env.authUrl,
+        url: "/qrcode",
+        method: "GET",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },   
+    }
+    axios(option).then(async function(response){
+      access.code_verifier = response.data.split("*")[0]
+      access.qrcodeUrl = env.authUrl + "/login/qrcode?text=" + response.data
+      check();
+    });
+}
+
+const check = () => {
+  var count = 0;
+  checkId = window.setInterval(() => {
+    count ++
+    if(qrcodeCheck()) {
+      clearInterval(checkId);
+    }
+    if(count == 20) {
+      clearInterval(checkId);
+    }
+  }, 30000)
+}
+
+const qrcodeCheck = () => {
+    const option = {
+        baseURL: env.authUrl,
+        url: "/token/qrcode",
+        method: "POST",
+        data: {
+          "text": access.code_verifier
+        },
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },   
+    }
+    axios(option).then(async function(response){
+      if (response.data.length > 0) {
+        var tokens = response.data.split("&&")
+        access.access_token = tokens[0];
+        access.id_token = tokens[1];
+        const decoded = jwt_decode(access.id_token);
+        const jwtString = (JSON.stringify(decoded));
+        const jwt = JSON.parse(jwtString);
+        access.permission = jwt["permission"]
+        access.sub = jwt["sub"]
+        access.email_verified = jwt["email_verified"]
+        access.client_id = jwt["azp"]
+        visible.qrcode = false
+      }
+    });
+    if (access.sub != "") {
+      return true
+    }
+}
 
 const callbackUrl = window.location.href;
 const redirect = new URL(callbackUrl).searchParams.get('redirect_uri');
@@ -281,4 +345,4 @@ const sessionlogout = () => {
         deleteCookie("_oauth2_proxy");
     })    
 }
-export { webauthnLogin, webauthnRegister, refreshlogin, logout, tmpLogin }
+export { webauthnLogin, webauthnRegister, refreshlogin, logout, tmpLogin, qrcodeLogin, qrcodeCheck }

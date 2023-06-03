@@ -79,11 +79,10 @@
 
   <el-dialog 
     v-model="visible.qrcode"
-    title="Warning"
     width="50%"
     align-center>
 
-    <QrcodeVue :value="qrcodeUrl" :size="200" level="H" />  
+    <QrcodeVue :value=access.qrcodeUrl :size="200" level="H" />  
   
   </el-dialog>
   <user ref="u"></user>
@@ -92,7 +91,7 @@
 
 <script lang="ts" setup >
 import { User, Iphone } from '@element-plus/icons-vue';
-import { webauthnRegister, webauthnLogin, tmpLogin, logout } from '~/assets/ts/login';
+import { webauthnRegister, webauthnLogin, tmpLogin, logout, qrcodeLogin } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
 import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
@@ -102,75 +101,6 @@ import bcrypt from 'bcryptjs';
 import { ElNotification } from 'element-plus';
 import user from '~/components/api/User.vue';
 import QrcodeVue from "qrcode.vue";
-import jwt_decode from "jwt-decode";
-
-let qrcodeUrl = ref("")
-let codeVerifier
-let checkId;
-
-const qrcodeLogin = () => {
-    visible.qrcode = true
-    const option = {
-        baseURL: env.authUrl,
-        url: "/qrcode",
-        method: "GET",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },   
-    }
-    axios(option).then(async function(response){
-      codeVerifier = response.data.split("*")[0]
-      qrcodeUrl.value = env.authUrl + "/login/qrcode?text=" + response.data
-      check()
-    });
-}
-
-const check = () => {
-  var count = 0;
-  checkId = window.setInterval(() => {
-    count ++
-    if(qrcodeCheck()) {
-      clearInterval(checkId);
-    }
-    if(count == 40) {
-      clearInterval(checkId);
-    }
-    console.log(count)
-  }, 15000)
-}
-
-const qrcodeCheck = () => {
-    const option = {
-        baseURL: env.authUrl,
-        url: "/token/qrcode",
-        method: "POST",
-        data: {
-          "text": codeVerifier
-        },
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },   
-    }
-    axios(option).then(async function(response){
-      if (response.data.length > 0) {
-        var tokens = response.data.split("&&")
-        access.access_token = tokens[0];
-        access.id_token = tokens[1];
-        const decoded = jwt_decode(access.id_token);
-        const jwtString = (JSON.stringify(decoded));
-        const jwt = JSON.parse(jwtString);
-        access.permission = jwt["permission"]
-        access.sub = jwt["sub"]
-        access.email_verified = jwt["email_verified"]
-        access.client_id = jwt["azp"]
-      }
-    });
-    if (access.sub != "") {
-      return true
-    }
-}
-
-
 
 const u = ref<InstanceType<typeof user> | null>(null)
 

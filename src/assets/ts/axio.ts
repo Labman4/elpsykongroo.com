@@ -3,7 +3,7 @@ import { toggleDark } from '~/composables';
 import { access } from './access';
 import { env } from './env';
 import { handleCookie } from './handleAuthCode';
-import { refreshlogin } from './login';
+import { qrcodeCheck, refreshlogin } from './login';
 const timeCount= ref(0);
 
 // const source = axios.CancelToken.source();
@@ -37,6 +37,7 @@ axios.interceptors.response.use(function (response) {
         refreshlogin();
       } else {
         refreshToken();   
+        qrcodeCheck();
       }
     } else {
       console.error(error);

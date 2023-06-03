@@ -53,6 +53,7 @@ if (code != null && state != null) {
           access.permission = jwt["permission"]
           access.sub = jwt["sub"]
           access.email_verified = jwt["email_verified"]
+          access.client_id = jwt["azp"]
           toggleDark();
           countDown();
         }

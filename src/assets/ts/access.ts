@@ -17,6 +17,7 @@ export const access = reactive(
     email_verified: false,
     sub: "",
     redirect_uri: "",
+    qrcodeUrl: "",
     update(token:string, expires_in:number) {
       this.access_token = token;
       this.expires_in = expires_in;
