@@ -119,12 +119,11 @@ const qrcodeLogin = () => {
         },   
     }
     axios(option).then(async function(response){
-      codeVerifier = response.data.split("&")[0]
-      qrcodeUrl.value = env.authUrl + "/login/qrcode?text=" + response.data
+      codeVerifier = response.data.split("*")[0]
+      qrcodeUrl.value = env.authUrl + "/login/qrcode?text=" + codeVerifier
       check()
     });
 }
-
 
 const check = () => {
   var count = 0;
@@ -136,6 +135,7 @@ const check = () => {
     if(count == 40) {
       clearInterval(checkId);
     }
+    console.log(count)
   }, 15000)
 }
 
