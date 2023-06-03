@@ -74,7 +74,8 @@ const data = reactive({files});
 const fileList = ref<UploadUserFile[]>([])
 
 const uploadInfo: Record<string, string> = {
-    bucket: "test"
+    bucket: "test",
+    idToken: access.id_token
 }
 const kb = (row: ListObject) => {
     let size = row.size/1024
@@ -132,7 +133,8 @@ const listObject = () => {
         url: "/storage/object/list",
         method: "POST",
         data: {
-            bucket: "test"
+            bucket: "test",
+            idToken: access.id_token
         },
         headers: {
             'Authorization': 'Bearer '+ access.access_token
@@ -150,7 +152,8 @@ const deleteObject = (index:number, row: ListObject) => {
         method: "POST",
         data: {
             bucket: "test",
-            key: row.key
+            key: row.key,
+            idToken: access.id_token
         },
         headers: {
             'Authorization': 'Bearer '+ access.access_token
@@ -191,7 +194,8 @@ async function downloadObject (row: ListObject)  {
         responseType: 'blob',
         data: {    
             bucket: "test",
-            key: row.key
+            key: row.key,
+            idToken: access.id_token
         },   
         headers: {
             'Authorization': 'Bearer '+ access.access_token
