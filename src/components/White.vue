@@ -1,4 +1,5 @@
 <template>
+    <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
     <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.sub == '' ">  <User /></el-icon>
     <el-icon class="whiteMode" v-if="access.sub != '' " @click="loadUser()"> {{ access.sub }} </el-icon>
 
@@ -64,8 +65,7 @@
     v-model="visible.tmpLogin"
     title="Warning"
     width="80%"
-    align-center
-  >
+    align-center>
     <span>send email to add authenticator for new Device?</span>
     <template #footer>
       <span class="dialog-footer">
@@ -77,12 +77,21 @@
     </template>
   </el-dialog>
 
+  <el-dialog 
+    v-model="visible.qrcode"
+    title="Warning"
+    width="50%"
+    align-center>
+
+    <QrcodeVue :value="qrcodeUrl" :size="200" level="H" />  
+  
+  </el-dialog>
   <user ref="u"></user>
 
 </template>
 
 <script lang="ts" setup >
-import { User } from '@element-plus/icons-vue';
+import { User, Iphone } from '@element-plus/icons-vue';
 import { webauthnRegister, webauthnLogin, tmpLogin, logout } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
 import { visible } from "~/assets/ts/visible";
@@ -92,6 +101,72 @@ import * as webauthnJson from "@github/webauthn-json";
 import bcrypt from 'bcryptjs';
 import { ElNotification } from 'element-plus';
 import user from '~/components/api/User.vue';
+import QrcodeVue from "qrcode.vue";
+import jwt_decode from "jwt-decode";
+
+let qrcodeUrl = ref("")
+let codeVerifier
+const timeCount= ref(0);
+
+const qrcodeLogin = () => {
+    visible.qrcode = true
+    const option = {
+        baseURL: env.authUrl,
+        url: "/qrcode",
+        method: "GET",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },   
+    }
+    axios(option).then(async function(response){
+      codeVerifier = response.data
+      qrcodeUrl.value = env.authUrl + "/login/qrcode/" + response.data
+      check()
+    });
+}
+
+
+const check = () => {
+  timeCount.value = window.setInterval(() => {
+    if(qrcodeCheck()) {
+      clearInterval(timeCount.value);
+    }
+  }, 10000)
+}
+
+const qrcodeCheck = () => {
+    const option = {
+        baseURL: env.authUrl,
+        url: "/token/qrcode",
+        method: "POST",
+        data: {
+          "text": codeVerifier
+        },
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },   
+    }
+    axios(option).then(async function(response){
+      if (response.data.length > 0) {
+        var tokens = response.data.split("&&")
+        access.access_token = tokens[0];
+        access.id_token = tokens[1];
+        const decoded = jwt_decode(access.id_token);
+        const jwtString = (JSON.stringify(decoded));
+        const jwt = JSON.parse(jwtString);
+        access.permission = jwt["permission"]
+        access.sub = jwt["sub"]
+        access.email_verified = jwt["email_verified"]
+        access.client_id = jwt["azp"]
+      }
+    });
+    if (access.sub != "") {
+      return true
+    }
+}
+
+
+
 const u = ref<InstanceType<typeof user> | null>(null)
 
 const userr:User = {
@@ -259,6 +334,10 @@ const updateUser = () =>{
 </script>
 
 <style scoped>
+ .phoneMode {
+    position:absolute;right: 40px; top:15px;
+    color: #409EFF;
+  }
   .whiteMode {
     position:absolute;right: 20px; top:15px;
     color: #409EFF;
