@@ -67,12 +67,32 @@ const qrcodeCheck = () => {
         access.sub = jwt["sub"]
         access.email_verified = jwt["email_verified"]
         access.client_id = jwt["azp"]
-        visible.qrcode = false
+        loginWithToken();
+        visible.qrcode = false;
       }
     });
     if (access.sub != "") {
       return true
     }
+}
+
+const loginWithToken = () => {
+    clearInterval(checkId);
+    visible.qrcode = true
+    const option = {
+        baseURL: env.authUrl,
+        url: "/login/token",
+        method: "POST",
+        data: {
+            token: access.id_token
+        },
+        headers: {
+            'Authorization': 'Bearer '+ access.access_token
+        },   
+    }
+    axios(option).then(async function(response){
+        console.log(response.data) 
+    });
 }
 
 const callbackUrl = window.location.href;
