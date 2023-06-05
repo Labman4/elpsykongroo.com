@@ -64,7 +64,7 @@ const qrcodeCheck = () => {
         const jwtString = (JSON.stringify(decoded));
         const jwt = JSON.parse(jwtString);
         access.permission = jwt["permission"]
-        // access.sub = jwt["sub"]
+        access.sub = jwt["sub"]
         access.email_verified = jwt["email_verified"]
         access.client_id = jwt["azp"]
         loginWithToken();
@@ -93,11 +93,11 @@ const loginWithToken = () => {
         withCredentials: true                        
     }
     axios(option).then(async function(response){
-        // if (access.sub == "admin") {
-        //     window.location.href = "https://pkce.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
-        // } else {
-        //     window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
-        // }
+        if (access.sub == "admin") {
+            window.location.href = "https://pkce.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
+        } else {
+            window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
+        }
     });
 }
 
