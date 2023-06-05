@@ -84,7 +84,8 @@ const loginWithToken = () => {
         url: "/login/token",
         method: "POST",
         data: {
-          token: access.id_token
+          token: access.access_token,
+          idToken: access.id_token
         },
         headers: {
             'Authorization': 'Bearer '+ access.access_token,
