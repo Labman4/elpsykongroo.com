@@ -89,7 +89,8 @@ const loginWithToken = () => {
         headers: {
             'Authorization': 'Bearer '+ access.access_token,
             "Content-Type": "application/x-www-form-urlencoded"
-        },   
+        },
+        withCredentials: true                        
     }
     axios(option).then(async function(response){
         // if (access.sub == "admin") {
