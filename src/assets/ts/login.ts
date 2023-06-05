@@ -64,7 +64,7 @@ const qrcodeCheck = () => {
         const jwtString = (JSON.stringify(decoded));
         const jwt = JSON.parse(jwtString);
         access.permission = jwt["permission"]
-        access.sub = jwt["sub"]
+        // access.sub = jwt["sub"]
         access.email_verified = jwt["email_verified"]
         access.client_id = jwt["azp"]
         loginWithToken();
