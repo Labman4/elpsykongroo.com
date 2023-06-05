@@ -84,10 +84,11 @@ const loginWithToken = () => {
         url: "/login/token",
         method: "POST",
         data: {
-            token: access.id_token
+          token: access.id_token
         },
         headers: {
-            'Authorization': 'Bearer '+ access.access_token
+            'Authorization': 'Bearer '+ access.access_token,
+            "Content-Type": "application/x-www-form-urlencoded"
         },   
     }
     axios(option).then(async function(response){
