@@ -270,7 +270,7 @@ const updateUser = () =>{
 
 <style scoped>
  .phoneMode {
-    position:absolute;right: 40px; top:15px;
+    position:absolute;right: 50px; top:15px;
     color: #409EFF;
   }
   .whiteMode {

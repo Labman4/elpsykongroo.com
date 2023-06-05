@@ -13,6 +13,7 @@ import jwt_decode from "jwt-decode";
 let checkId;
 
 const qrcodeLogin = () => {
+    clearInterval(checkId);
     visible.qrcode = true
     const option = {
         baseURL: env.authUrl,
@@ -36,10 +37,10 @@ const check = () => {
     if(qrcodeCheck()) {
       clearInterval(checkId);
     }
-    if(count == 20) {
+    if(count == 30) {
       clearInterval(checkId);
     }
-  }, 30000)
+  }, 10000)
 }
 
 const qrcodeCheck = () => {

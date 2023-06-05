@@ -49,7 +49,6 @@ declare module '@vue/runtime-core' {
     Kibana: typeof import('./components/dashboard/Kibana.vue')['default']
     Kubernetes: typeof import('./components/dashboard/Kubernetes.vue')['default']
     Loading: typeof import('element-plus/es')['ElLoadingDirective']
-    Qrcode: typeof import('./components/Qrcode.vue')['default']
     Record: typeof import('./components/api/Record.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

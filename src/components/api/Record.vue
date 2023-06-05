@@ -69,7 +69,7 @@ const selectRecord:string[] = [];
 const DeleteSelect= () => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/record" + selectRecord.toString(),
+    url: "/record/" + selectRecord.toString(),
     method: "DELETE",
     headers: {
       'Authorization': 'Bearer '+ access.access_token
@@ -178,9 +178,10 @@ function filterByParam() {
     url: "/record",
     method: "POST",
     data: {
-      "param": search.value,
+      "params": search.value,
       "pageNumber": recordPage.pageNumber-1,
-      "pageSize": recordPage.pageSize
+      "pageSize": recordPage.pageSize,
+      "order": recordPage.order
     },
     headers: {
       'Authorization': 'Bearer '+ access.access_token,
