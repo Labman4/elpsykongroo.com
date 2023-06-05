@@ -88,7 +88,6 @@ const loginWithToken = () => {
           idToken: access.id_token
         },
         headers: {
-            'Authorization': 'Bearer '+ access.access_token,
             "Content-Type": "application/x-www-form-urlencoded"
         },
         withCredentials: true                        
