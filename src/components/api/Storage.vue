@@ -28,6 +28,7 @@
         class="upload-demo"
         action=https://api.elpsykongroo.com/storage/object
         method="PUT"
+        :headers=uploadHeader
         name="data"
         :data=uploadInfo
         :auto-upload=true
@@ -77,6 +78,10 @@ const uploadInfo: Record<string, string> = {
     bucket: "test",
     idToken: access.id_token
 }
+const uploadHeader: Record<string, string> = {
+    Authorization: 'Bearer '+ access.access_token
+}
+
 const kb = (row: ListObject) => {
     let size = row.size/1024
     if (size > 1024) {
