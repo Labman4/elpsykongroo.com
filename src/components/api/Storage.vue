@@ -26,7 +26,7 @@
     <el-upload
         v-model:file-list="fileList"
         class="upload-demo"
-        action=http://localhost:8443/storage/object
+        action=https://api.elpsykongroo.com/storage/object
         method="PUT"
         name="data"
         :data=uploadInfo
