@@ -46,7 +46,7 @@ const check = () => {
 const qrcodeCheck = () => {
     const option = {
         baseURL: env.apiUrl,
-        url: "/token/qrcode",
+        url: "/redis/token/qrcode",
         method: "POST",
         data: {
           "text": access.code_verifier
