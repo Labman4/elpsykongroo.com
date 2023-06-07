@@ -27,7 +27,7 @@
         v-model:file-list="fileList"
         class="upload-demo"
         action=https://storage.elpsykongroo.com/storage/object
-        method="PUT"
+        method="POST"
         :headers=uploadHeader
         name="file"
         :data=uploadInfo
