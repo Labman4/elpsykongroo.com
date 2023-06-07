@@ -47,9 +47,9 @@ const qrcodeCheck = () => {
     const option = {
         baseURL: env.apiUrl,
         url: "/public/token/qrcode",
-        method: "POST",
-        data: {
-          "text": access.code_verifier
+        method: "GET",
+        param: {
+          text: access.code_verifier
         },
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
