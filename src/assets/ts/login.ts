@@ -2,7 +2,6 @@ import { access } from '~/assets/ts/access';
 import { pkce } from '~/assets/ts/pkce';
 import axios from "axios";
 import { env } from "~/assets/ts/env";
-// const attestation:AttestationConveyancePreference = "direct";
 import * as webauthnJson from "@github/webauthn-json";
 import { visible } from "~/assets/ts/visible";
 import { ElMessage, ElNotification } from 'element-plus';
@@ -356,20 +355,4 @@ const tmpLogin = () => {
     axios(option);
  }
 
-const sessionlogout = () => {
-    const option = {
-        baseURL: env.authUrl,
-        url: "/logout",
-        method: "POST", 
-        withCredentials: true                
-    }
-    axios(option).then(function (response) {
-        access.grant_type = "";
-        access.expires_in = 5;
-        access.access_token = "";
-        access.refresh_token = "";
-        access.id_token = "";
-        deleteCookie("_oauth2_proxy");
-    })    
-}
 export { webauthnLogin, webauthnRegister, refreshlogin, logout, tmpLogin, qrcodeLogin, qrcodeCheck }
