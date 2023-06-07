@@ -29,7 +29,7 @@
         action=https://storage.elpsykongroo.com/storage/object
         method="PUT"
         :headers=uploadHeader
-        name="data"
+        name="file"
         :data=uploadInfo
         :auto-upload=true
         multiple
