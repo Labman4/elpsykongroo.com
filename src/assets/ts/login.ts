@@ -45,7 +45,7 @@ const check = () => {
 
 const qrcodeCheck = () => {
     const option = {
-        baseURL: env.authUrl,
+        baseURL: env.apiUrl,
         url: "/token/qrcode",
         method: "POST",
         data: {

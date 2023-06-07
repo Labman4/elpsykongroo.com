@@ -29,7 +29,7 @@
         action=https://api.elpsykongroo.com/storage/object
         method="POST"
         :headers=uploadHeader
-        name="file"
+        name="data"
         :data=uploadInfo
         :auto-upload=true
         multiple
@@ -80,7 +80,7 @@ const uploadInfo: Record<string, string> = {
 }
 const uploadHeader: Record<string, string> = {
     "Authorization": 'Bearer '+ access.access_token,
-    "Content-Type":  'multipart/form-data'
+    // "Content-Type":  'multipart/form-data'
 }
 
 const kb = (row: ListObject) => {
