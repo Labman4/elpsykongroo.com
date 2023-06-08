@@ -8,7 +8,7 @@
       <el-table-column label="Operations">
       <template #default="scope">
         <el-button size="small" type="danger" @click="deleteObject(scope.$index, scope.row)">Delete</el-button>
-        <el-button size="small" type="primary" @click="downloadObject(scope.row)">Download</el-button>
+        <el-button size="small" type="primary" @click="downloadUrl(scope.row)">Download</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -53,7 +53,6 @@
 
 <script lang="ts" setup>
 import { axios } from '~/assets/ts/axio';
-import fileDownload from 'js-file-download';
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
 import { ElMessage, ElMessageBox, UploadProps, UploadUserFile } from 'element-plus';
@@ -173,10 +172,22 @@ const deleteObject = (index:number, row: ListObject) => {
     })   
 }
 
-async function downloadObject (row: ListObject)  {
+function downloadUrl (row: ListObject) {
+    const url = env.storageUrl + "/storage/object/download?bucket=test&key=" + row.key + "&idToken=" + access.id_token;
+    const aLink = document.createElement('a');
+      aLink.style.display = 'none';
+      aLink.href = url;
+      aLink.download = row.key;
+      aLink.target = '_parent';
+      document.body.appendChild(aLink);
+      aLink.click();
+      document.body.removeChild(aLink); 
+}
+
+function downloadObject (row: ListObject)  {
     axios({
         method: 'POST',
-        url: env.storageUrl + "/storage/object/download",
+        url: env.storageUrl + "/storage/object/download" ,
         responseType: 'blob',
         data: {    
             bucket: "test",
@@ -187,17 +198,17 @@ async function downloadObject (row: ListObject)  {
             'Authorization': 'Bearer '+ access.access_token,
             "Content-Type": "application/x-www-form-urlencoded"
         },
-    }).then(function(response){
+    }).then(async function(response){
         // fileDownload(response.data, row.key);
         const url = URL.createObjectURL(response.data);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = row.key;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = row.key;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     })
 
 
