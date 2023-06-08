@@ -146,7 +146,7 @@ const authorityList = () => {
     authorityTable.value = true
     const option = {
         baseURL: env.apiUrl,
-        url: "/auth/authority/list",
+        url: "/auth/authority",
         method: "GET",
         headers: {
         'Authorization': 'Bearer '+ access.access_token
@@ -192,7 +192,7 @@ const authorityList = () => {
 const addAuthority = () => {
     const option = {
         baseURL: env.apiUrl,
-        url: "auth/authority/add",
+        url: "auth/authority",
         method: "PUT",
         data: {
             name: authorityFormData.name
@@ -213,11 +213,8 @@ const addAuthority = () => {
 const deleteAuthority = (index: number, row: Authority) => {
     const option = {
         baseURL: env.apiUrl,
-        url: "auth/authority/delete",
+        url: "auth/authority/" + row.authority,
         method: "DELETE",
-        params: {
-            "name": row.authority
-        },
         headers: {
         'Authorization': 'Bearer '+ access.access_token,
         "Content-Type": "application/x-www-form-urlencoded"
@@ -243,7 +240,7 @@ const updateAuthority = (authorities: string, ids: string, userOrGroup: boolean)
     }
     const userOption = {
         baseURL: env.apiUrl,
-        url: "auth/authority/user/patch",
+        url: "auth/authority/user",
         method: "PATCH",
         params: {
             authorities: authorities,
@@ -268,7 +265,7 @@ const updateAuthority = (authorities: string, ids: string, userOrGroup: boolean)
 const updateGroupAuthority = (authorities: string, ids: string) => {
     const Authorityoption = {
         baseURL: env.apiUrl,
-        url: "auth/authority/group/patch",
+        url: "auth/authority/group",
         method: "PATCH",
         params: {
             authorities: authorities,
@@ -289,7 +286,7 @@ const updateGroupAuthority = (authorities: string, ids: string) => {
 const userList = async (row: Authority) => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/auth/user/list",
+    url: "/auth/user",
     method: "GET",
     params: {
       pageNumber: 0,
@@ -308,7 +305,7 @@ const userList = async (row: Authority) => {
             for (let i = 0; i <users.length; i++) {
                 const checkOption = {
                     baseURL: env.apiUrl,
-                    url: "auth/authority/user/list",
+                    url: "auth/authority/user",
                     method: "GET",
                     params: {
                         id: users[i].id
@@ -356,11 +353,8 @@ const pushUser = (users: User[], checked: number[]) => {
 const groupList = (row: Authority) => {
     const checkOption = {
         baseURL: env.apiUrl,
-        url: "auth/group/authority/list",
+        url: "auth/group/authority/" + row.authority,
         method: "GET",
-        params: {
-            name: row.authority
-        },
         headers: {
         'Authorization': 'Bearer '+ access.access_token
         },

@@ -719,11 +719,8 @@ const handleClientSetting = (data) => {
 const DeleteClient = (index: number, row: AuthClient) => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/auth/client/delete",
+    url: "/auth/client/" + row.clientId,
     method: "DELETE",
-    params: {
-      "clientId": row.clientId
-    },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
     },
@@ -738,11 +735,8 @@ const DeleteClient = (index: number, row: AuthClient) => {
 const DeleteReigster = (index: number, row: AuthClientRegister) => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/auth/client/register/delete",
+    url: "/auth/client/register/" + row.registrationId,
     method: "DELETE",
-    params: {
-      "registerId": row.registrationId
-    },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
     },
@@ -760,8 +754,8 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
     if (valid) {
       const option = {
         baseURL: env.apiUrl,
-        url: "/auth/client/add",
-        method: "POST",
+        url: "/auth/client",
+        method: "PUT",
         data: clientForm,
         headers: {
           'Authorization': 'Bearer '+ access.access_token,
@@ -830,8 +824,8 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
     if (valid) {
       const option = {
         baseURL: env.apiUrl,
-        url: "/auth/client/register/add",
-        method: "POST",
+        url: "/auth/client/register",
+        method: "PUT",
         data: authRegister,
         headers: {
           'Authorization': 'Bearer '+ access.access_token,
@@ -866,7 +860,7 @@ const authClientRegisterList = () => {
   authClientRegisterTable.value = true;
   const option = {
     baseURL: env.apiUrl,
-    url: "/auth/client/register/list",
+    url: "/auth/client/register",
     method: "GET",
     // params: {
     //   "param": search.value,
@@ -887,7 +881,7 @@ const authClientList = () =>  {
   authClientTable.value = true;
   const option = {
     baseURL: env.apiUrl,
-    url: "/auth/client/list",
+    url: "/auth/client",
     method: "GET",
     // params: {
     //   "param": search.value,

@@ -165,7 +165,7 @@ const openAuthority = (row: Group) => {
 const addGroup = () => {
     const option = {
         baseURL: env.apiUrl,
-        url: "auth/group/add",
+        url: "auth/group",
         method: "PUT",
         data: {
             name: groupFormData.name
@@ -186,11 +186,8 @@ const addGroup = () => {
 const deleteGroup = (index: number, row: Group) => {
     const option = {
         baseURL: env.apiUrl,
-        url: "auth/group/delete",
+        url: "auth/group/" + row.groupName,
         method: "DELETE",
-        params: {
-            "name": row.groupName
-        },
         headers: {
         'Authorization': 'Bearer '+ access.access_token,
         "Content-Type": "application/x-www-form-urlencoded"
@@ -206,12 +203,12 @@ const deleteGroup = (index: number, row: Group) => {
 const userList = async (row: Group) => {
     const option = {
         baseURL: env.apiUrl,
-        url: "/auth/user/list",
+        url: "/auth/user",
         method: "GET",
         params: {
-        pageNumber: 0,
-        pageSize: 100,
-        order: 0
+            pageNumber: 0,
+            pageSize: 100,
+            order: 0
         },
         headers: {
         'Authorization': 'Bearer '+ access.access_token
@@ -225,7 +222,7 @@ const userList = async (row: Group) => {
             for (let i = 0; i <users.length; i++) {
                 const checkOption = {
                     baseURL: env.apiUrl,
-                    url: "auth/group/user/list",
+                    url: "auth/group/user",
                     method: "GET",
                     params: {
                         id: users[i].id
@@ -311,7 +308,7 @@ const pushUser = (users: User[], checked: number[]) => {
 const authorityList = (row: Group) => {
     const checkOption = {
         baseURL: env.apiUrl,
-        url: "auth/authority/group/list",
+        url: "auth/authority/group",
         method: "GET",
         params: {
             name: row.groupName
@@ -327,10 +324,10 @@ const authorityList = (row: Group) => {
     }).then(function(response) {
             const option = {
                 baseURL: env.apiUrl,
-                url: "/auth/authority/list",
+                url: "/auth/authority",
                 method: "GET",
                 headers: {
-                'Authorization': 'Bearer '+ access.access_token
+                    'Authorization': 'Bearer '+ access.access_token
                 }
             }
             axios(option).then(function (response) {
@@ -379,10 +376,10 @@ const groupList = () => {
     groupTable.value = true
     const option = {
         baseURL: env.apiUrl,
-        url: "auth/group/list",
+        url: "auth/group",
         method: "GET",
         headers: {
-        'Authorization': 'Bearer '+ access.access_token
+            'Authorization': 'Bearer '+ access.access_token
         },
     }
     axios(option).then(function (response) {
@@ -407,7 +404,7 @@ const updateGroup = (groupsIds: string, Ids: string, userOrAuth: boolean) => {
     }
     const userOption = {
         baseURL: env.apiUrl,
-        url: "auth/group/user/patch",
+        url: "auth/group/user",
         method: "PATCH",
         params: {
             groups: groupsIds,
@@ -432,7 +429,7 @@ const updateGroup = (groupsIds: string, Ids: string, userOrAuth: boolean) => {
 const updateGroupAuthority = () => {
     const Authorityoption = {
         baseURL: env.apiUrl,
-        url: "auth/authority/group/patch",
+        url: "auth/authority/group",
         method: "PATCH",
         params: {
             authorities: Ids.value.slice(0,-1),
