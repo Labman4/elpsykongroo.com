@@ -47,7 +47,7 @@ const qrcodeCheck = () => {
         baseURL: env.apiUrl,
         url: "/public/token/qrcode",
         method: "GET",
-        param: {
+        params: {
           text: access.code_verifier
         },
         headers: {
