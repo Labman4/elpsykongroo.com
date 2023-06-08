@@ -80,7 +80,7 @@ const uploadInfo: Record<string, string> = {
 }
 const uploadHeader: Record<string, string> = {
     "Authorization": 'Bearer '+ access.access_token,
-    "Content-Type":  'multipart/form-data'
+    "enctype": 'multipart/form-data'
 }
 
 const kb = (row: ListObject) => {
