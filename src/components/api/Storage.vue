@@ -26,7 +26,7 @@
     <el-upload
         v-model:file-list="fileList"
         class="upload-demo"
-        action=https://api.elpsykongroo.com/storage/object
+        action=https://storage.elpsykongroo.com/storage/object
         method="POST"
         :headers=uploadHeader
         name="data"
