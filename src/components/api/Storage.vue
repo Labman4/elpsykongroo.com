@@ -80,7 +80,7 @@ const uploadInfo: Record<string, string> = {
 }
 const uploadHeader: Record<string, string> = {
     "Authorization": 'Bearer '+ access.access_token,
-    // "Content-Type":  'multipart/form-data'
+    "Content-Type":  'multipart/form-data'
 }
 
 const kb = (row: ListObject) => {
@@ -143,7 +143,8 @@ const listObject = () => {
             idToken: access.id_token
         },
         headers: {
-            'Authorization': 'Bearer '+ access.access_token
+            'Authorization': 'Bearer '+ access.access_token,
+            "Content-Type": "application/x-www-form-urlencoded"
         }
     }
     axios(option).then(function (response) {
@@ -162,7 +163,8 @@ const deleteObject = (index:number, row: ListObject) => {
             idToken: access.id_token
         },
         headers: {
-            'Authorization': 'Bearer '+ access.access_token
+            'Authorization': 'Bearer '+ access.access_token,
+            "Content-Type": "application/x-www-form-urlencoded"
         }
     }
     axios(option).then(function (response) {
@@ -173,27 +175,6 @@ const deleteObject = (index:number, row: ListObject) => {
 }
 
 async function downloadObject (row: ListObject)  {
-    const option = {
-        baseURL: env.apiUrl,
-        url: "/storage/object/download",
-        method: "POST",
-      
-        headers: {
-            'Authorization': 'Bearer '+ access.access_token
-        },
-        // responseType: 'blob',
-        onDownloadProgress: function (axiosProgressEvent) {
-            /*{
-            loaded: number;
-            total?: number;
-            progress?: number;
-            bytes: number; 
-            estimated?: number;
-            rate?: number; // download speed in bytes
-            download: true; // download sign
-            }*/
-        }
-    }
     axios({
         method: 'POST',
         url: env.apiUrl + "/storage/object/download",
@@ -204,7 +185,8 @@ async function downloadObject (row: ListObject)  {
             idToken: access.id_token
         },   
         headers: {
-            'Authorization': 'Bearer '+ access.access_token
+            'Authorization': 'Bearer '+ access.access_token,
+            "Content-Type": "application/x-www-form-urlencoded"
         },
     }).then(function(response){
         fileDownload(response.data, row.key);

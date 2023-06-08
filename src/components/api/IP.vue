@@ -85,7 +85,7 @@ function addIp() {
     url: "/ip",
     method: "PUT",
     params: {
-      isBlack: ipFormData.black,
+      black: ipFormData.black,
       address: ipFormData.address,
     },
     headers: {
