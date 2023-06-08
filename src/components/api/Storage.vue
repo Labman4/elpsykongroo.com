@@ -173,12 +173,12 @@ const deleteObject = (index:number, row: ListObject) => {
 }
 
 function downloadUrl (row: ListObject) {
-    const url = env.storageUrl + "/storage/object/download?bucket=test&key=" + row.key + "&idToken=" + access.id_token;
+    const url = env.storageUrl + "/storage/object?bucket=test&key=" + row.key + "&idToken=" + access.id_token;
     const aLink = document.createElement('a');
       aLink.style.display = 'none';
       aLink.href = url;
       aLink.download = row.key;
-      aLink.target = '_parent';
+    //   aLink.target = '_parent';
       document.body.appendChild(aLink);
       aLink.click();
       document.body.removeChild(aLink); 
