@@ -176,7 +176,7 @@ const deleteObject = (index:number, row: ListObject) => {
 async function downloadObject (row: ListObject)  {
     axios({
         method: 'POST',
-        url: env.apiUrl + "/storage/object/download",
+        url: env.storageUrl + "/storage/object/download",
         responseType: 'blob',
         data: {    
             bucket: "test",
