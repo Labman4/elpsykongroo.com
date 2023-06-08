@@ -188,7 +188,16 @@ async function downloadObject (row: ListObject)  {
             "Content-Type": "application/x-www-form-urlencoded"
         },
     }).then(function(response){
-        fileDownload(response.data, row.key);
+        // fileDownload(response.data, row.key);
+        const url = URL.createObjectURL(response.data);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = row.key;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
     })
 
 
