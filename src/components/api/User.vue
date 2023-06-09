@@ -281,11 +281,8 @@ const loadGroups = (row: User) => {
   Ids.value = row.id
   const option = {
     baseURL: env.apiUrl,
-    url: "auth/group/user/list",
+    url: "auth/group/user/" + row.id,
     method: "GET",
-    params: {
-      id: row.id
-    },
     headers: {
     'Authorization': 'Bearer '+ access.access_token
     },
@@ -301,11 +298,8 @@ const loadAuthorities = (row: User) => {
   Ids.value = row.id
   const option = {
     baseURL: env.apiUrl,
-    url: "auth/user/authority/list",
+    url: "auth/user/authority/" + row.username,
     method: "GET",
-    params: {
-      username: row.username
-    },
     headers: {
     'Authorization': 'Bearer '+ access.access_token
     },
@@ -320,11 +314,8 @@ async function loadUserInfo (row: User) {
   userInfoTableData.username = row.username
   const option = {
     baseURL: env.apiUrl,
-    url: "auth/user/info",
+    url: "auth/user/info/" + row.username,
     method: "GET",
-    params: {
-      username: row.username
-    },
     headers: {
     'Authorization': 'Bearer '+ access.access_token
     },
@@ -370,12 +361,12 @@ const updateUserInfo = () => {
   userInfoTableData.claims = JSON.stringify(Object.fromEntries(newclaimMap));
   const option = {
     baseURL: env.apiUrl,
-    url: "auth/user/info/patch",
-    method: "PATCH",
+    url: "auth/user/info",
+    method: "POST",
     data: userInfoTableData,
     headers: {
-    'Authorization': 'Bearer '+ access.access_token,
-    'Content-Type': 'application/json'
+      'Authorization': 'Bearer '+ access.access_token,
+      'Content-Type': 'application/json'
     },
   }
   axios(option).then(function(response){
@@ -421,12 +412,12 @@ const deleteClaim = (rmkey:string) => {
     //}
     const option = {
       baseURL: env.apiUrl,
-      url: "auth/user/info/patch",
-      method: "PATCH",
+      url: "auth/user/info",
+      method: "POST",
       data: userInfoTableData,
       headers: {
-      'Authorization': 'Bearer '+ access.access_token,
-      'Content-Type': 'application/json'
+        'Authorization': 'Bearer '+ access.access_token,
+        'Content-Type': 'application/json'
       },
     }
     axios(option).then(function(response){
@@ -452,11 +443,11 @@ const lockUser = (row: User) => {
   }
   const option = {
     baseURL: env.apiUrl,
-    url: "auth/user/patch",
-    method: "PATCH",
+    url: "auth/user",
+    method: "POST",
     data: row,
     headers: {
-    'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function (response) {
@@ -483,11 +474,11 @@ const updateUser = () =>{
     userFormData.username = selectUserName[0].username;
     const option = {
       baseURL: env.apiUrl,
-      url: "auth/user/patch",
-      method: "PATCH",
+      url: "auth/user",
+      method: "POST",
       data: userFormData,
       headers: {
-      'Authorization': 'Bearer '+ access.access_token
+        'Authorization': 'Bearer '+ access.access_token
       },
     }
     if (userFormData.password == "" || userFormData.password == undefined){
@@ -518,7 +509,7 @@ const userList = () => {
     userTable.value = true;
     const option = {
       baseURL: env.apiUrl,
-      url: "/auth/user/list",
+      url: "/auth/user",
       method: "GET",
       params: {
         pageNumber: userPage.pageNumber-1,

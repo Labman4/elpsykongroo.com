@@ -167,7 +167,7 @@ const addGroup = () => {
         baseURL: env.apiUrl,
         url: "auth/group",
         method: "PUT",
-        data: {
+        params: {
             name: groupFormData.name
         },
         headers: {
@@ -222,11 +222,8 @@ const userList = async (row: Group) => {
             for (let i = 0; i <users.length; i++) {
                 const checkOption = {
                     baseURL: env.apiUrl,
-                    url: "auth/group/user",
+                    url: "auth/group/user/" + users[i].id,
                     method: "GET",
-                    params: {
-                        id: users[i].id
-                    },
                     headers: {
                     'Authorization': 'Bearer '+ access.access_token
                     },
@@ -308,11 +305,8 @@ const pushUser = (users: User[], checked: number[]) => {
 const authorityList = (row: Group) => {
     const checkOption = {
         baseURL: env.apiUrl,
-        url: "auth/authority/group",
+        url: "auth/authority/group/" + row.groupName,
         method: "GET",
-        params: {
-            name: row.groupName
-        },
         headers: {
         'Authorization': 'Bearer '+ access.access_token
         },
@@ -405,7 +399,7 @@ const updateGroup = (groupsIds: string, Ids: string, userOrAuth: boolean) => {
     const userOption = {
         baseURL: env.apiUrl,
         url: "auth/group/user",
-        method: "PATCH",
+        method: "POST",
         params: {
             groups: groupsIds,
             ids: Ids
@@ -430,7 +424,7 @@ const updateGroupAuthority = () => {
     const Authorityoption = {
         baseURL: env.apiUrl,
         url: "auth/authority/group",
-        method: "PATCH",
+        method: "POST",
         params: {
             authorities: Ids.value.slice(0,-1),
             ids: groupsIds.value

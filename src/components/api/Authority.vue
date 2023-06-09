@@ -194,7 +194,7 @@ const addAuthority = () => {
         baseURL: env.apiUrl,
         url: "auth/authority",
         method: "PUT",
-        data: {
+        params: {
             name: authorityFormData.name
         },
         headers: {
@@ -241,7 +241,7 @@ const updateAuthority = (authorities: string, ids: string, userOrGroup: boolean)
     const userOption = {
         baseURL: env.apiUrl,
         url: "auth/authority/user",
-        method: "PATCH",
+        method: "POST",
         params: {
             authorities: authorities,
             ids: ids
@@ -266,7 +266,7 @@ const updateGroupAuthority = (authorities: string, ids: string) => {
     const Authorityoption = {
         baseURL: env.apiUrl,
         url: "auth/authority/group",
-        method: "PATCH",
+        method: "POST",
         params: {
             authorities: authorities,
             ids: ids
@@ -305,11 +305,8 @@ const userList = async (row: Authority) => {
             for (let i = 0; i <users.length; i++) {
                 const checkOption = {
                     baseURL: env.apiUrl,
-                    url: "auth/authority/user",
+                    url: "auth/authority/user/" + users[i].id,
                     method: "GET",
-                    params: {
-                        id: users[i].id
-                    },
                     headers: {
                     'Authorization': 'Bearer '+ access.access_token
                     },
@@ -365,7 +362,7 @@ const groupList = (row: Authority) => {
     }).then(function(response) {
         const option = {
             baseURL: env.apiUrl,
-            url: "auth/group/list",
+            url: "auth/group",
             method: "GET",
             headers: {
             'Authorization': 'Bearer '+ access.access_token
@@ -382,7 +379,7 @@ const groupList = (row: Authority) => {
                             key: group[i].id,
                             label: group[i].groupName,
                             disabled: true,
-                            checked: false
+                            checked: true
                         })
                         // datas.left.push(group[i].groupName)
                         // datas.array.push(authorities[i].authority)
