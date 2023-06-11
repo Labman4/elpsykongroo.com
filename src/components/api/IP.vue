@@ -4,6 +4,7 @@
     <el-table :data="data.ips">
       <el-table-column property="address" label="address" width="auto"/>
       <el-table-column property="black" label="black"/>
+      <el-table-column property="timestamp" label="date" :formatter="recorTimestamp" sortable/>
       <el-table-column label="Operations">
       <template #default="scope">
         <el-button
@@ -94,10 +95,8 @@ function addIp() {
     },
   }
   axios(option).then(function(response){
-    const len = response.data.data.length;
-    if (len > 0) {
       ipList();   
-    }
+    
   })
 }
 
@@ -118,7 +117,7 @@ const ipList = () => {
     },
   }
   axios(option).then(function (response) {
-    data.ips=response.data.data;
+    data.ips=response.data;
   })
 }
 
@@ -137,7 +136,7 @@ const DeleteIP = (index: number, row: IP) => {
     },
   }
   axios(option).then(function (response) {
-    if (response.data.code == 200) {
+    if (response.status == 200) {
       data.ips.splice(index, 1);
     }
   }) 

@@ -149,7 +149,7 @@ function recordList(order:string) {
     },
   } 
   axios(option).then(function (response) {
-  data.records = response.data.data;
+  data.records = response.data;
   })
 }
 

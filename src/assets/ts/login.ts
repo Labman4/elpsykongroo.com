@@ -5,7 +5,7 @@ import { env } from "~/assets/ts/env";
 import * as webauthnJson from "@github/webauthn-json";
 import { visible } from "~/assets/ts/visible";
 import { ElMessage, ElNotification } from 'element-plus';
-import { deleteCookie, handleCookie, getAccessToken } from './handleAuthCode';
+import { handleCookie, getAccessToken } from './handleAuthCode';
 import { toggleDark } from '~/composables';
 import jwt_decode from "jwt-decode";
 
@@ -25,21 +25,49 @@ const qrcodeLogin = () => {
     axios(option).then(async function(response){
       access.code_verifier = response.data.split("*")[0]
       access.qrcodeUrl = env.authUrl + "/login/qrcode?text=" + response.data
-      check();
+      checkToken();
+    //   check();
     });
 }
 
-const check = () => {
-  var count = 0;
-  checkId = window.setInterval(() => {
-    count ++
-    if(qrcodeCheck()) {
-      clearInterval(checkId);
+// async function check()  {
+//   var count = 0;
+//   checkId = window.setInterval(async () => {
+//     count ++
+//     if(await checkToken()) {
+//       clearInterval(checkId);
+//     }
+//     if(count == 30) {
+//       clearInterval(checkId);
+//     }
+//   }, 10000)
+// }
+
+async function checkToken () {
+    const options = {
+        withCredentials: true
     }
-    if(count == 30) {
-      clearInterval(checkId);
+    var eventSource = new EventSource(env.apiUrl + "/public/token/qrcode?text=" + access.code_verifier, options);
+    eventSource.onmessage = (e) => {
+        var data = e.data
+         if (data.length > 0) {
+            var tokens = data.split("&&")
+            access.access_token = tokens[0];
+            access.id_token = tokens[1];
+            const decoded = jwt_decode(access.id_token);
+            const jwtString = (JSON.stringify(decoded));
+            const jwt = JSON.parse(jwtString);
+            access.permission = jwt["permission"]
+            access.sub = jwt["sub"]
+            access.email_verified = jwt["email_verified"]
+            access.client_id = jwt["azp"]
+            visible.qrcode = false;
+        }
     }
-  }, 10000)
+    if (access.sub != "") {
+        eventSource.close();
+        loginWithToken();
+    }
 }
 
 const qrcodeCheck = () => {
