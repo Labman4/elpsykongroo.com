@@ -76,7 +76,7 @@ const DeleteSelect= () => {
     },
   }
   axios(option).then(function (response) {
-    var count = response.data.data;
+    var count = response.data;
     if (count == selectRecord.length) {
       selectRecord.forEach(function(item, index){
         data.records.forEach(function(i, ind){
@@ -120,7 +120,7 @@ const DeleteRecord = (index: number, row: Record) => {
     },
   }
   axios(option).then(function (response) {
-    var count = response.data.data;
+    var count = response.data;
     if (count > 0) {
       data.records.splice(index, 1);
     }
@@ -173,25 +173,29 @@ const recordPageSizeChange = (newPage: number) => {
 const search = ref('')
 
 function filterByParam() {
-  const option = {
-    baseURL: env.apiUrl,
-    url: "/record",
-    method: "POST",
-    data: {
-      "params": search.value,
-      "pageNumber": recordPage.pageNumber-1,
-      "pageSize": recordPage.pageSize,
-      "order": recordPage.order
-    },
-    headers: {
-      'Authorization': 'Bearer '+ access.access_token,
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
+  if (search.value != '') {
+    const option = {
+      baseURL: env.apiUrl,
+      url: "/record",
+      method: "POST",
+      data: {
+        "params": search.value,
+        "pageNumber": recordPage.pageNumber-1,
+        "pageSize": recordPage.pageSize,
+        "order": recordPage.order
+      },
+      headers: {
+        'Authorization': 'Bearer '+ access.access_token,
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+    }
+    axios(option).then(function (response) {
+      data.records=response.data;
+    })
+  } else {
+    recordList(recordPage.order);
   }
-  axios(option).then(function (response) {
-    data.records=response.data.data;
-  })
- }
+}
 
  defineExpose({
   recordList

@@ -67,6 +67,7 @@ interface IP {
 const ipPage = {
   "pageNumber": 1,
   "pageSize": 20,
+  "order": 0
 };
 
 const ipFormData =  reactive({
@@ -109,7 +110,8 @@ const ipList = () => {
     params: {
       black: "",
       pageNumber: ipPage.pageNumber-1,
-      pageSize: ipPage.pageSize
+      pageSize: ipPage.pageSize,
+      order: ipPage.order
     },
     headers: {
     'Authorization': 'Bearer '+ access.access_token
