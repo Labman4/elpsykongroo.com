@@ -306,7 +306,7 @@ async function webauthnLogin() {
 
 const refreshlogin = () => {
     if (document.domain != "localhost") {
-        if (access.sub == "admin") {
+        if (access.username == "admin") {
             window.location.href = "https://pkce.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
         } else {
             window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
