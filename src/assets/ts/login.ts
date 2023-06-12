@@ -9,10 +9,10 @@ import { handleCookie, getAccessToken } from './handleAuthCode';
 import { toggleDark } from '~/composables';
 import jwt_decode from "jwt-decode";
 
-let checkId;
+// let checkId;
 
 const qrcodeLogin = () => {
-    clearInterval(checkId);
+    // clearInterval(checkId);
     visible.qrcode = true
     const option = {
         baseURL: env.authUrl,
@@ -25,6 +25,7 @@ const qrcodeLogin = () => {
     axios(option).then(async function(response){
       access.code_verifier = response.data.split("*")[0]
       access.qrcodeUrl = env.authUrl + "/login/qrcode?text=" + response.data
+      console.log(access.qrcodeUrl)
       checkToken();
     //   check();
     });
@@ -49,20 +50,17 @@ async function checkToken () {
     }
     var eventSource = new EventSource(env.apiUrl + "/public/token/qrcode?text=" + access.code_verifier, options);
     eventSource.onmessage = (e) => {
-        var data = e.data
-         if (data.length > 0) {
-            var tokens = data.split("&&")
-            access.access_token = tokens[0];
-            access.id_token = tokens[1];
-            const decoded = jwt_decode(access.id_token);
-            const jwtString = (JSON.stringify(decoded));
-            const jwt = JSON.parse(jwtString);
-            access.permission = jwt["permission"]
-            access.sub = jwt["sub"]
-            access.email_verified = jwt["email_verified"]
-            access.client_id = jwt["azp"]
-            visible.qrcode = false;
-        }
+        var tokens = e.data.split("&&")
+        access.access_token = tokens[0];
+        access.id_token = tokens[1];
+        const decoded = jwt_decode(access.id_token);
+        const jwtString = (JSON.stringify(decoded));
+        const jwt = JSON.parse(jwtString);
+        access.permission = jwt["permission"]
+        access.sub = jwt["sub"]
+        access.email_verified = jwt["email_verified"]
+        access.client_id = jwt["azp"]
+        visible.qrcode = false;
     }
     if (access.sub != "") {
         eventSource.close();
@@ -104,8 +102,8 @@ const qrcodeCheck = () => {
 }
 
 const loginWithToken = () => {
-    clearInterval(checkId);
-    visible.qrcode = true
+    // clearInterval(checkId);
+    // visible.qrcode = true
     const option = {
         baseURL: env.authUrl,
         url: "/login/token",
@@ -277,7 +275,7 @@ async function webauthnLogin() {
                             visible.webauthnFormVisible = false
                             console.log(idp)
                             if (idp == undefined || idp == "elpsykongroo" || idp == "labroom") {
-                                if (document.domain != "localhost") {
+                                if (document.domain != "localhost" && document.domain != "127.0.0.1") {
                                     if (access.username == "admin") {
                                         window.location.href = "https://pkce.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
                                     } else {
