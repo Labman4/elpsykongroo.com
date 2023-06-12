@@ -9,10 +9,7 @@ import { handleCookie, getAccessToken } from './handleAuthCode';
 import { toggleDark } from '~/composables';
 import jwt_decode from "jwt-decode";
 
-// let checkId;
-
 const qrcodeLogin = () => {
-    // clearInterval(checkId);
     visible.qrcode = true
     const option = {
         baseURL: env.authUrl,
@@ -27,28 +24,11 @@ const qrcodeLogin = () => {
       access.qrcodeUrl = env.authUrl + "/login/qrcode?text=" + response.data
       console.log(access.qrcodeUrl)
       checkToken();
-    //   check();
     });
 }
 
-// async function check()  {
-//   var count = 0;
-//   checkId = window.setInterval(async () => {
-//     count ++
-//     if(await checkToken()) {
-//       clearInterval(checkId);
-//     }
-//     if(count == 30) {
-//       clearInterval(checkId);
-//     }
-//   }, 10000)
-// }
-
 async function checkToken () {
-    const options = {
-        withCredentials: true
-    }
-    var eventSource = new EventSource(env.apiUrl + "/public/token/qrcode?text=" + access.code_verifier, options);
+    var eventSource = new EventSource(env.apiUrl + "/public/token/qrcode?text=" + access.code_verifier, { withCredentials: true });
     eventSource.onmessage = (e) => {
         var tokens = e.data.split("&&")
         access.access_token = tokens[0];
@@ -60,50 +40,15 @@ async function checkToken () {
         access.sub = jwt["sub"]
         access.email_verified = jwt["email_verified"]
         access.client_id = jwt["azp"]
-        visible.qrcode = false;
-    }
-    if (access.sub != "") {
         eventSource.close();
-        loginWithToken();
-    }
-}
-
-const qrcodeCheck = () => {
-    const option = {
-        baseURL: env.apiUrl,
-        url: "/public/token/qrcode",
-        method: "GET",
-        params: {
-          text: access.code_verifier
-        },
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },   
-    }
-    axios(option).then(async function(response){
-      if (response.data.length > 0) {
-        var tokens = response.data.split("&&")
-        access.access_token = tokens[0];
-        access.id_token = tokens[1];
-        const decoded = jwt_decode(access.id_token);
-        const jwtString = (JSON.stringify(decoded));
-        const jwt = JSON.parse(jwtString);
-        access.permission = jwt["permission"]
-        access.sub = jwt["sub"]
-        access.email_verified = jwt["email_verified"]
-        access.client_id = jwt["azp"]
-        loginWithToken();
         visible.qrcode = false;
-      }
-    });
-    if (access.sub != "") {
-      return true
+        if (access.sub != "") {
+            loginWithToken();
+        }
     }
 }
 
 const loginWithToken = () => {
-    // clearInterval(checkId);
-    // visible.qrcode = true
     const option = {
         baseURL: env.authUrl,
         url: "/login/token",
@@ -385,4 +330,4 @@ const tmpLogin = () => {
     axios(option);
  }
 
-export { webauthnLogin, webauthnRegister, refreshlogin, logout, tmpLogin, qrcodeLogin, qrcodeCheck }
+export { webauthnLogin, webauthnRegister, refreshlogin, logout, tmpLogin, qrcodeLogin }
