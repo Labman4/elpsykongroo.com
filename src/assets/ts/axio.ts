@@ -37,7 +37,7 @@ axios.interceptors.response.use(function (response) {
         refreshlogin();
       } else {
         refreshToken();   
-        qrcodeCheck();
+        // qrcodeCheck();
       }
     } else {
       console.error(error);
