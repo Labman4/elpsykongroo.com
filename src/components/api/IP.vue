@@ -3,15 +3,14 @@
     <el-button type="" @click="openIpAdd">Add</el-button>
     <el-table :data="data.ips">
       <el-table-column property="address" label="address" width="auto"/>
-      <el-table-column property="black" label="black"/>
-      <el-table-column property="timestamp" label="date" :formatter="recorTimestamp" sortable/>
+      <el-table-column property="black" label="black" width="100px"/>
+      <el-table-column property="timestamp" label="date" sortable width="auto"/>
       <el-table-column label="Operations">
       <template #default="scope">
-        <el-button
-          size="small"
-          type="danger"
-          @click="DeleteIP(scope.$index, scope.row)"
-          >Delete</el-button>
+        <el-button size="small" type="danger" @click="block(scope.$index, scope.row)"> 
+         <span v-if="!scope.row.black">block</span>
+         <span v-if="scope.row.black">unblock</span>
+        </el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -36,6 +35,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="ipForm = false">Cancel</el-button>
+        <el-button type="danger" @click="DeleteIP">delete</el-button>
         <el-button type="primary" @click="addIp" >
           Confirm
         </el-button>
@@ -121,15 +121,15 @@ const ipList = () => {
   })
 }
 
-const DeleteIP = (index: number, row: IP) => {
+const DeleteIP = () => {
   const option = {
     baseURL: env.apiUrl,
     url: "/ip",
     method: "PATCH",
     params: {
-      "address": "",
-      "black": row.black,
-      "id": row.id
+      black: "",
+      address: ipFormData.address,
+      id: "",
     },
     headers: {
     'Authorization': 'Bearer '+ access.access_token
@@ -137,7 +137,8 @@ const DeleteIP = (index: number, row: IP) => {
   }
   axios(option).then(function (response) {
     if (response.status == 200) {
-      data.ips.splice(index, 1);
+      ipForm.value = false
+      ipList()
     }
   }) 
 }
@@ -152,6 +153,24 @@ const ipPageSizeChange = (newPage: number) => {
   ipList();
 }
 
+const block = (index: number, row: IP) => {
+  const option = {
+    baseURL: env.apiUrl,
+    url: "/ip",
+    method: "PATCH",
+    params: {
+      "address": "",
+      "black": !row.black,
+      "id": row.id
+    },
+    headers: {
+    'Authorization': 'Bearer '+ access.access_token
+    },
+  }
+  axios(option).then(function (response) {
+    ipList()
+  }) 
+}
 defineExpose({
   ipList
 })
