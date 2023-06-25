@@ -39,6 +39,7 @@
         :limit="10"
         :on-exceed="handleExceed"
         :on-success="refreshList"
+        :on-error="continueUpload"
     >
         <el-button type="primary">Click to upload</el-button>
         <template #tip>
@@ -55,7 +56,7 @@
 import { axios } from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
-import { ElMessage, ElMessageBox, UploadProps, UploadUserFile } from 'element-plus';
+import { ElMessage, ElMessageBox, UploadFile, UploadProps, UploadUserFile } from 'element-plus';
 import { dayjs } from 'element-plus';
 
 
@@ -74,8 +75,9 @@ const data = reactive({files});
 const fileList = ref<UploadUserFile[]>([])
 
 const uploadInfo: Record<string, string> = {
-    bucket: "test",
-    idToken: access.id_token
+    bucket: access.sub,
+    idToken: access.id_token,
+    mode: "stream"
 }
 const uploadHeader: Record<string, string> = {
     "Authorization": 'Bearer '+ access.access_token
@@ -113,8 +115,12 @@ const handleExceed: UploadProps['onExceed'] = (files, uploadFiles) => {
   )
 }
 
-const refreshList: UploadProps['onExceed'] = (files, uploadFiles) => {
+const refreshList = (response: any, uploadFile: UploadFile) => {
     listObject();
+}
+
+const continueUpload = (error: Error, uploadFile: UploadFile) => {
+  upload();
 }
 
 const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
@@ -130,6 +136,27 @@ const openUpload = () => {
     uploadForm.value = true;
 }
 
+const upload = () => {
+    storageForm.value = true
+    const option = {
+        baseURL: env.apiUrl,
+        url: "/storage/object",
+        method: "POST",
+        data: {
+            bucket: access.sub,
+            idToken: access.id_token
+        },
+        headers: {
+            'Authorization': 'Bearer '+ access.access_token,
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+    }
+    axios(option).then(function (response) {
+        data.files = response.data;
+    })   
+}
+
+
 const listObject = () => {
     storageForm.value = true
     const option = {
@@ -137,7 +164,7 @@ const listObject = () => {
         url: "/storage/object/list",
         method: "POST",
         data: {
-            bucket: "test",
+            bucket: access.sub,
             idToken: access.id_token
         },
         headers: {
@@ -156,7 +183,7 @@ const deleteObject = (index:number, row: ListObject) => {
         url: "/storage/object/delete",
         method: "POST",
         data: {
-            bucket: "test",
+            bucket: access.sub,
             key: row.key,
             idToken: access.id_token
         },
@@ -190,7 +217,7 @@ function downloadObject (row: ListObject)  {
         url: env.storageUrl + "/storage/object/download" ,
         responseType: 'blob',
         data: {    
-            bucket: "test",
+            bucket: access.sub,
             key: row.key,
             idToken: access.id_token
         },   
