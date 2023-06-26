@@ -148,7 +148,7 @@ const upload = () => {
         },
         headers: {
             'Authorization': 'Bearer '+ access.access_token,
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "multipart/form-data"
         }
     }
     axios(option).then(function (response) {
