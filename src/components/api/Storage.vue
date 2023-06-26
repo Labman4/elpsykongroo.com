@@ -37,10 +37,9 @@
         :on-remove="handleRemove"
         :before-remove="beforeRemove"
         :limit="10"
-        :on-exceed="handleExceed"
+        :on-exceed="continueUpload"
         :on-success="refreshList"
-        :on-error="continueUpload"
-    >
+        >
         <el-button type="primary">Click to upload</el-button>
         <template #tip>
         <div class="el-upload__tip">
@@ -119,8 +118,8 @@ const refreshList = (response: any, uploadFile: UploadFile) => {
     listObject();
 }
 
-const continueUpload = (error: Error, uploadFile: UploadFile) => {
-  upload();
+const continueUpload:UploadProps['onExceed'] = (files: File[], uploadFiles: UploadUserFile[]) => {
+  upload(files);
 }
 
 const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
@@ -136,13 +135,14 @@ const openUpload = () => {
     uploadForm.value = true;
 }
 
-const upload = () => {
+const upload = (files: File[]) => {
     storageForm.value = true
     const option = {
         baseURL: env.apiUrl,
         url: "/storage/object",
         method: "POST",
         data: {
+            data: files[0],
             bucket: access.sub,
             idToken: access.id_token
         },
