@@ -37,8 +37,9 @@
         :on-remove="handleRemove"
         :before-remove="beforeRemove"
         :limit="10"
-        :on-exceed="continueUpload"
         :on-success="refreshList"
+        :http-request="upload"
+        :on-exceed="continueUpload"
         >
         <el-button type="primary">Click to upload</el-button>
         <template #tip>
@@ -55,7 +56,7 @@
 import { axios } from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
-import { ElMessage, ElMessageBox, UploadFile, UploadProps, UploadUserFile } from 'element-plus';
+import { ElMessage, ElMessageBox, UploadFile, UploadProps, UploadRequestOptions, UploadUserFile } from 'element-plus';
 import { dayjs } from 'element-plus';
 
 
@@ -119,7 +120,24 @@ const refreshList = (response: any, uploadFile: UploadFile) => {
 }
 
 const continueUpload:UploadProps['onExceed'] = (files: File[], uploadFiles: UploadUserFile[]) => {
-  upload(files);
+    const option = {
+        // baseURL: "http://localhost:9999",
+        baseURL: env.storageUrl,
+        url: "/storage/object",
+        method: "POST",
+        data: {
+            data: files[0],
+            bucket: access.sub,
+            mode: "stream",
+            idToken: access.id_token
+        },
+        headers: {
+            'Authorization': 'Bearer '+ access.access_token,
+            "Content-Type": "multipart/form-data"
+        }
+    }
+    axios(option).then(function (response) {
+    })   
 }
 
 const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
@@ -135,15 +153,17 @@ const openUpload = () => {
     uploadForm.value = true;
 }
 
-const upload = (files: File[]) => {
+const upload = (options: UploadRequestOptions) => {
     storageForm.value = true
     const option = {
-        baseURL: env.apiUrl,
+        // baseURL: "http://localhost:9999",
+        baseURL: env.storageUrl,
         url: "/storage/object",
-        method: "POST",
+        method: options.method,
         data: {
-            data: files[0],
+            data: options.file,
             bucket: access.sub,
+            mode: "stream",
             idToken: access.id_token
         },
         headers: {
@@ -151,8 +171,8 @@ const upload = (files: File[]) => {
             "Content-Type": "multipart/form-data"
         }
     }
-    axios(option).then(function (response) {
-        data.files = response.data;
+    return axios(option).then(function (response) {
+
     })   
 }
 
@@ -160,6 +180,7 @@ const upload = (files: File[]) => {
 const listObject = () => {
     storageForm.value = true
     const option = {
+        // baseURL: "http://localhost:9999",
         baseURL: env.apiUrl,
         url: "/storage/object/list",
         method: "POST",
@@ -200,7 +221,8 @@ const deleteObject = (index:number, row: ListObject) => {
 }
 
 function downloadUrl (row: ListObject) {
-    const url = env.storageUrl + "/storage/object?bucket=test&key=" + row.key + "&idToken=" + access.id_token;
+    // const url = env.storageUrl + "/storage/object?bucket=" + access.sub + "&key=" + row.key + "&idToken=";
+    const url = env.storageUrl + "/storage/object?bucket=" + access.sub + "&key=" + row.key + "&idToken=" + access.id_token;
     const aLink = document.createElement('a');
       aLink.style.display = 'none';
       aLink.href = url;
@@ -237,8 +259,6 @@ function downloadObject (row: ListObject)  {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     })
-
-
     // await axios.post(env.apiUrl+ "/storage/object/download", data, {});  
 }
 
