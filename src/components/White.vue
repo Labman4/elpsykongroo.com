@@ -10,12 +10,12 @@
         :element-loading-spinner="svg"
         element-loading-svg-view-box="-10, -10, 50, 50"
         element-loading-background="rgba(122, 122, 122, 0.8)"
-
+        @keyup.enter.prevent="webauthnLogin()"
         label-position="left"
         label-width="auto" 
         :fit-input-width=true	>
         <el-form-item label="name" label-width="auto">
-          <el-input v-model="access.username" @keyup.enter="webauthnLogin()" />
+          <el-input v-model="access.username" />
         </el-form-item>
       </el-form>
       <template #footer>
