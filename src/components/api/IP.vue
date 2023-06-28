@@ -8,8 +8,8 @@
       <el-table-column label="Operations">
       <template #default="scope">
         <el-button size="small" type="danger" @click="block(scope.$index, scope.row)"> 
-         <span v-if="!scope.row.black">block</span>
-         <span v-if="scope.row.black">unblock</span>
+         <span v-if="scope.row.black == 'false'">block</span>
+         <span v-if="scope.row.black == 'true'">unblock</span>
         </el-button>
       </template>
       </el-table-column>
@@ -154,13 +154,17 @@ const ipPageSizeChange = (newPage: number) => {
 }
 
 const block = (index: number, row: IP) => {
+  var black = "false";
+  if (row.black == "false") {
+      black = "true"
+  }
   const option = {
     baseURL: env.apiUrl,
     url: "/ip",
     method: "PATCH",
     params: {
       "address": "",
-      "black": !row.black,
+      "black": black,
       "id": row.id
     },
     headers: {
