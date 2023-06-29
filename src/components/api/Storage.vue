@@ -153,7 +153,7 @@ const openUpload = () => {
     uploadForm.value = true;
 }
 
-const upload = (options: UploadRequestOptions) => {
+const upload = async (options: UploadRequestOptions) => {
     storageForm.value = true
     const option = {
         // baseURL: "http://localhost:9999",
@@ -171,9 +171,7 @@ const upload = (options: UploadRequestOptions) => {
             "Content-Type": "multipart/form-data"
         }
     }
-    return axios(option).then(function (response) {
-
-    })   
+    await axios(option);   
 }
 
 
