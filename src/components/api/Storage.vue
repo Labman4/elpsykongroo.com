@@ -451,6 +451,7 @@ const initS3Info = async() => {
       try {
         if (s3Secret.value == "") {
           saveS3InfoForm.value = true
+          access.accessSecret = ""
           return;
         }
         const resp = await decryptData(ciphertext, iv, s3Secret.value);
@@ -482,7 +483,8 @@ const initS3Info = async() => {
         if (s3Secret.value != "") {
           ElMessageBox.alert("incorrect secret, will open default s3, please try again later by load button")
           s3Secret.value = ""
-          saveS3InfoForm.value = true  
+          saveS3InfoForm.value = true
+          access.accessSecret = ""
         }
         if (!s3Init.value) {
           saveS3InfoForm.value = false  
