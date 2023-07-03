@@ -341,7 +341,7 @@ function chunkedUpload(options: UploadRequestOptions, chunkSize) {
 
 const upload = async (options: UploadRequestOptions) => {
     if (options.file.size > 1024*1024*10) {
-        chunkedUpload(options, 1024*1024*5);
+        chunkedUpload(options, 1024*1024*2);
     } else {
         const option = {
             baseURL: env.storageUrl,
