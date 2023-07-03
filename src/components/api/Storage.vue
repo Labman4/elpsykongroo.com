@@ -384,6 +384,7 @@ const connect = () => {
     access.endpoint = s3FormData.endpoint
     access.region = s3FormData.region   
     listObject()
+    storageTable.value = true
 }
 
 const saveS3Info = async() => {
