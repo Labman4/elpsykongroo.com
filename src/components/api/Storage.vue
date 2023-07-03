@@ -485,6 +485,7 @@ const initS3Info = async() => {
           s3Secret.value = ""
           saveS3InfoForm.value = true
           access.accessSecret = ""
+          access.platform = ""
         }
         if (!s3Init.value) {
           saveS3InfoForm.value = false  
