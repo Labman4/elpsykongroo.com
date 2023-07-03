@@ -340,7 +340,7 @@ function chunkedUpload(options: UploadRequestOptions, chunkSize) {
 }    
 
 const upload = async (options: UploadRequestOptions) => {
-    if (options.file.size > 1024*1024*100) {
+    if (options.file.size > 1024*1024*10) {
         chunkedUpload(options, 1024*1024*5);
     } else {
         const option = {
