@@ -8,6 +8,7 @@ export const visible = reactive(
     "tmpLogin": false,
     "qrcode": false,
     "userInfoForm": false,
+    "formLabelWidth": "100px",
     "ipFormLabelWidth": "100px",
     "userFormLabelWidth": "100px",
     "groupFormLabelWidth": "100px",

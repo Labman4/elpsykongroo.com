@@ -151,7 +151,7 @@ const openAuthority = () => {
 let isCollapse = ref(true)
 
 const openStorage = () => {
-  storage.value?.listObject();
+  storage.value?.initS3();
 }
 const expand = () => {
   isCollapse.value = false;

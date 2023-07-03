@@ -18,6 +18,11 @@ export const access = reactive(
     sub: "",
     redirect_uri: "",
     qrcodeUrl: "",
+    accessKey: "",
+    accessSecret: "",
+    endpoint: "",
+    region: "",
+    platform: "default",
     update(token:string, expires_in:number) {
       this.access_token = token;
       this.expires_in = expires_in;
