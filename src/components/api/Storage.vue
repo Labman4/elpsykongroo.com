@@ -475,10 +475,9 @@ const initS3Info = async() => {
               access.accessKey = s3[0].accessKey 
             }
         } 
-        console.log(11)
-        // s3Init.value = true;
-        // storageTable.value = true
-        // listObject()
+        s3Init.value = true;
+        storageTable.value = true
+        listObject()
       } catch (error) {
         if (s3Secret.value != "") {
           ElMessageBox.alert("incorrect secret, will open default s3, please try again later by load button")
