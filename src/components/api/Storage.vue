@@ -41,7 +41,7 @@
         :limit="10"
         :on-success="refreshList"
         :http-request="upload"
-        :on-exceed="continueUpload"
+        :on-error="continueUpload"
         >
         <el-button type="primary">Click to upload</el-button>
         <template #tip>
@@ -254,7 +254,8 @@ const continueUpload:UploadProps['onExceed'] = (files: File[], uploadFiles: Uplo
             accessSecret: access.accessSecret,
             endpoint: access.endpoint, 
             region: access.region,
-            platform: access.platform
+            platform: access.platform,
+            partSize: 1024*1024*2
         },
         headers: {
             'Authorization': 'Bearer '+ access.access_token,
@@ -299,6 +300,7 @@ function chunkedUpload(options: UploadRequestOptions, chunkSize) {
         }
     }
     axios(option).then(function (response) {    
+      if (response.data != "") {
         const uploadId = response.data;
         var partCount = Math.ceil(options.file.size / chunkSize);
         var start = 0;
@@ -336,7 +338,8 @@ function chunkedUpload(options: UploadRequestOptions, chunkSize) {
             chunkIndex++;
         }
         listObject();
-    })
+    }
+  })
 }    
 
 const upload = async (options: UploadRequestOptions) => {
@@ -434,7 +437,10 @@ const deleteS3Info = async(index:number, row: s3Info) => {
 
 const initS3Info = async() => {
   //for local s3 dev
-  // access.id_token = ""
+  const domain = window.location.hostname;
+  if (domain.split(":")[0] == "127.0.0.1") {
+    access.id_token = ""
+  }
   const db = await openDB('s3', 1, ['s3',"aes"]);
   const s3Infos = await getObject(db, "s3", "", "readwrite", "all");
   var replacedStr = JSON.stringify(s3Infos).replace(/"{/g, '{').replace(/}"/g, '}').replace(/\\/g, '');
