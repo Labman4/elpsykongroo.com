@@ -240,7 +240,11 @@ const refreshList = (response: any, uploadFile: UploadFile) => {
     listObject();
 }
 
-const continueUpload:UploadProps['onExceed'] = (files: File[], uploadFiles: UploadUserFile[]) => {
+const continueUpload:UploadProps['onExceed'] = async (files: File[], uploadFiles: UploadUserFile[]) => {
+    var uploadId;
+    if (access.platform == "" || access.platform == "default") {
+      uploadId = await getUploadId(files[0].name);
+    }
     const option = {
         baseURL: env.storageUrl,
         url: "/storage/object",
@@ -252,10 +256,10 @@ const continueUpload:UploadProps['onExceed'] = (files: File[], uploadFiles: Uplo
             idToken: access.id_token,
             accessKey: access.accessKey,
             accessSecret: access.accessSecret,
-            endpoint: access.endpoint, 
+            endpoint: access.endpoint,
             region: access.region,
             platform: access.platform,
-            partSize: 1024*1024*2
+            uploadId: uploadId
         },
         headers: {
             'Authorization': 'Bearer '+ access.access_token,
@@ -279,14 +283,14 @@ const openUpload = () => {
     uploadForm.value = true;
 }
 
-function chunkedUpload(options: UploadRequestOptions, chunkSize) {
+const getUploadId = async (fileName) => {
     const option = {
         baseURL: env.storageUrl,
         url: "/storage/object",
-        method: options.method,
+        method: "POST",
         data: {
             bucket: access.sub,
-            key: options.file.name,
+            key: fileName,
             accessKey: access.accessKey,
             accessSecret: access.accessSecret,
             endpoint: access.endpoint, 
@@ -299,52 +303,67 @@ function chunkedUpload(options: UploadRequestOptions, chunkSize) {
             "Content-Type": "application/json"
         }
     }
-    axios(option).then(function (response) {    
-      if (response.data != "") {
-        const uploadId = response.data;
-        var partCount = Math.ceil(options.file.size / chunkSize);
-        var start = 0;
-        var end = Math.min(chunkSize, options.file.size);
-        var chunkIndex = 0;  
-        while (start < options.file.size) {
-            var chunk = options.file.slice(start, end);
-            const option = {
-                baseURL: env.storageUrl,
-                url: "/storage/object",
-                method: "POST",
-                data: {
-                    data: chunk,
-                    bucket: access.sub,
-                    key: options.file.name,
-                    partCount: partCount,
-                    partNum: chunkIndex,
-                    idToken: access.id_token,
-                    uploadId: uploadId,
-                    mode: "stream",
-                    accessKey: access.accessKey,
-                    accessSecret: access.accessSecret,
-                    endpoint: access.endpoint, 
-                    region: access.region,
-                    platform: access.platform
-                },
-                headers: {
-                    'Authorization': 'Bearer '+ access.access_token,
-                    "Content-Type": "multipart/form-data"
-                }
-            }
-            axios(option);   
-            start = end;
-            end = Math.min(end + chunkSize, options.file.size);
-            chunkIndex++;
-        }
-        listObject();
+    return axios(option).then(function(resp) {
+      return resp.data
+   })
+}
+
+async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
+    var uploadId;
+    var fileName = options.file.name;
+    if (access.platform == "" || access.platform == "default") {
+      uploadId = await getUploadId(fileName);
     }
-  })
+    var partCount = Math.ceil(options.file.size / chunkSize);
+    var start = 0;
+    var end = Math.min(chunkSize, options.file.size);
+    var chunkIndex = 0;  
+    while (start < options.file.size) {
+        var id = await getUploadId(fileName)
+        if (id == "" || id == undefined) {
+          return;
+        }
+        var chunk = options.file.slice(start, end);
+          const option = {
+              baseURL: env.storageUrl,
+              url: "/storage/object",
+              method: "POST",
+              data: {
+                  data: chunk,
+                  bucket: access.sub,
+                  key: options.file.name,
+                  partCount: partCount,
+                  partNum: chunkIndex,
+                  idToken: access.id_token,
+                  uploadId: uploadId,
+                  mode: "stream",
+                  accessKey: access.accessKey,
+                  accessSecret: access.accessSecret,
+                  endpoint: access.endpoint, 
+                  region: access.region,
+                  platform: access.platform
+              },
+              headers: {
+                  'Authorization': 'Bearer '+ access.access_token,
+                  "Content-Type": "multipart/form-data"
+              }
+          }
+          axios(option);   
+          start = end;
+          end = Math.min(end + chunkSize, options.file.size);
+          chunkIndex++;   
+    }
+    listObject();    
 }    
 
 const upload = async (options: UploadRequestOptions) => {
     if (options.file.size > 1024*1024*10) {
-        chunkedUpload(options, 1024*1024*2);
+      // be careful minio must big than 5mb 
+      if (access.platform == "" || access.platform == "default") {
+        chunkedUpload(options, 1024*1024*5);
+      } else {
+        chunkedUpload(options, 1024*1024*5);
+      }
     } else {
         const option = {
             baseURL: env.storageUrl,
@@ -450,7 +469,6 @@ const initS3Info = async() => {
     if (access.platform == "default") {
         access.platform = s3[0].platform 
     }
-    console.log(access.platform)
     const ciphertext = await getObject(db, "aes", "ciphertext-" + access.platform, "readwrite", "");
     const iv = await getObject(db, "aes", "iv-" + access.platform, "readwrite", "");
     if (ciphertext != undefined && ciphertext != "") {
@@ -479,12 +497,10 @@ const initS3Info = async() => {
             if (data.s3InfoList.length == 1) {
               access.endpoint = s3[0].endpoint 
               access.region = s3[0].region 
-              access.accessKey = s3[0].accessKey 
+              access.accessKey = s3[0].accessKey
+              s3InfoTable.value = false;
             }
         } 
-        s3Init.value = true;
-        storageTable.value = true
-        listObject()
       } catch (error) {
         if (s3Secret.value != "") {
           ElMessageBox.alert("incorrect secret, will open default s3, please try again later by load button")
@@ -499,7 +515,10 @@ const initS3Info = async() => {
         storageTable.value = true
         listObject()    
       }
-    }
+    } 
+    s3Init.value = true;
+    storageTable.value = true
+    listObject()
   } else if (access.platform == "default") {
     s3Form.value = true
     access.platform = "";
