@@ -1,7 +1,7 @@
 import '~/assets/js/live2d/live2d.min';
 import '~/assets/js/live2d/live2dcubismcore';
 import * as PIXI from 'pixi.js';
-import { Live2DModel } from 'pixi-live2d-display';
+import { Live2DModel } from 'pixi-live2d-display-labman4';
 import { visible } from './visible';
 
 
