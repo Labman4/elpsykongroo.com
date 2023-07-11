@@ -10,7 +10,7 @@
       <el-table-column label="Operations">
       <template #default="scope">
         <el-button size="small" type="danger" @click="deleteS3(scope.$index, scope.row)">Delete</el-button>
-        <el-button size="small" type="primary" @click="downloadUrl(scope.row)">Download</el-button>
+        <el-button size="small" type="primary" @click="download(scope.row)">Download</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -154,7 +154,7 @@ import { ElMessage, ElMessageBox, UploadFile, UploadProps, UploadRequestOptions,
 import { dayjs } from 'element-plus';
 import { visible } from '~/assets/ts/visible'
 import { setObject, deleteObject, getObject, openDB } from '~/assets/ts/indexDB'
-import { encryptData, decryptData } from '~/assets/ts/encrypt'
+import { encryptData, decryptData, computeFileSHA256 } from '~/assets/ts/encrypt'
 
 interface ListObject {
     "key": string
@@ -243,7 +243,7 @@ const refreshList = (response: any, uploadFile: UploadFile) => {
 const continueUpload:UploadProps['onExceed'] = async (files: File[], uploadFiles: UploadUserFile[]) => {
     var uploadId;
     if (access.platform == "" || access.platform == "default") {
-      uploadId = await getUploadId(files[0].name);
+      uploadId = await getUploadId(files[0].name, "", "", "");
     }
     const option = {
         baseURL: env.storageUrl,
@@ -283,7 +283,7 @@ const openUpload = () => {
     uploadForm.value = true;
 }
 
-const getUploadId = async (fileName) => {
+const getUploadId = async (fileName, sha256, partCount, partNum) => {
     const option = {
         baseURL: env.storageUrl,
         url: "/storage/object",
@@ -296,7 +296,10 @@ const getUploadId = async (fileName) => {
             endpoint: access.endpoint, 
             region: access.region,
             platform: access.platform,
-            idToken: access.id_token
+            idToken: access.id_token,
+            sha256: sha256,
+            partCount: partCount,
+            partNum: partNum,
         },
         headers: {
             'Authorization': 'Bearer '+ access.access_token,
@@ -309,52 +312,70 @@ const getUploadId = async (fileName) => {
 }
 
 async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
+    const fileName = options.file.name;
     var uploadId;
-    var fileName = options.file.name;
-    if (access.platform == "" || access.platform == "default") {
-      uploadId = await getUploadId(fileName);
+    if (access.platform != "" && access.platform != "default") {
+      const upload = await getUploadId(fileName, "", "", "");
+      uploadId = upload;
     }
     var partCount = Math.ceil(options.file.size / chunkSize);
-    var start = 0;
-    var end = Math.min(chunkSize, options.file.size);
-    var chunkIndex = 0;  
-    while (start < options.file.size) {
-        var id = await getUploadId(fileName)
-        if (id == "" || id == undefined) {
-          return;
-        }
-        var chunk = options.file.slice(start, end);
-          const option = {
-              baseURL: env.storageUrl,
-              url: "/storage/object",
-              method: "POST",
-              data: {
-                  data: chunk,
-                  bucket: access.sub,
-                  key: options.file.name,
-                  partCount: partCount,
-                  partNum: chunkIndex,
-                  idToken: access.id_token,
-                  uploadId: uploadId,
-                  mode: "stream",
-                  accessKey: access.accessKey,
-                  accessSecret: access.accessSecret,
-                  endpoint: access.endpoint, 
-                  region: access.region,
-                  platform: access.platform
-              },
-              headers: {
-                  'Authorization': 'Bearer '+ access.access_token,
-                  "Content-Type": "multipart/form-data"
-              }
+    for (const { index, chunk } of chunks(options.file, chunkSize)) {
+        chunk.arrayBuffer().then(async function(arrayBuffer) {
+          const sha256 = await computeFileSHA256(arrayBuffer)
+          var checkUpload = await getUploadId(fileName, sha256, partCount, index)
+          if (checkUpload == "" || checkUpload == undefined) {
+              console.log(sha256)
+              console.log("exist")
+              console.log(index)
+              return; 
           }
-          axios(option);   
-          start = end;
-          end = Math.min(end + chunkSize, options.file.size);
-          chunkIndex++;   
+          if (access.platform != "" && access.platform != "default" && uploadId != checkUpload) {
+              console.log(sha256)
+              console.log("not minio")
+              console.log(index)
+              listObject()
+              return;
+          }
+          
+          const option = {
+            baseURL: env.storageUrl,
+            url: "/storage/object",
+            method: "POST",
+            data: {
+                data: chunk,
+                bucket: access.sub,
+                key: options.file.name,
+                partCount: partCount,
+                partNum: index,
+                idToken: access.id_token,
+                uploadId: uploadId,
+                mode: "stream",
+                accessKey: access.accessKey,
+                accessSecret: access.accessSecret,
+                endpoint: access.endpoint, 
+                region: access.region,
+                platform: access.platform
+            },
+            headers: {
+                'Authorization': 'Bearer '+ access.access_token,
+                "Content-Type": "multipart/form-data"
+            }
+        }
+        axios(option);
+      })
     }
-    listObject();    
 }    
+
+function* chunks(file, chunkSize) {
+  let offset = 0;
+  let index = 0;
+  while (offset < file.size) {
+    const chunk = file.slice(offset, offset + chunkSize);
+    yield { index, chunk };    
+    offset += chunkSize;
+    index++;
+  }
+}
 
 const upload = async (options: UploadRequestOptions) => {
     if (options.file.size > 1024*1024*10) {
@@ -418,9 +439,9 @@ const saveS3Info = async() => {
   const db = await openDB('s3', 1, ['s3',"aes"]);
   const resp = await encryptData(s3FormData.accessSecret, s3Secret.value);
   s3FormData.accessSecret = resp.ciphertext
-  const ciphertext = await setObject(db, "aes", "ciphertext-" + s3FormData.platform, resp.ciphertext, "readwrite", "");
-  const iv = await setObject(db, "aes", "iv-" + s3FormData.platform, resp.iv, "readwrite", "");
-  const s3 = await setObject(db, "s3", s3FormData.platform, JSON.stringify(s3FormData), "readwrite", "put");
+  await setObject(db, "aes", "ciphertext-" + s3FormData.platform, resp.ciphertext, "readwrite", "");
+  await setObject(db, "aes", "iv-" + s3FormData.platform, resp.iv, "readwrite", "");
+  await setObject(db, "s3", s3FormData.platform, JSON.stringify(s3FormData), "readwrite", "put");
   saveS3InfoForm.value = false
   s3Form.value = false
   storageTable.value = true
@@ -447,10 +468,10 @@ const clearS3Info = async() => {
 }
 
 const deleteS3Info = async(index:number, row: s3Info) => {
-  const db = await openDB('s3', 1);
-  const ciphertext = await deleteObject(db, "aes", "ciphertext-" + row.platform, "readwrite");
-  const iv = await deleteObject(db, "aes", "iv-" + row.platform, "readwrite");
-  const s3 = await deleteObject(db, "s3", row.platform, "readwrite");
+  const db = await openDB('s3', 1, ['s3',"aes"]);
+  await deleteObject(db, "aes", "ciphertext-" + row.platform, "readwrite");
+  await deleteObject(db, "aes", "iv-" + row.platform, "readwrite");
+  await deleteObject(db, "s3", row.platform, "readwrite");
   data.s3InfoList.splice(index, 1)
 }
 
@@ -459,6 +480,7 @@ const initS3Info = async() => {
   const domain = window.location.hostname;
   if (domain.split(":")[0] == "127.0.0.1") {
     access.id_token = ""
+    // access.sub = "labman1"
   }
   const db = await openDB('s3', 1, ['s3',"aes"]);
   const s3Infos = await getObject(db, "s3", "", "readwrite", "all");
@@ -508,6 +530,9 @@ const initS3Info = async() => {
           saveS3InfoForm.value = true
           access.accessSecret = ""
           access.platform = ""
+          access.accessKey = ""
+          access.endpoint = ""
+          access.region = ""
         }
         if (!s3Init.value) {
           saveS3InfoForm.value = false  
@@ -587,6 +612,14 @@ const deleteS3 = (index:number, row: ListObject) => {
             data.files.splice(index, 1);
         }    
     })   
+}
+
+const download = (row: ListObject) => {
+  if (access.platform == "" || access.platform == "default") {
+    downloadUrl(row);
+  } else {
+    downloadObject(row);
+  }
 }
 
 function downloadUrl (row: ListObject) {
