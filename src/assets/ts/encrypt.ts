@@ -30,7 +30,6 @@ function base64ToArrayBuffer(base64) {
 }
 
 async function generateFixedKey(text) {
-    const encoder = new TextEncoder();
     const keyData = await generateSHA256ByInput(text);
     const key = await crypto.subtle.importKey(
         'raw',

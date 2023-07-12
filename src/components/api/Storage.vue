@@ -478,9 +478,9 @@ const deleteS3Info = async(index:number, row: s3Info) => {
 const initS3Info = async() => {
   //for local s3 dev
   const domain = window.location.hostname;
-  if (domain.split(":")[0] == "127.0.0.1") {
+  if (domain.split(":")[0] == "127.0.0.1" || domain.split(":")[0] == "localhost") {
     access.id_token = ""
-    // access.sub = "labman1"
+    access.sub = "admin"
   }
   const db = await openDB('s3', 1, ['s3',"aes"]);
   const s3Infos = await getObject(db, "s3", "", "readwrite", "all");
@@ -538,7 +538,8 @@ const initS3Info = async() => {
           saveS3InfoForm.value = false  
         }
         storageTable.value = true
-        listObject()    
+        listObject()
+        return
       }
     } 
     s3Init.value = true;
@@ -618,8 +619,39 @@ const download = (row: ListObject) => {
   if (access.platform == "" || access.platform == "default") {
     downloadUrl(row);
   } else {
-    downloadObject(row);
+    getObjectUrl(row);
+    // downloadObject(row);
   }
+}
+const getObjectUrl = (row: ListObject) =>{
+  axios({
+        method: 'POST',
+        url: env.storageUrl + "/storage/object/url" ,
+        data: {    
+            bucket: access.sub,
+            key: row.key,
+            idToken: access.id_token,
+            accessKey: access.accessKey,
+            accessSecret: access.accessSecret,
+            endpoint: access.endpoint, 
+            region: access.region,
+            platform: access.platform
+        },   
+        headers: {
+            'Authorization': 'Bearer '+ access.access_token,
+            "Content-Type": "application/json"
+        },
+    }).then(async function(response){
+      const url = response.data;
+      const aLink = document.createElement('a');
+      aLink.style.display = 'none';
+      aLink.href = url;
+      aLink.download = row.key;
+    //   aLink.target = '_parent';
+      document.body.appendChild(aLink);
+      aLink.click();
+      document.body.removeChild(aLink); 
+    }) 
 }
 
 function downloadUrl (row: ListObject) {
