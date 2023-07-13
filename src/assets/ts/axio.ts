@@ -4,6 +4,7 @@ import { access } from './access';
 import { env } from './env';
 import { handleCookie } from './handleAuthCode';
 import { refreshlogin } from './login';
+import { visible } from './visible';
 const timeCount= ref(0);
 
 // const source = axios.CancelToken.source();
@@ -33,8 +34,7 @@ axios.interceptors.response.use(function (response) {
       if (error.response.data === 'no access') {
         ElMessageBox.alert("no access, please ensure and retry")
       } else if (handleCookie().length != 0) {
-        ElMessageBox.alert("cookie expired, will redirect to refresh it")
-        refreshlogin();
+        visible.refreshlogin = true
       } else {
         refreshToken();   
       }
@@ -67,8 +67,8 @@ axios.interceptors.response.use(function (response) {
         if(handleCookie().length == 0) {
           ElMessageBox.alert("session expired, please login agian");
         } else {
-          ElMessageBox.alert("cookie expired, will redirect to refresh it")
-          refreshlogin();        }
+          visible.refreshlogin = true
+        }
       })
     }
   }

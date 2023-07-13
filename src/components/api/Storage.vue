@@ -41,7 +41,6 @@
         :limit="10"
         :on-success="refreshList"
         :http-request="upload"
-        :on-error="continueUpload"
         >
         <el-button type="primary">Click to upload</el-button>
         <template #tip>
@@ -138,7 +137,7 @@
       </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="saveS3InfoForm = false, s3Secret = ''">Cancel</el-button>
+        <el-button @click="cancelLoad()">Cancel</el-button>
         <el-button type="primary" @click="initS3Info()">load</el-button>
         <el-button type="primary" @click="saveS3Info()">save</el-button>
       </span>
@@ -240,17 +239,18 @@ const refreshList = (response: any, uploadFile: UploadFile) => {
     listObject();
 }
 
-const continueUpload:UploadProps['onExceed'] = async (files: File[], uploadFiles: UploadUserFile[]) => {
+const continueUpload:UploadProps['onError'] = async (error: Error, file: UploadFile, uploadFiles: UploadFile[]) => {
+    console.log(error)
     var uploadId;
     if (access.platform == "" || access.platform == "default") {
-      uploadId = await getUploadId(files[0].name, "", "", "");
+      uploadId = await getUploadId(file.name, "", "", "");
     }
     const option = {
         baseURL: env.storageUrl,
         url: "/storage/object",
         method: "POST",
         data: {
-            data: files[0],
+            data: file,
             bucket: access.sub,
             mode: "stream",
             idToken: access.id_token,
@@ -324,19 +324,13 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
           const sha256 = await computeFileSHA256(arrayBuffer)
           var checkUpload = await getUploadId(fileName, sha256, partCount, index)
           if (checkUpload == "" || checkUpload == undefined) {
-              console.log(sha256)
-              console.log("exist")
-              console.log(index)
               return; 
           }
           if (access.platform != "" && access.platform != "default" && uploadId != checkUpload) {
-              console.log(sha256)
-              console.log("not minio")
-              console.log(index)
               listObject()
               return;
           }
-          
+        
           const option = {
             baseURL: env.storageUrl,
             url: "/storage/object",
@@ -360,8 +354,11 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
                 'Authorization': 'Bearer '+ access.access_token,
                 "Content-Type": "multipart/form-data"
             }
-        }
-        axios(option);
+          }
+          axios(option).catch(function(error) {
+            console.log(error)
+            axios(option);
+          });
       })
     }
 }    
@@ -383,7 +380,7 @@ const upload = async (options: UploadRequestOptions) => {
       if (access.platform == "" || access.platform == "default") {
         chunkedUpload(options, 1024*1024*5);
       } else {
-        chunkedUpload(options, 1024*1024*5);
+        chunkedUpload(options, 1024*1024*2);
       }
     } else {
         const option = {
@@ -456,6 +453,14 @@ const loadS3Info = async(index:number, row: s3Info) => {
   await initS3Info();
 }
 
+const cancelLoad = () => {
+  saveS3InfoForm.value = false;
+  s3Secret.value = '';
+  access.platform = ''
+  listObject();
+  storageTable.value = true;
+} 
+
 const clearS3Info = async() => {
   saveS3Warning.value = false;
   s3Form.value = false;
@@ -481,6 +486,7 @@ const initS3Info = async() => {
   if (domain.split(":")[0] == "127.0.0.1" || domain.split(":")[0] == "localhost") {
     access.id_token = ""
     access.sub = "admin"
+    // access.access_token = ""
   }
   const db = await openDB('s3', 1, ['s3',"aes"]);
   const s3Infos = await getObject(db, "s3", "", "readwrite", "all");

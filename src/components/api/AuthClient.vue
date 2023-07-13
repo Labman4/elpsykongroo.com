@@ -412,6 +412,10 @@ const tokenSettings = [
             {
               value: 1200,
               label: "20min"
+            },
+            {
+              value: 86400,
+              label: "1day"
             }
           ]
         }

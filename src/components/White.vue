@@ -77,6 +77,22 @@
     </template>
   </el-dialog>
 
+  <el-dialog
+    v-model="visible.refreshlogin"
+    title="Warning"
+    width="80%"
+    align-center>
+    <span>redirect to refresh access?</span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="visible.refreshlogin = false">later</el-button>
+        <el-button type="primary" @click="refreshlogin()">
+          Confirm
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
+
   <el-dialog 
     v-model="visible.qrcode"
     width="50%"
@@ -100,8 +116,9 @@ import * as webauthnJson from "@github/webauthn-json";
 import bcrypt from 'bcryptjs';
 import { ElNotification } from 'element-plus';
 import user from '~/components/api/User.vue';
-import QrcodeVue from "qrcode.vue";
-
+import QrcodeVue from 'qrcode.vue';
+import { refreshlogin } from '~/assets/ts/login';
+ 
 const u = ref<InstanceType<typeof user> | null>(null)
 
 const userr:User = {

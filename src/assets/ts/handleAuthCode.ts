@@ -18,7 +18,6 @@ if (code != null && state != null) {
 }
 
  function pkceCode() {
-    // const code_verifier =  fs.readFileSync('/codeVerifier.txt', "utf8");
     var codeVerifier;
     codeVerifier = "841aa35355d86c55c1a948831ab90f23f80f71c65a08feb0dc4830a066fd55d36422c464bc58128edecf2f0bf5e0baadfda1168f8cb5883bd8ff6745454afe8b";
     if (window.sessionStorage.getItem("code_verifier") != null) {
@@ -54,9 +53,39 @@ if (code != null && state != null) {
           access.sub = jwt["sub"]
           access.email_verified = jwt["email_verified"]
           access.client_id = jwt["azp"]
+          access.expires_in = jwt["exp"] - jwt["iat"]
           toggleDark();
           countDown();
         }
+      }) 
+  }
+
+  function openaiPkceCode(code) {
+    console.log(code)
+    var codeVerifier;
+    codeVerifier = "841aa35355d86c55c1a948831ab90f23f80f71c65a08feb0dc4830a066fd55d36422c464bc58128edecf2f0bf5e0baadfda1168f8cb5883bd8ff6745454afe8b";
+    if (window.sessionStorage.getItem("code_verifier") != null) {
+        codeVerifier =  window.sessionStorage.getItem("code_verifier");
+    }
+    const code_verifier = btoa(codeVerifier);
+    const authOption = {
+        baseURL: env.authUrl,
+        url: "/oauth2/token",
+        method: "POST",
+        data: {
+          code_verifier: code_verifier,
+          grant_type: 'authorization_code',
+          code: code,
+          redirect_uri: "com.openai.chat://auth0.openai.com/ios/com.openai.chat/callback",
+          client_id: "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh"
+        },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },   
+        withCredentials: true                  
+    }
+      axios(authOption).then(function (response) {
+        console.log(response.data)
       }) 
   }
 
@@ -109,6 +138,7 @@ async function deleteCookie(name) {
           access.permission = jwt["permission"]
           access.email_verified = jwt["email_verified"]
           access.client_id = jwt["azp"]
+          access.expires_in = jwt["exp"] - jwt["iat"]
           toggleDark();
           countDown();
         }

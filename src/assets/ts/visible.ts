@@ -6,6 +6,7 @@ export const visible = reactive(
     "authFormVisible": false,
     "loading": false,
     "tmpLogin": false,
+    "refreshlogin": false,
     "qrcode": false,
     "userInfoForm": false,
     "formLabelWidth": "100px",

@@ -1,16 +1,17 @@
 <template>
   <el-dialog v-model="ipTable" title="address" width="75%">
-    <el-button type="" @click="openIpAdd">Add</el-button>
+    <el-button type="" @click="openIpAdd">Update</el-button>
     <el-table :data="data.ips">
       <el-table-column property="address" label="address" width="auto"/>
       <el-table-column property="black" label="black" width="100px"/>
       <el-table-column property="timestamp" label="date" sortable width="auto"/>
       <el-table-column label="Operations">
       <template #default="scope">
-        <el-button size="small" type="danger" @click="block(scope.$index, scope.row)"> 
+        <el-button size="small" type="danger" @click="ipBlock(scope.$index, scope.row.address, scope.row.black, scope.row.id)"> 
          <span v-if="scope.row.black == 'false'">block</span>
          <span v-if="scope.row.black == 'true'">unblock</span>
         </el-button>
+        <el-button size="small" type="danger" @click="DeleteIP(scope.row.address)">delete</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -35,7 +36,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="ipForm = false">Cancel</el-button>
-        <el-button type="danger" @click="DeleteIP">delete</el-button>
+        <el-button type="danger" @click="DeleteIP('')">delete</el-button>
         <el-button type="primary" @click="addIp" >
           Confirm
         </el-button>
@@ -100,35 +101,17 @@ function addIp() {
   })
 }
 
-const ipList = () => {
-  ipTable.value = true;
-  const option = {
-    baseURL: env.apiUrl,
-    url: "/ip",
-    method: "GET",
-    params: {
-      black: "",
-      pageNumber: ipPage.pageNumber-1,
-      pageSize: ipPage.pageSize,
-      order: ipPage.order
-    },
-    headers: {
-    'Authorization': 'Bearer '+ access.access_token
-    },
+const DeleteIP = (address) => {
+  if (address == "" || address == undefined) {
+    address = ipFormData.address
   }
-  axios(option).then(function (response) {
-    data.ips=response.data;
-  })
-}
-
-const DeleteIP = () => {
   const option = {
     baseURL: env.apiUrl,
     url: "/ip",
     method: "PATCH",
     params: {
       black: "",
-      address: ipFormData.address,
+      address: address,
       id: "",
     },
     headers: {
@@ -153,29 +136,54 @@ const ipPageSizeChange = (newPage: number) => {
   ipList();
 }
 
-const block = (index: number, row: IP) => {
-  var black = "false";
-  if (row.black == "false") {
-      black = "true"
+const ipBlock = (index: number, address, black, id) => {
+    var flag = "false";
+    if (black == "false") {
+      flag = "true"
+    }
+    const option = {
+      baseURL: env.apiUrl,
+      url: "/ip",
+      method: "PATCH",
+      params: {
+        "address": address,
+        "black": flag,
+        "id": id
+      },
+      headers: {
+      'Authorization': 'Bearer '+ access.access_token
+      },
+    }
+    axios(option).then(function (response) {
+      if (response.data == "UPDATED") {
+        ipList()
+      }
+    }) 
   }
-  const option = {
-    baseURL: env.apiUrl,
-    url: "/ip",
-    method: "PATCH",
-    params: {
-      "address": "",
-      "black": black,
-      "id": row.id
-    },
-    headers: {
-    'Authorization': 'Bearer '+ access.access_token
-    },
+
+  const ipList = () => {
+    ipTable.value = true;
+    const option = {
+      baseURL: env.apiUrl,
+      url: "/ip",
+      method: "GET",
+      params: {
+        black: "",
+        pageNumber: ipPage.pageNumber-1,
+        pageSize: ipPage.pageSize,
+        order: ipPage.order
+      },
+      headers: {
+      'Authorization': 'Bearer '+ access.access_token,
+      "x-real-ip": "131.186.44.191"
+      },
+    }
+    axios(option).then(function (response) {
+      data.ips=response.data;
+    })
   }
-  axios(option).then(function (response) {
-    ipList()
-  }) 
-}
+
 defineExpose({
-  ipList
+  ipList, ipBlock
 })
 </script>
