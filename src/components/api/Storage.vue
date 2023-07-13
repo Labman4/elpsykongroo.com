@@ -3,6 +3,7 @@
     <el-button type="" @click="openUpload()">upload</el-button>
     <el-button type="" @click="s3Form = true">connect</el-button>
     <el-button type="" @click="s3InfoTable = true">load</el-button>
+    <el-button @click="listObject()">refresh</el-button>
     <el-table :data="data.files">
       <el-table-column property="key" label="file" width="auto"/>
       <el-table-column property="timestamp" label="lastModified" :formatter="formatTimestamp" sortable/>
@@ -592,7 +593,12 @@ const listObject = () => {
       }
   }
   axios(option).then(function (response) {
-      data.files = response.data;
+      const listObject:ListObject[] = response.data
+      const filterObject = listObject.filter( obj => {
+            return !obj.key.startsWith(access.sub)
+        })
+      data.files = filterObject;
+      
   })   
 }
 
