@@ -357,7 +357,9 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
           }
           axios(option).catch(function(error) {
             console.log(error)
-            axios(option);
+            axios(option).catch(function(error){
+              axios(option)
+            });
           });
       })
     }
