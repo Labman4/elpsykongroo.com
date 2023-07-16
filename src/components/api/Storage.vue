@@ -361,6 +361,7 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
             axios(option).catch(function(error){
               axios(option).catch(function(error){
                 ElMessageBox.alert("upload failed, please click upload and retry")
+                return;
               })
             });
           });
