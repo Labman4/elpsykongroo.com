@@ -150,7 +150,7 @@
 import { axios } from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
-import { ElMessage, ElMessageBox, UploadFile, UploadProps, UploadRequestOptions, UploadUserFile } from 'element-plus';
+import { ElMessage, ElMessageBox, ElNotification, UploadFile, UploadProps, UploadRequestOptions, UploadUserFile } from 'element-plus';
 import { dayjs } from 'element-plus';
 import { visible } from '~/assets/ts/visible'
 import { setObject, deleteObject, getObject, openDB } from '~/assets/ts/indexDB'
@@ -360,8 +360,11 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
             console.log(error)
             axios(option).catch(function(error){
               axios(option).catch(function(error){
-                ElMessageBox.alert("upload failed, please click upload and retry")
-                return;
+                ElNotification({
+                  title: 'Network Error',
+                  message: 'please click upload and retry',
+                  duration: 3000,
+                })
               })
             });
           });
