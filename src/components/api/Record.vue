@@ -3,20 +3,17 @@
     <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
     <el-table :data="data.records" @selection-change="handleRecordSelectChange">
       <el-table-column type="selection"/>
-      <el-table-column property="sourceIP" label="address" width="130px" />
       <el-table-column property="accessPath" label="path"  width="170px"/>
       <el-table-column property="userAgent" label="userAgent"  width="300px"/>
       <el-table-column property="timestamp" label="date" :formatter="recordTimestamp" sortable/>
+      <el-table-column property="sourceIP" label="address" width="130px" />
       <el-table-column  align="right">
       <template #header>
         <el-input v-model="search" size="small" placeholder="Type to search"  @keyup.enter="filterByParam" />
       </template>
       <template #default="scope">
-        <el-button
-          size="small"
-          type="danger"
-          @click="DeleteRecord(scope.$index, scope.row)"
-          >Delete</el-button>
+        <el-button size="small" type="danger" @click="DeleteRecord(scope.$index, scope.row)">Delete</el-button>
+        <el-button size="small" type="danger" @click="block(scope.$index, scope.row.sourceIP, 'false', '')">lock</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -26,6 +23,8 @@
       @update:current-page="recordPageChange"
       @update:page-size="recordPageSizeChange"/>
   </el-dialog>
+  <IP ref="ip"></IP>
+
 </template>
 
 <script lang="ts" setup>
@@ -33,6 +32,9 @@ import { axios } from '~/assets/ts/axio';
 import { dayjs } from 'element-plus';
 import { access } from '~/assets/ts/access';
 import { env } from '~/assets/ts/env';
+import IP from '~/components/api/IP.vue';
+
+const ip = ref<InstanceType<typeof IP> | null>(null)
 
 const records:Record[]= [];
 
@@ -61,6 +63,10 @@ const handleRecordSelectChange = (val: Record[]) => {
     selectRecord.push(i.id);
   }
 }
+ 
+const block = (index: number, address, black, id) => {
+  ip.value?.ipBlock(index, address, black, id)
+}
 
 const multipleRecordSelect = ref<Record[]>([])
 
@@ -69,18 +75,14 @@ const selectRecord:string[] = [];
 const DeleteSelect= () => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/record/delete",
+    url: "/record/" + selectRecord.toString(),
     method: "DELETE",
-    params: {
-      "sourceIP": "",
-      "id": selectRecord.toString(),
-    },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function (response) {
-    var count = response.data.data;
+    var count = response.data;
     if (count == selectRecord.length) {
       selectRecord.forEach(function(item, index){
         data.records.forEach(function(i, ind){
@@ -117,18 +119,14 @@ const DeleteSelect= () => {
 const DeleteRecord = (index: number, row: Record) => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/record/delete",
+    url: "/record/" + row.id,
     method: "DELETE",
-    params: {
-      "sourceIP": "",
-      "id": row.id,
-    },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function (response) {
-    var count = response.data.data;
+    var count = response.data;
     if (count > 0) {
       data.records.splice(index, 1);
     }
@@ -145,7 +143,7 @@ function recordList(order:string) {
   recordPage.order = order;
   const option = {
     baseURL: env.apiUrl,
-    url: "/record/access",
+    url: "/record",
     method: "GET",
     params: {
       "pageNumber": recordPage.pageNumber-1,
@@ -157,7 +155,7 @@ function recordList(order:string) {
     },
   } 
   axios(option).then(function (response) {
-  data.records = response.data.data;
+  data.records = response.data;
   })
 }
 
@@ -181,24 +179,29 @@ const recordPageSizeChange = (newPage: number) => {
 const search = ref('')
 
 function filterByParam() {
-  const option = {
-    baseURL: env.apiUrl,
-    url: "/record/filter",
-    method: "POST",
-    data: {
-      "param": search.value,
-      "pageNumber": recordPage.pageNumber-1,
-      "pageSize": recordPage.pageSize
-    },
-    headers: {
-      'Authorization': 'Bearer '+ access.access_token,
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
+  if (search.value != '') {
+    const option = {
+      baseURL: env.apiUrl,
+      url: "/record",
+      method: "POST",
+      data: {
+        "params": search.value,
+        "pageNumber": recordPage.pageNumber-1,
+        "pageSize": recordPage.pageSize,
+        "order": recordPage.order
+      },
+      headers: {
+        'Authorization': 'Bearer '+ access.access_token,
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+    }
+    axios(option).then(function (response) {
+      data.records=response.data;
+    })
+  } else {
+    recordList(recordPage.order);
   }
-  axios(option).then(function (response) {
-    data.records=response.data.data;
-  })
- }
+}
 
  defineExpose({
   recordList

@@ -2,15 +2,45 @@ import axios from 'axios';
 import { toggleDark } from '~/composables';
 import { access } from './access';
 import { env } from './env';
+import { handleCookie } from './handleAuthCode';
+import { refreshlogin } from './login';
+import { visible } from './visible';
 const timeCount= ref(0);
 
+// const source = axios.CancelToken.source();
+
+// axios.interceptors.request.use(config => {
+//   config.headers['X-Requested-With'] = 'XMLHttpRequest';
+//   // config.cancelToken = source.token;
+
+//   return config;
+// });
+
 axios.interceptors.response.use(function (response) {
+    // if (response.status === 302) {
+    //   console.log(response)
+    //   return axios.get(response.headers.location)
+    // }
     return response;
   }, function (error) {
-    if (error.response.status === 401 || error.response.data === 'no access') {
+    if (axios.isCancel(error)) {
+      console.log('Request canceled', error.message);
+    } 
+    if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
+      console.log("cors error");
+      // window.location.href = error.response.request.responseURL;       
+    } 
+    if (error.response.status === 401) {
+      if (error.response.data === 'no access') {
         ElMessageBox.alert("no access, please ensure and retry")
+      } else if (handleCookie().length != 0) {
+        visible.refreshlogin = true
+      } else {
+        refreshToken();   
+      }
+    } else {
+      console.error(error);
     }
-      refreshToken();
     return Promise.reject(error);
   });
 
@@ -27,16 +57,19 @@ axios.interceptors.response.use(function (response) {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded"
         },  
-        auth : { 
-          username : access.client_id , 
-          password : access.client_secret 
-        } ,           
+        withCredentials: true           
       }
       axios(refreshOption).then(function (response) {
         if(response.data.access_token != "") {
           access.update(response.data.access_token, response.data.expires_in);
+        } 
+      }).catch(function(error){
+        if(handleCookie().length == 0) {
+          ElMessageBox.alert("session expired, please login agian");
+        } else {
+          visible.refreshlogin = true
         }
-      }) 
+      })
     }
   }
 

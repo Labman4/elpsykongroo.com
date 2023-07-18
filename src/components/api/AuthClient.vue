@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="authClientForm" title="">
+  <el-dialog v-model="authClientForm" title="" width="75%">
     <el-form 
     ref="clientformRef"
     :model="clientForm" 
@@ -23,6 +23,9 @@
         </el-form-item>
       <el-form-item label="redirectUris" :label-width=visible.authClientFormWidth>
         <el-input v-model="clientForm.redirectUris" />
+      </el-form-item>
+      <el-form-item label="logoutRedirectUris" :label-width=visible.authClientFormWidth>
+        <el-input v-model="clientForm.postLogoutRedirectUris" />
       </el-form-item>
       <el-form-item label="clientName" :label-width=visible.authClientFormWidth>
         <el-input v-model="clientForm.clientName" />
@@ -81,6 +84,7 @@
       <el-table-column property="clientSecret" label="Secret" />
       <el-table-column property="clientName" label="name" />
       <el-table-column property="redirectUris" label="redirectUris" width="100px" />
+      <el-table-column property="postLogoutRedirectUris" label="postLogoutRedirectUris" width="100px" />
       <el-table-column property="scopes" label="scopes" width="70px"/>
       <el-table-column property="clientAuthenticationMethods" label="Methods" width="60px"/>
       <el-table-column property="authorizationGrantTypes" label="type" width="70px"/>
@@ -109,7 +113,7 @@
       @update:page-size="authClientPageSizeChange"/>
   </el-dialog>
 
-  <el-dialog v-model="authClientRegisterForm" title="">
+  <el-dialog v-model="authClientRegisterForm" title="" width="75%">
     <el-form 
     ref="registerformRef"
     :model="registerForm" 
@@ -281,6 +285,7 @@ let initClientForm  = () => ({
   clientSecretExpiresAt: "",
   scopes: "",
   redirectUris: "",
+  postLogoutRedirectUris: "",
   clientName: "",
   clientSettings: "",
   tokenSettings: "",
@@ -318,6 +323,7 @@ interface AuthClient {
   clientSecretExpiresAt: string
   scopes: string
   redirectUris: string
+  postLogoutRedirectUris: string
   clientName: string
   clientSettings: string
   tokenSettings: string
@@ -406,6 +412,10 @@ const tokenSettings = [
             {
               value: 1200,
               label: "20min"
+            },
+            {
+              value: 86400,
+              label: "1day"
             }
           ]
         }
@@ -419,6 +429,10 @@ const tokenSettings = [
           value: "java.time.Duration",
           label: "Duration",
           children: [
+            {
+              value: 60,
+              label: "1min"
+            },
             {
               value: 3600,
               label: "1h"
@@ -452,7 +466,11 @@ const tokenSettings = [
         {
           value: "value",
           label: "value",
-          children: [
+          children: [       
+            {
+              value: "reference",
+              label: "reference"
+            },
             {
               value: "self-contained",
               label: "self-contained"
@@ -464,14 +482,14 @@ const tokenSettings = [
     {
       value: "settings.token.reuse-refresh-tokens",
       label: "reuseRefreshTokens",
-      children: [
-        {
-          value: "reuse-refresh-tokens-true",
-          label: "true",
-        },
+      children: [    
         {
           value: "reuse-refresh-tokens-false",
           label: "false",
+        },
+        {
+          value: "reuse-refresh-tokens-true",
+          label: "true",
         }
       ]
     },
@@ -515,7 +533,7 @@ const clientSettings = [
       {
         value: "require-proof-key-false",
         label: "false",
-      },
+      }
     ]
   },  
   {
@@ -563,28 +581,28 @@ const clientSettings = [
   {
     value: "settings.client.jwk-set-url",
     label: "jwkSetUrl",
-    children: [
+    children: [ 
       {
-        value: "http://127.0.0.1:9000",
-        label: "http://127.0.0.1:9000",
+        value: "https://auth-dev.elpsykongroo.com",
+        label: "https://auth-dev.elpsykongroo.com",
       },
       {
-        value: "http://127.0.0.1:9000",
-        label: "http://127.0.0.1:9000",
+        value: "https://auth.elpsykongroo.com",
+        label: "https://auth.elpsykongroo.com",
       }
     ]
   },
   {
     value: "settings.client.require-authorization-consent",
     label: "Consent",
-    children: [
-      {
-        value: "require-authorization-consent-true",
-        label: "true",
-      },
+    children: [ 
       {
         value: "require-authorization-consent-false",
         label: "false",
+      },
+      {
+        value: "require-authorization-consent-true",
+        label: "true",
       }
     ]
   },
@@ -705,11 +723,8 @@ const handleClientSetting = (data) => {
 const DeleteClient = (index: number, row: AuthClient) => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/auth/client/delete",
+    url: "/auth/client/" + row.clientId,
     method: "DELETE",
-    params: {
-      "clientId": row.clientId
-    },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
     },
@@ -724,11 +739,8 @@ const DeleteClient = (index: number, row: AuthClient) => {
 const DeleteReigster = (index: number, row: AuthClientRegister) => {
   const option = {
     baseURL: env.apiUrl,
-    url: "/auth/client/register/delete",
+    url: "/auth/client/register/" + row.registrationId,
     method: "DELETE",
-    params: {
-      "registerId": row.registrationId
-    },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
     },
@@ -746,8 +758,8 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
     if (valid) {
       const option = {
         baseURL: env.apiUrl,
-        url: "/auth/client/add",
-        method: "POST",
+        url: "/auth/client",
+        method: "PUT",
         data: clientForm,
         headers: {
           'Authorization': 'Bearer '+ access.access_token,
@@ -759,7 +771,7 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
         bcrypt.hash(clientForm.clientSecret, 10).then(function(hash) {
           clientForm.clientSecret = '{bcrypt}' + hash ;
           axios(option).then(function (response) {
-            if(response.data > 0) {
+            if(response.status == 200) {
               authClientForm.value = false;
               authClientList();
             }
@@ -767,7 +779,7 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
         });
       } else {
           axios(option).then(function (response) {
-            if(response.data > 0) {
+            if(response.status == 200) {
               authClientForm.value = false;
               authClientList();
             }
@@ -796,11 +808,7 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
     }
     let scope;
     if(registerForm.scopes != "") {
-      if(registerForm.scopes.includes(",")) {
         scope = registerForm.scopes.split(",");
-      } else {
-        scope = registerForm.scopes;
-      }
     }
     const authRegister: AuthClientRegister = {
       registrationId: registerForm.registrationId,
@@ -820,8 +828,8 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
     if (valid) {
       const option = {
         baseURL: env.apiUrl,
-        url: "/auth/client/register/add",
-        method: "POST",
+        url: "/auth/client/register",
+        method: "PUT",
         data: authRegister,
         headers: {
           'Authorization': 'Bearer '+ access.access_token,
@@ -832,7 +840,7 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
         bcrypt.hash(registerForm.clientSecret, 10).then(function(hash) {
           authRegister.clientSecret = '{bcrypt}' + hash ;
           axios(option).then(function (response) {
-            if(response.data > 0) {
+            if(response.data.length > 0) {
               authClientRegisterForm.value = false ;
               authClientRegisterList();
             } 
@@ -856,7 +864,7 @@ const authClientRegisterList = () => {
   authClientRegisterTable.value = true;
   const option = {
     baseURL: env.apiUrl,
-    url: "/auth/client/register/list",
+    url: "/auth/client/register",
     method: "GET",
     // params: {
     //   "param": search.value,
@@ -877,7 +885,7 @@ const authClientList = () =>  {
   authClientTable.value = true;
   const option = {
     baseURL: env.apiUrl,
-    url: "/auth/client/list",
+    url: "/auth/client",
     method: "GET",
     // params: {
     //   "param": search.value,

@@ -5,8 +5,8 @@
       </el-tab-pane>
       <el-tab-pane label="Blog" name="Blog"></el-tab-pane>
       <el-tab-pane label="Daily" name="Daily"></el-tab-pane>
-      <el-tab-pane label="Something" name="Something"></el-tab-pane>
-      <el-tab-pane label="Dashboard" name="Dashboard" v-if = "access.expires_in > 0" >
+      <el-tab-pane label="Else" name="Else"></el-tab-pane>
+      <el-tab-pane label="Dashboard" name="Dashboard" v-if="visible.width > 768 && access.permission != undefined && access.permission.includes('admin')">
         <Dashboard class="hidden-sm-and-down"/>
         <span class="hidden-md-and-up">not support</span>
       </el-tab-pane>
@@ -17,6 +17,7 @@
 import { ref } from 'vue';
 import { access } from '~/assets/ts/access';
 import '~/assets/ts/live2d.js';
+import { visible } from '~/assets/ts/visible';
 
 const activeName = ref('Home')
 </script>

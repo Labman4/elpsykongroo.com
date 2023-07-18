@@ -1,6 +1,6 @@
 <template>
     <el-button id="darkMode" size=small @click="visible.authFormVisible = true" 
-    v-if = "access.expires_in == 0"
+    v-if = "1 == 1"
     >
     </el-button>
     <el-dialog v-model="visible.authFormVisible" width="65%">
@@ -15,8 +15,10 @@
             <el-option label="Implicit" value="token" />
             <el-option label="Resource Owner Password Credentials" value="password" />
             <el-option label="Client Credentials" value="client_credentials" />
-            <el-option label="pkce" value="pkce" />
+            <!-- <el-option label="pkce" value="pkce" /> -->
             <el-option label="github" value="github" />
+            <el-option label="info" value="info" />
+
           </el-select>
         </el-form-item>
         <el-form-item label="client" label-width="auto"  v-if = "access.grant_type != 'authorization_code'">
@@ -45,6 +47,7 @@ import { ElButton, ElDialog, ElForm, ElFormItem, ElSelect, ElOption, ElInput } f
 import { toggleDark } from '~/composables';
 import { code, pkceCode } from '~/assets/ts/handleAuthCode';
 import { visible } from '~/assets/ts/visible';
+import { pkce } from '~/assets/ts/pkce';
 
 const github = () => {
   const githubOption = {
@@ -106,7 +109,7 @@ const authorizationCode = () => {
       data: {
         grant_type: 'authorization_code',
         code: code,
-        redirect_uri: env.redirectUrl,
+        redirect_uri: window.location.href.split("?")[0],
         // clientId: access.client_id
       },
       headers: {
@@ -132,25 +135,6 @@ const authorizationCode = () => {
 
 
 const userInfo = () => {
-  const authOption = {
-      baseURL: env.authUrl,
-      url: "/userinfo",
-      method: "POST",
-      headers: {
-      'Authorization': 'Bearer '+ access.access_token
-      },  
-      // auth : { 
-      //     username : access.client_id , 
-      //     password : access.client_secret 
-      // } , 
-      withCredentials: true                 
-    }
-    axios(authOption).then(function (response) {
-        console.log(response.data)
-    }) 
-}
-
-const oidc = () => {
   const authOption = {
       baseURL: env.authUrl,
       url: "/userinfo",
@@ -237,8 +221,10 @@ const oauth = () =>{
   } else if (access.grant_type == "github") {
       github();
   } else if (access.grant_type == "pkce") {
-     pkceCode();
-  } 
+     pkce();
+  } else if (access.grant_type == "info") {
+    userInfo()
+  }
 }
 
 </script>

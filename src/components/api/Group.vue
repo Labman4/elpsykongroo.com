@@ -17,7 +17,7 @@
         @update:current-page="groupPageChange"
         @update:page-size="groupPageSizeChange"/>
     </el-dialog>
-    <el-dialog v-model="groupForm" title="group">
+    <el-dialog v-model="groupForm" title="group" width="75%">
         <el-form :model="groupFormData">
             <el-form-item label="name" :label-width=visible.groupFormLabelWidth>
                 <el-input v-model="groupFormData.name" />
@@ -32,7 +32,7 @@
     </el-dialog>
 
 
-    <el-dialog v-model="groupTransfer">
+    <el-dialog v-model="groupTransfer" width="75%">
         <el-transfer
             v-model="datas.array"
             style="text-align: left; display: inline-block"
@@ -165,9 +165,9 @@ const openAuthority = (row: Group) => {
 const addGroup = () => {
     const option = {
         baseURL: env.apiUrl,
-        url: "auth/group/add",
+        url: "auth/group",
         method: "PUT",
-        data: {
+        params: {
             name: groupFormData.name
         },
         headers: {
@@ -176,7 +176,7 @@ const addGroup = () => {
         },
     }
     axios(option).then(function (response) {
-        if (response.data == "done") {
+        if (response.status == 200) {
             groupList()
             groupForm.value = false
         }
@@ -186,18 +186,15 @@ const addGroup = () => {
 const deleteGroup = (index: number, row: Group) => {
     const option = {
         baseURL: env.apiUrl,
-        url: "auth/group/delete",
+        url: "auth/group/" + row.groupName,
         method: "DELETE",
-        params: {
-            "name": row.groupName
-        },
         headers: {
         'Authorization': 'Bearer '+ access.access_token,
         "Content-Type": "application/x-www-form-urlencoded"
         },
     }
     axios(option).then(function (response) {
-        if (response.data == "done") {
+        if (response.status == 200) {
             datas.groups.splice(index, 1);
         }
     }) 
@@ -206,12 +203,12 @@ const deleteGroup = (index: number, row: Group) => {
 const userList = async (row: Group) => {
     const option = {
         baseURL: env.apiUrl,
-        url: "/auth/user/list",
+        url: "/auth/user",
         method: "GET",
         params: {
-        pageNumber: 0,
-        pageSize: 100,
-        order: 0
+            pageNumber: 0,
+            pageSize: 100,
+            order: 0
         },
         headers: {
         'Authorization': 'Bearer '+ access.access_token
@@ -225,11 +222,8 @@ const userList = async (row: Group) => {
             for (let i = 0; i <users.length; i++) {
                 const checkOption = {
                     baseURL: env.apiUrl,
-                    url: "auth/group/user/list",
+                    url: "auth/group/user/" + users[i].id,
                     method: "GET",
-                    params: {
-                        id: users[i].id
-                    },
                     headers: {
                     'Authorization': 'Bearer '+ access.access_token
                     },
@@ -311,11 +305,8 @@ const pushUser = (users: User[], checked: number[]) => {
 const authorityList = (row: Group) => {
     const checkOption = {
         baseURL: env.apiUrl,
-        url: "auth/authority/group/list",
+        url: "auth/authority/group/" + row.groupName,
         method: "GET",
-        params: {
-            name: row.groupName
-        },
         headers: {
         'Authorization': 'Bearer '+ access.access_token
         },
@@ -327,10 +318,10 @@ const authorityList = (row: Group) => {
     }).then(function(response) {
             const option = {
                 baseURL: env.apiUrl,
-                url: "/auth/authority/list",
+                url: "/auth/authority",
                 method: "GET",
                 headers: {
-                'Authorization': 'Bearer '+ access.access_token
+                    'Authorization': 'Bearer '+ access.access_token
                 }
             }
             axios(option).then(function (response) {
@@ -379,10 +370,10 @@ const groupList = () => {
     groupTable.value = true
     const option = {
         baseURL: env.apiUrl,
-        url: "auth/group/list",
+        url: "auth/group",
         method: "GET",
         headers: {
-        'Authorization': 'Bearer '+ access.access_token
+            'Authorization': 'Bearer '+ access.access_token
         },
     }
     axios(option).then(function (response) {
@@ -407,8 +398,8 @@ const updateGroup = (groupsIds: string, Ids: string, userOrAuth: boolean) => {
     }
     const userOption = {
         baseURL: env.apiUrl,
-        url: "auth/group/user/patch",
-        method: "PATCH",
+        url: "auth/group/user",
+        method: "POST",
         params: {
             groups: groupsIds,
             ids: Ids
@@ -420,7 +411,7 @@ const updateGroup = (groupsIds: string, Ids: string, userOrAuth: boolean) => {
     }
     if (userOrAuth) {
         axios(userOption).then(function (response) {
-            if(response.data == "done") {
+            if(response.status == 200) {
                 groupTransfer.value = false
             }
         }) 
@@ -432,8 +423,8 @@ const updateGroup = (groupsIds: string, Ids: string, userOrAuth: boolean) => {
 const updateGroupAuthority = () => {
     const Authorityoption = {
         baseURL: env.apiUrl,
-        url: "auth/authority/group/patch",
-        method: "PATCH",
+        url: "auth/authority/group",
+        method: "POST",
         params: {
             authorities: Ids.value.slice(0,-1),
             ids: groupsIds.value
@@ -444,7 +435,7 @@ const updateGroupAuthority = () => {
         },
     }
     axios(Authorityoption).then(function (response) {
-        if(response.data == "done") {
+        if(response.status == 200) {
                 groupTransfer.value = false
         }
     }) 
@@ -487,7 +478,6 @@ const resetSelect = () => {
             // transfer[key].checked = true
         }
     }
-    console.log(datas.transfer)
 }
 
 defineExpose({

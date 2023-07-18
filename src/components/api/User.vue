@@ -40,7 +40,7 @@
       @update:page-size="userPageSizeChange"/>
   </el-dialog>
 
-  <el-dialog v-model="userForm" title="user">
+  <el-dialog v-model="userForm" title="user" width="75%">
     <el-form :model="userFormData">
       <el-form-item label="email" :label-width=visible.userFormLabelWidth>
       <el-input v-model="userFormData.email" />
@@ -51,9 +51,9 @@
     <el-form-item label="password" :label-width=visible.userFormLabelWidth>
       <el-input v-model="userFormData.password" />
     </el-form-item>
-    <el-form-item label="username" :label-width=visible.userFormLabelWidth>
+    <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
       <el-input v-model="userFormData.username" />
-    </el-form-item> 
+    </el-form-item>  -->
     </el-form>
     <template #footer>
       <span class="dialog-footer">
@@ -65,8 +65,7 @@
     </template>
   </el-dialog>
 
-
-  <el-dialog v-model="userInfoForm" title="userInfo">
+  <el-dialog v-model="visible.userInfoForm" title="userInfo"  width="80%">
     <el-button type="" @click="claimForm = true">Add</el-button>
     <el-form ref="userinfoRef" :model="dynamicClaimForm" >
       <el-form-item v-for="(value, key) in dynamicClaimForm"
@@ -81,13 +80,14 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="userInfoForm = false">Cancel</el-button>
+        <el-button @click="visible.userInfoForm = false">Cancel</el-button>
         <el-button type="primary" @click="updateUserInfo()" >Confirm</el-button>
-        <el-button type="primary" @click="resetUseInfo()" >Reset</el-button> 
+        <el-button type="primary" @click="resetUseInfo(userInfoTableData.username)" >Reset</el-button> 
       </span>
     </template>
   </el-dialog>
-  <el-dialog v-model="claimForm" title="claim">
+
+  <el-dialog v-model="claimForm" title="claim" width="75%">
     <el-form>
       <el-form-item label="claimName" :label-width="visible.userFormLabelWidth">
         <el-input v-model="claimFormData.key" />
@@ -174,7 +174,6 @@ const authorityPage = {
 
 const claimForm = ref(false);
 const userForm = ref(false);
-const userInfoForm = ref(false);
 const userTable = ref(false);
 const authorityTable = ref(false);
 const groupTable = ref(false);
@@ -282,11 +281,8 @@ const loadGroups = (row: User) => {
   Ids.value = row.id
   const option = {
     baseURL: env.apiUrl,
-    url: "auth/group/user/list",
+    url: "auth/group/user/" + row.id,
     method: "GET",
-    params: {
-      id: row.id
-    },
     headers: {
     'Authorization': 'Bearer '+ access.access_token
     },
@@ -302,11 +298,8 @@ const loadAuthorities = (row: User) => {
   Ids.value = row.id
   const option = {
     baseURL: env.apiUrl,
-    url: "auth/authority/user/list",
+    url: "auth/user/authority/" + row.username,
     method: "GET",
-    params: {
-      id: row.id
-    },
     headers: {
     'Authorization': 'Bearer '+ access.access_token
     },
@@ -316,16 +309,13 @@ const loadAuthorities = (row: User) => {
   })
 }
 
-const loadUserInfo = (row: User) => {
+async function loadUserInfo (row: User) {
   Object.assign(dynamicClaimForm, inituserInfoTable())
   userInfoTableData.username = row.username
   const option = {
     baseURL: env.apiUrl,
-    url: "auth/user/info",
+    url: "auth/user/info/" + row.username,
     method: "GET",
-    params: {
-      username: row.username
-    },
     headers: {
     'Authorization': 'Bearer '+ access.access_token
     },
@@ -333,7 +323,7 @@ const loadUserInfo = (row: User) => {
   axios(option).then(function(response){
     if (response.data == null) {
         dynamicClaimForm.value = inituserInfoTable();
-        userInfoForm.value = true;
+        visible.userInfoForm = true;
     } else {
       const userinfo = response.data
       for (var key in userinfo) {
@@ -354,7 +344,7 @@ const loadUserInfo = (row: User) => {
         } 
       }
       dynamicClaimForm.value = userinfo;
-      userInfoForm.value = true;
+      visible.userInfoForm = true;
     }
   })
 }
@@ -371,17 +361,17 @@ const updateUserInfo = () => {
   userInfoTableData.claims = JSON.stringify(Object.fromEntries(newclaimMap));
   const option = {
     baseURL: env.apiUrl,
-    url: "auth/user/info/patch",
-    method: "PATCH",
+    url: "auth/user/info",
+    method: "POST",
     data: userInfoTableData,
     headers: {
-    'Authorization': 'Bearer '+ access.access_token,
-    'Content-Type': 'application/json'
+      'Authorization': 'Bearer '+ access.access_token,
+      'Content-Type': 'application/json'
     },
   }
   axios(option).then(function(response){
-    if(response.data == "done") {
-      userInfoForm.value = false;
+    if(response.status == 200) {
+      visible.userInfoForm = false;
     }
   })
 
@@ -422,26 +412,27 @@ const deleteClaim = (rmkey:string) => {
     //}
     const option = {
       baseURL: env.apiUrl,
-      url: "auth/user/info/patch",
-      method: "PATCH",
+      url: "auth/user/info",
+      method: "POST",
       data: userInfoTableData,
       headers: {
-      'Authorization': 'Bearer '+ access.access_token,
-      'Content-Type': 'application/json'
+        'Authorization': 'Bearer '+ access.access_token,
+        'Content-Type': 'application/json'
       },
     }
     axios(option).then(function(response){
-      if (response.data == "done") {
+      if (response.status == 200) {
         ElMessageBox.alert("delete success")
       }
     })
   }
 }
 
-const resetUseInfo = () => {
+const resetUseInfo = (username:string) => {
   dynamicClaimForm.value = inituserInfoTable()
   Object.assign(dynamicClaimForm, inituserInfoTable());
   Object.assign(userInfoTableData, inituserInfoTable());
+  userInfoTableData.username = username;
 }
 
 const lockUser = (row: User) => {
@@ -452,57 +443,65 @@ const lockUser = (row: User) => {
   }
   const option = {
     baseURL: env.apiUrl,
-    url: "auth/user/patch",
-    method: "PATCH",
+    url: "auth/user",
+    method: "POST",
     data: row,
     headers: {
-    'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function (response) {
-    if (response.data == "done") {
+    if (response.status == 200) {
       userList()
     }
   }) 
 }
+
 const loadUser = () => {
   if (selectUserName.length < 1) {
       ElMessageBox.alert("please select someone to update") 
   } else if (selectUserName.length > 1) {
       ElMessageBox.alert("dont support batch update")
   } else {
+      userFormData.email = selectUserName[0].email
+      userFormData.nickName = selectUserName[0].nickName
+      userFormData.password = selectUserName[0].password
       userForm.value = true
   }
 }
 
 const updateUser = () =>{
-    userFormData.username = selectUserName[0];
+    userFormData.username = selectUserName[0].username;
     const option = {
       baseURL: env.apiUrl,
-      url: "auth/user/patch",
-      method: "PATCH",
+      url: "auth/user",
+      method: "POST",
       data: userFormData,
       headers: {
-      'Authorization': 'Bearer '+ access.access_token
+        'Authorization': 'Bearer '+ access.access_token
       },
     }
-    if (!userFormData.password.startsWith("{bcrypt}")){
+    if (userFormData.password == "" || userFormData.password == undefined){
+        axios(option).then(function (response) {
+          if(response.status == 200) {
+            userForm.value = false;
+          }
+        })
+    } else if (userFormData.password.startsWith("{bcrypt}")) {
+        axios(option).then(function (response) {
+          if(response.status == 200) {
+            userForm.value = false;
+          }
+        })
+    } else {
         bcrypt.hash(userFormData.password, 10).then(function(hash) {
           userFormData.password = '{bcrypt}' + hash ;
           axios(option).then(function (response) {
-            if(response.data == "done") {
+            if(response.status == 200) {
               userForm.value = false;
-              userList();
             }
           })
         });
-    } else {
-        axios(option).then(function (response) {
-          if(response.data == "done") {
-            userForm.value = false;
-            userList();
-          }
-        })
     }
 }
 
@@ -510,7 +509,7 @@ const userList = () => {
     userTable.value = true;
     const option = {
       baseURL: env.apiUrl,
-      url: "/auth/user/list",
+      url: "/auth/user",
       method: "GET",
       params: {
         pageNumber: userPage.pageNumber-1,
@@ -552,7 +551,7 @@ const authorityPageSizeChange = (newPage: number) => {
   authorityPage.pageSize = newPage;
 }
 
-const selectUserName:string[] = [];
+const selectUserName:User[] = [];
 
 const multipleUserSelect = ref<User[]>([])
 
@@ -560,12 +559,12 @@ const handleUserSelectChange = (val: User[]) => {
   multipleUserSelect.value = val ;
   selectUserName.splice(0, selectUserName.length);
   for(let i of multipleUserSelect.value) {
-    selectUserName.push(i.username);
+    selectUserName.push(i);
   }
 }
 
 defineExpose({
-  userList
+  userList, loadUserInfo
 })
 
 </script> 

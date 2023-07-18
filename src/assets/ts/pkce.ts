@@ -1,58 +1,42 @@
-import axios from 'axios';
-import jsSHA from "jssha";
 import { access } from "./access";
 import { env } from "./env";
+import cryptoRandomString from 'crypto-random-string';
+import jsSHA from 'jssha';
+import { axios } from "./axio";
 
 async function generateCodeVerifier() {
-    var codeVerifier = "";
-    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
-    var charLength = characters.length;
-    for (var i = 0; i < 128; i++) {
-      codeVerifier += characters.charAt(Math.floor(Math.random() * charLength));
-    }
-    window.localStorage.setItem("code_verifier", codeVerifier);
-    
-    console.log(codeVerifier);
-    console.log(    window.localStorage.getItem("code_verifier")    )
+    const codeVerifier = "841aa35355d86c55c1a948831ab90f23f80f71c65a08feb0dc4830a066fd55d36422c464bc58128edecf2f0bf5e0baadfda1168f8cb5883bd8ff6745454afe8b";
+    // const codeVerifier = cryptoRandomString({ length: 128 });
+    var base64Str = btoa(codeVerifier); // 编码为base64字符串
+    // console.log(window.sessionStorage.getItem("code_verifier")    )
     // fs.writeFileSync('/codeVerifier.txt', codeVerifier);
     const sha256 = new jsSHA("SHA-256", "TEXT");
-    sha256.update(codeVerifier);
-    access.code_challenge = sha256.getHash("B64");
+    sha256.update(base64Str);
+    var codeChallenge = sha256.getHash("B64");
+    codeChallenge = codeChallenge.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    access.code_challenge = codeChallenge;
 }
- 
 
-axios.interceptors.response.use(function (response) {
-  return response;
-}, function (error) {
-  if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
-    console.log(error);
-    // window.location.href = error.response.request.responseURL;       
-  } 
-  return Promise.reject(error);
-});
-
-  
-  const pkce = () => {
-    generateCodeVerifier();
-    if (document.referrer != "" ) {
-      access.redirect_uri = document.referrer
-    } else if (document.domain = "localhost") {
+async function pkce () {
+    await generateCodeVerifier();
+    if (document.domain == "localhost") {
       access.redirect_uri = env.redirectUrl
+    } else if (document.referrer != "" ) {
+      access.redirect_uri = document.referrer
     } else {
       access.redirect_uri = window.location.origin
     } 
-    
     const pkceOption = {
         baseURL: env.authUrl,
         url: "oauth2/authorize",
-        method: "POST",
-        data: {
+        method: "GET",
+        params: {
           response_type: "code",
           code_challenge_method: "S256",
           code_challenge: access.code_challenge,
           redirect_uri: access.redirect_uri,
-          scope: "openid",
-          client_id: "spring"
+          scope: "openid permission",
+          client_id: "pkce"
         },
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -63,13 +47,13 @@ axios.interceptors.response.use(function (response) {
         //   return status >= 200 && status < 500; // default
         // },                
       }
-      axios(pkceOption).catch(function (error) {
+    
+      axios(pkceOption).then(function (response){
+        window.location.href = response.request.responseURL
+      }).catch(function (error) {
         if (error.response.status === 404 && error.response.request.responseURL) {
           // handle redirect 404 error
           window.location.href = error.response.request.responseURL;       
-        } else {
-          // handle other errors
-          console.error(error);
         }
       })
   }
