@@ -222,9 +222,9 @@ async function webauthnLogin() {
                             if (idp == undefined || idp == "elpsykongroo" || idp == "labroom") {
                                 if (document.domain != "localhost" && document.domain != "127.0.0.1") {
                                     if (access.username == "admin") {
-                                        window.location.href = "https://pkce.elpsykongroo.com/oauth2/start?rd=" + "https://" + window.location.host;
+                                        window.location.href = env.oauth2ProxyPkceUrl + "/oauth2/start?rd=" + "https://" + window.location.host;
                                     } else {
-                                        window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=" + "https://" + window.location.host;
+                                        window.location.href = env.oauth2ProxyUrl +"/oauth2/start?rd=" + "https://" + window.location.host;
                                     }
                                 } else {
                                     pkce();
