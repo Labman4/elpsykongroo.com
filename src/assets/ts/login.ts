@@ -220,15 +220,7 @@ async function webauthnLogin() {
                             visible.webauthnFormVisible = false
                             console.log(idp)
                             if (idp == undefined || idp == "elpsykongroo" || idp == "labroom") {
-                                if (document.domain != "localhost" && document.domain != "127.0.0.1") {
-                                    if (access.username == "admin") {
-                                        window.location.href = env.oauth2ProxyPkceUrl + "/oauth2/start?rd=" + "https://" + window.location.host;
-                                    } else {
-                                        window.location.href = env.oauth2ProxyUrl +"/oauth2/start?rd=" + "https://" + window.location.host;
-                                    }
-                                } else {
-                                    pkce();
-                                }                          
+                               refreshlogin()                    
                             } else if (redirect != null && state != null) {
                                 window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
                             }
@@ -252,9 +244,9 @@ async function webauthnLogin() {
 const refreshlogin = () => {
     if (document.domain != "localhost") {
         if (access.username == "admin") {
-            window.location.href = "https://pkce.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
+            window.location.href = env.oauth2ProxyPkceUrl + "/oauth2/start?rd=" + "https://" + window.location.host;
         } else {
-            window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
+            window.location.href = env.oauth2ProxyUrl +"/oauth2/start?rd=" + "https://" + window.location.host;
         }
     } else {
         pkce();
