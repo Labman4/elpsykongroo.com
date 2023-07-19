@@ -224,7 +224,7 @@ async function webauthnLogin() {
                                     if (access.username == "admin") {
                                         window.location.href = "https://pkce.elpsykongroo.com/oauth2/start?rd=" + window.location.host;
                                     } else {
-                                        window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=" + + window.location.host;
+                                        window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=" + window.location.host;
                                     }
                                 } else {
                                     pkce();
