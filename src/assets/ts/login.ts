@@ -175,7 +175,7 @@ async function webauthnLogin() {
         axios(loginOption).then(async function (response) {
             if(response.data == 200) {
                 if(handleCookie().length == 0) {
-                    refreshlogin();
+                    refreshlogin(access.username);
                 } else {
                     getAccessToken();
                     visible.loading = false;
@@ -216,7 +216,7 @@ async function webauthnLogin() {
                             visible.webauthnFormVisible = false
                             console.log(idp)
                             if (idp == undefined || idp == "elpsykongroo" || idp == "labroom" || idp == "preview") {
-                                refreshlogin();
+                                refreshlogin(access.username);
                             } else if (redirect != null && state != null) {
                                 window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
                             }
@@ -237,16 +237,16 @@ async function webauthnLogin() {
     }
 }
 
-const refreshlogin = () => {
+const refreshlogin = (username) => {
     if (document.domain != "localhost") {
-        redirectOauthProxy();
+        redirectOauthProxy(username);
     } else {
         pkce();
     }
 }
 
-const redirectOauthProxy = () => {
-    if (access.username == "admin") {
+const redirectOauthProxy = (username) => {
+    if (access.username == "admin" || username == "admin") {
         window.location.href = env.oauth2ProxyPkceUrl + "/oauth2/start?rd=" + "https://" + window.location.host;
     } else {
         window.location.href = env.oauth2ProxyUrl +"/oauth2/start?rd=" + "https://" + window.location.host;
