@@ -583,8 +583,8 @@ const clientSettings = [
     label: "jwkSetUrl",
     children: [ 
       {
-        value: "https://auth-dev.elpsykongroo.com",
-        label: "https://auth-dev.elpsykongroo.com",
+        value: "https://auth-pre.elpsykongroo.com",
+        label: "https://auth-pre.elpsykongroo.com",
       },
       {
         value: "https://auth.elpsykongroo.com",

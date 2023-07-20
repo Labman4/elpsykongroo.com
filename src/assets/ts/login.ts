@@ -63,12 +63,8 @@ const loginWithToken = () => {
         withCredentials: true                        
     }
     axios(option).then(async function(response){
-        if (access.sub == "admin") {
-            window.location.href = "https://pkce.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
-        } else {
-            window.location.href = "https://oauth2-proxy.elpsykongroo.com/oauth2/start?rd=https://elpsykongroo.com";
-        }
-    });
+        redirectOauthProxy()
+    })
 }
 
 const callbackUrl = window.location.href;
@@ -81,7 +77,7 @@ var idp;
 
 if (referrer != "" && referrer != undefined) {   
     idp = referrer.split(".")[0].split("//")[1];
-    if (idp != "elpsykongroo" && idp != "auth" && document.domain != "localhost" && document.domain != "127.0.0.1") {
+    if (idp != "elpsykongroo" && idp != "auth" && idp != "develop" && document.domain != "localhost" && document.domain != "127.0.0.1") {
         visible.webauthnFormVisible = true
     }
 }
@@ -220,7 +216,7 @@ async function webauthnLogin() {
                             visible.webauthnFormVisible = false
                             console.log(idp)
                             if (idp == undefined || idp == "elpsykongroo" || idp == "labroom") {
-                               refreshlogin()                    
+                                refreshlogin()
                             } else if (redirect != null && state != null) {
                                 window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
                             }
@@ -243,16 +239,19 @@ async function webauthnLogin() {
 
 const refreshlogin = () => {
     if (document.domain != "localhost") {
-        if (access.username == "admin") {
-            window.location.href = env.oauth2ProxyPkceUrl + "/oauth2/start?rd=" + "https://" + window.location.host;
-        } else {
-            window.location.href = env.oauth2ProxyUrl +"/oauth2/start?rd=" + "https://" + window.location.host;
-        }
+        redirectOauthProxy();
     } else {
         pkce();
     }
 }
 
+const redirectOauthProxy = () => {
+    if (access.username == "admin") {
+        window.location.href = env.oauth2ProxyPkceUrl + "/oauth2/start?rd=" + "https://" + window.location.host;
+    } else {
+        window.location.href = env.oauth2ProxyUrl +"/oauth2/start?rd=" + "https://" + window.location.host;
+    }
+}
 const tmpLogin = () => {
     visible.tmpLogin = false
     const option = {
