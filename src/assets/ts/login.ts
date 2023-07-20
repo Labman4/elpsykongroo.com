@@ -77,7 +77,7 @@ var idp;
 
 if (referrer != "" && referrer != undefined) {   
     idp = referrer.split(".")[0].split("//")[1];
-    if (idp != "elpsykongroo" && idp != "auth" && idp != "develop" && document.domain != "localhost" && document.domain != "127.0.0.1") {
+    if (idp != "elpsykongroo" && idp != "auth" && idp != "preview" && document.domain != "localhost" && document.domain != "127.0.0.1") {
         visible.webauthnFormVisible = true
     }
 }
@@ -215,7 +215,7 @@ async function webauthnLogin() {
                             visible.loading = false;
                             visible.webauthnFormVisible = false
                             console.log(idp)
-                            if (idp == undefined || idp == "elpsykongroo" || idp == "labroom" || idp == "develop") {
+                            if (idp == undefined || idp == "elpsykongroo" || idp == "labroom" || idp == "preview") {
                                 refreshlogin();
                             } else if (redirect != null && state != null) {
                                 window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
