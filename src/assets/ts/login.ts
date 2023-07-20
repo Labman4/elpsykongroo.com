@@ -63,7 +63,7 @@ const loginWithToken = () => {
         withCredentials: true                        
     }
     axios(option).then(async function(response){
-        redirectOauthProxy()
+        redirectOauthProxy("")
     })
 }
 
