@@ -215,8 +215,8 @@ async function webauthnLogin() {
                             visible.loading = false;
                             visible.webauthnFormVisible = false
                             console.log(idp)
-                            if (idp == undefined || idp == "elpsykongroo" || idp == "labroom") {
-                                refreshlogin()
+                            if (idp == undefined || idp == "elpsykongroo" || idp == "labroom" || idp == "develop") {
+                                refreshlogin();
                             } else if (redirect != null && state != null) {
                                 window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
                             }
