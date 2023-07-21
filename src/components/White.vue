@@ -86,7 +86,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="visible.refreshlogin = false">later</el-button>
-        <el-button type="primary" @click="refreshlogin()">
+        <el-button type="primary" @click="refreshlogin(access.sub)">
           Confirm
         </el-button>
       </span>
