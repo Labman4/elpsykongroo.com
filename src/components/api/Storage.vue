@@ -320,58 +320,65 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
       uploadId = upload;
     }
     var partCount = Math.ceil(options.file.size / chunkSize);
+    var completeSize = 0;
     for (const { index, chunk } of chunks(options.file, chunkSize)) {
         chunk.arrayBuffer().then(async function(arrayBuffer) {
           const sha256 = await computeFileSHA256(arrayBuffer)
           var checkUpload = await getUploadId(fileName, sha256, partCount, index)
           if (checkUpload == "" || checkUpload == undefined) {
-              return; 
-          }
-          if (access.platform != "" && access.platform != "default" && uploadId != checkUpload) {
+              completeSize ++;
+          } else if (access.platform != "" && access.platform != "default" && uploadId != checkUpload) {
+              completeSize ++;
               listObject()
-              return;
+          } else {          
+            uploadPart(chunk, options.file.name, partCount, index, uploadId)
           }
-        
-          const option = {
-            baseURL: env.storageUrl,
-            url: "/storage/object",
-            method: "POST",
-            data: {
-                data: chunk,
-                bucket: access.sub,
-                key: options.file.name,
-                partCount: partCount,
-                partNum: index,
-                idToken: access.id_token,
-                uploadId: uploadId,
-                mode: "stream",
-                accessKey: access.accessKey,
-                accessSecret: access.accessSecret,
-                endpoint: access.endpoint, 
-                region: access.region,
-                platform: access.platform
-            },
-            headers: {
-                'Authorization': 'Bearer '+ access.access_token,
-                "Content-Type": "multipart/form-data"
-            }
-          }
-          axios(option).catch(function(error) {
-            console.log(error)
-            axios(option).catch(function(error){
-              axios(option).catch(function(error){
-                ElNotification({
-                  title: 'Network Error',
-                  message: 'please click upload and retry',
-                  duration: 3000,
-                })
-              })
-            });
-          });
       })
+      if (completeSize == partCount) {
+        uploadPart(chunk, options.file.name, partCount, index, uploadId)
+      }
     }
+   
 }    
 
+const uploadPart = (chunk, filename, partCount, partNum, uploadId) => {
+      const option = {
+        baseURL: env.storageUrl,
+        url: "/storage/object",
+        method: "POST",
+        data: {
+            data: chunk,
+            bucket: access.sub,
+            key: filename,
+            partCount: partCount,
+            partNum: partNum,
+            idToken: access.id_token,
+            uploadId: uploadId,
+            mode: "stream",
+            accessKey: access.accessKey,
+            accessSecret: access.accessSecret,
+            endpoint: access.endpoint, 
+            region: access.region,
+            platform: access.platform
+        },
+        headers: {
+            'Authorization': 'Bearer '+ access.access_token,
+            "Content-Type": "multipart/form-data"
+        }
+      }
+      axios(option).catch(function(error) {
+        console.log(error)
+        axios(option).catch(function(error){
+          axios(option).catch(function(error){
+            ElNotification({
+              title: 'Network Error',
+              message: 'please click upload and retry',
+              duration: 3000,
+            })
+          })
+        });
+      });
+}
 function* chunks(file, chunkSize) {
   let offset = 0;
   let index = 0;
