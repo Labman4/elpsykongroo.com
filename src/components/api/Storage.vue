@@ -328,12 +328,12 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
           if (checkUpload == "" || checkUpload == undefined) {
               completeSize ++;
           } else if (access.platform != "" && access.platform != "default" && uploadId != checkUpload) {
-              completeSize ++;
               listObject()
           } else {          
             uploadPart(chunk, options.file.name, partCount, index, uploadId)
           }
       })
+      console.log(completeSize)
       if (completeSize == partCount) {
         uploadPart(chunk, options.file.name, partCount, index, uploadId)
       }
