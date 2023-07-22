@@ -332,13 +332,12 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
           } else {          
             uploadPart(chunk, options.file.name, partCount, index, uploadId)
           }
+          console.log(completeSize)
+          if (completeSize == partCount) {
+            uploadPart(chunk, options.file.name, partCount, index, uploadId)
+          }
       })
-      console.log(completeSize)
-      if (completeSize == partCount) {
-        uploadPart(chunk, options.file.name, partCount, index, uploadId)
-      }
-    }
-   
+    }  
 }    
 
 const uploadPart = (chunk, filename, partCount, partNum, uploadId) => {
