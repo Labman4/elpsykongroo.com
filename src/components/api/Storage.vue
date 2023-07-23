@@ -330,17 +330,16 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
           } else if (access.platform != "" && access.platform != "default" && uploadId != checkUpload) {
               listObject()
           } else {          
-            uploadPart(chunk, options.file.name, partCount, index, uploadId)
+            uploadPart(chunk, options.file.name, partCount, index, uploadId, "")
           }
-          console.log(completeSize)
           if (completeSize == partCount) {
-            uploadPart(chunk, options.file.name, partCount, index, uploadId)
+            uploadPart(chunk, options.file.name, partCount, index, uploadId, "")
           }
       })
     }  
 }    
 
-const uploadPart = (chunk, filename, partCount, partNum, uploadId) => {
+const uploadPart = (chunk, filename, partCount, partNum, uploadId, offset) => {
       const option = {
         baseURL: env.storageUrl,
         url: "/storage/object",
@@ -358,7 +357,8 @@ const uploadPart = (chunk, filename, partCount, partNum, uploadId) => {
             accessSecret: access.accessSecret,
             endpoint: access.endpoint, 
             region: access.region,
-            platform: access.platform
+            platform: access.platform,
+            offset: offset
         },
         headers: {
             'Authorization': 'Bearer '+ access.access_token,
