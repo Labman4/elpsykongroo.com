@@ -386,8 +386,8 @@ const tokenSettings = [
               label: "2h"
             },
             {
-              value: 86400,
-              label: "1day"
+              value: 43200,
+              label: "12h"
             }
           ]
         }
@@ -415,7 +415,7 @@ const tokenSettings = [
             },
             {
               value: 86400,
-              label: "1day"
+              label: "24h"
             }
           ]
         }
@@ -913,7 +913,7 @@ const openClientAdd = (formEl: FormInstance | undefined)  =>  {
       const clientset = JSON.parse(authClient.clientSettings);
       objToArray(clientset, clientArray);
     }
-    if (authClient.clientSettings != "") {
+    if (authClient.tokenSettings != "") {
       const tokenset = JSON.parse(authClient.tokenSettings);
       objToArray(tokenset, tokenArray);
     }
