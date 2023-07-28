@@ -167,7 +167,7 @@ const svg = `
 
 const loadUser = () => {
   const option = {
-      baseURL: env.apiUrl,
+      baseURL: env.authUrl,
       url: "auth/user/" + access.sub,
       method: "GET",
       headers: {
@@ -251,7 +251,7 @@ const addAuthenticator = () => {
 const updateUser = () =>{
   userFormData.username = access.sub;
   const option = {
-      baseURL: env.apiUrl,
+      baseURL: env.authUrl,
       url: "auth/user/patch",
       method: "PATCH",
       data: userFormData,
