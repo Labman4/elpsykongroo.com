@@ -1,10 +1,12 @@
 <template>
   <el-dialog v-model="storageTable" title="Object"  width="80%">
+    <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
     <el-button type="" @click="openUpload()">upload</el-button>
     <el-button type="" @click="s3Form = true">connect</el-button>
     <el-button type="" @click="s3InfoTable = true">load</el-button>
     <el-button @click="listObject()">refresh</el-button>
-    <el-table :data="data.files">
+    <el-table :data="data.files" @selection-change="handleSelectChange">
+      <el-table-column type="selection"/>
       <el-table-column property="key" label="file" width="auto"/>
       <el-table-column property="timestamp" label="lastModified" :formatter="formatTimestamp" sortable/>
       <el-table-column property="size" label="size" :formatter="kb"/>
@@ -52,7 +54,8 @@
     </el-upload>
 </el-dialog>
 
-<el-dialog v-model="s3InfoTable" title="Object"  width="80%">
+<el-dialog v-model="s3InfoTable" title="S3 Info"  width="80%">
+    <el-button type="" @click="getS3Info()">refresh</el-button>
     <el-table :data="data.s3InfoList">
       <el-table-column property="accessKey" label="accessKey"/>
       <el-table-column property="accessSecret" label="accessSecret"/>
@@ -62,7 +65,7 @@
       <el-table-column label="Operations">
       <template #default="scope">
         <el-button size="small" type="danger" @click="deleteS3Info(scope.$index, scope.row)">Delete</el-button>
-        <el-button size="small" type="primary" @click="loadS3Info(scope.$index, scope.row)">select</el-button>
+        <el-button size="small" type="primary" @click="loadS3Info(scope.row)">select</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -84,7 +87,11 @@
     <span>need to connect to s3 from other platform?</span>
     <el-form :model="s3FormData">
         <el-form-item label="platform" :label-width=visible.formLabelWidth>
-          <el-input v-model="s3FormData.platform" placeholder="default"/>       
+          <el-select v-model="s3FormData.platform" placeholder="default" :allow-create=true :filterable=true>
+            <el-option label="cloudflare R2" value="cloudflare" />
+            <el-option label="oracle" value="oracle" />
+            <el-option label="minio" value="minio" />
+          </el-select>      
         </el-form-item>
         <el-form-item label="accessKey" :label-width=visible.formLabelWidth>
           <el-input v-model="s3FormData.accessKey"/>       
@@ -98,6 +105,9 @@
         <el-form-item label="region" :label-width=visible.formLabelWidth>
           <el-input v-model="s3FormData.region" />
         </el-form-item>
+        <!-- <el-form-item label="bucket" :label-width=visible.formLabelWidth v-if="s3FormData.platform != 'default'">
+          <el-input v-model="access.bucket" />
+        </el-form-item> -->
       </el-form>
     <template #footer>
       <span class="dialog-footer">
@@ -134,6 +144,9 @@
     <el-form :model="s3FormData">
         <el-form-item label="secret" :label-width=visible.formLabelWidth>
           <el-input v-model="s3Secret"/>       
+        </el-form-item>
+        <el-form-item label="bucket" :label-width=visible.formLabelWidth>
+          <el-input v-model="access.bucket"/>       
         </el-form-item>
       </el-form>
     <template #footer>
@@ -184,19 +197,19 @@ let initS3FormData  = () => ({
   accessSecret: "",
   endpoint: "",
   region: "",
-  platform: "default"
+  platform: "default",
 })
 
 let s3FormData = reactive(initS3FormData());
 
-const files = [{}];
+const files:ListObject[] = [];
 const s3InfoList:s3Info[] = [];
 const data = reactive({files, s3InfoList});
 
 const fileList = ref<UploadUserFile[]>([])
 
 const uploadInfo: Record<string, string> = {
-    bucket: access.sub,
+    bucket: access.bucket,
     idToken: access.id_token,
     mode: "stream"
 }
@@ -252,7 +265,7 @@ const continueUpload:UploadProps['onError'] = async (error: Error, file: UploadF
         method: "POST",
         data: {
             data: file,
-            bucket: access.sub,
+            bucket: access.bucket,
             mode: "stream",
             idToken: access.id_token,
             accessKey: access.accessKey,
@@ -290,7 +303,7 @@ const getUploadId = async (fileName, sha256, partCount, partNum) => {
         url: "/storage/object",
         method: "POST",
         data: {
-            bucket: access.sub,
+            bucket: access.bucket,
             key: fileName,
             accessKey: access.accessKey,
             accessSecret: access.accessSecret,
@@ -327,7 +340,7 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
           var checkUpload = await getUploadId(fileName, sha256, partCount, index)
           if (checkUpload == "" || checkUpload == undefined) {
               completeSize ++;
-          } else if (access.platform != "" && access.platform != "default" && uploadId != checkUpload) {
+          } else if (access.platform != "" && access.platform != "default" && access.platform != "cloudflare" && uploadId != checkUpload) {
               listObject()
           } else {          
             uploadPart(chunk, options.file.name, partCount, index, uploadId, "")
@@ -346,7 +359,7 @@ const uploadPart = (chunk, filename, partCount, partNum, uploadId, offset) => {
         method: "POST",
         data: {
             data: chunk,
-            bucket: access.sub,
+            bucket: access.bucket,
             key: filename,
             partCount: partCount,
             partNum: partNum,
@@ -378,6 +391,7 @@ const uploadPart = (chunk, filename, partCount, partNum, uploadId, offset) => {
         });
       });
 }
+
 function* chunks(file, chunkSize) {
   let offset = 0;
   let index = 0;
@@ -392,10 +406,10 @@ function* chunks(file, chunkSize) {
 const upload = async (options: UploadRequestOptions) => {
     if (options.file.size > 1024*1024*10) {
       // be careful minio must big than 5mb 
-      if (access.platform == "" || access.platform == "default") {
+      if (access.platform == "" || access.platform == "default" || access.platform == "cloudflare" ) {
         chunkedUpload(options, 1024*1024*5);
       } else {
-        chunkedUpload(options, 1024*1024*2);
+        chunkedUpload(options, 1024*1024*5);
       }
     } else {
         const option = {
@@ -404,7 +418,7 @@ const upload = async (options: UploadRequestOptions) => {
             method: "POST",
             data: {
                 data: options.file,
-                bucket: access.sub,
+                bucket: access.bucket,
                 mode: "stream",
                 idToken: access.id_token,
                 accessKey: access.accessKey,
@@ -454,18 +468,20 @@ const saveS3Info = async() => {
   await setObject(db, "aes", "ciphertext-" + s3FormData.platform, resp.ciphertext, "readwrite", "");
   await setObject(db, "aes", "iv-" + s3FormData.platform, resp.iv, "readwrite", "");
   await setObject(db, "s3", s3FormData.platform, JSON.stringify(s3FormData), "readwrite", "put");
+  await getS3Info();
   saveS3InfoForm.value = false
   s3Form.value = false
   storageTable.value = true
   Object.assign(s3FormData, initS3FormData());
 }
 
-const loadS3Info = async(index:number, row: s3Info) => {
+const loadS3Info = async(row: s3Info) => {
   access.accessKey = row.accessKey
   access.endpoint = row.endpoint
   access.region = row.region       
-  access.platform = row.platform 
-  await initS3Info();
+  access.platform = row.platform
+  s3Secret.value = ""
+  saveS3InfoForm.value = true;
 }
 
 const cancelLoad = () => {
@@ -495,22 +511,30 @@ const deleteS3Info = async(index:number, row: s3Info) => {
   data.s3InfoList.splice(index, 1)
 }
 
+const getS3Info = async() => {
+  const db = await openDB('s3', 1, ['s3',"aes"]);
+  const s3Infos = await getObject(db, "s3", "", "readwrite", "all");
+  var replacedStr = JSON.stringify(s3Infos).replace(/"{/g, '{').replace(/}"/g, '}').replace(/\\/g, '');
+  const s3 = JSON.parse(replacedStr);
+  data.s3InfoList = s3
+  return db
+}
+
 const initS3Info = async() => {
   //for local s3 dev
   const domain = window.location.hostname;
   if (domain.split(":")[0] == "127.0.0.1" || domain.split(":")[0] == "localhost") {
     access.id_token = ""
     access.sub = "admin"
-    // access.access_token = ""
   }
-  const db = await openDB('s3', 1, ['s3',"aes"]);
-  const s3Infos = await getObject(db, "s3", "", "readwrite", "all");
-  var replacedStr = JSON.stringify(s3Infos).replace(/"{/g, '{').replace(/}"/g, '}').replace(/\\/g, '');
-  const s3 = JSON.parse(replacedStr);
-  data.s3InfoList = s3
+  if (access.bucket == "") {
+    access.bucket = access.sub
+  }
+  const db = await getS3Info();
   if (data.s3InfoList.length > 0) {
     if (access.platform == "default") {
-        access.platform = s3[0].platform 
+        access.platform = data.s3InfoList[0].platform
+        access.bucket = access.sub
     }
     const ciphertext = await getObject(db, "aes", "ciphertext-" + access.platform, "readwrite", "");
     const iv = await getObject(db, "aes", "iv-" + access.platform, "readwrite", "");
@@ -538,9 +562,9 @@ const initS3Info = async() => {
               }
             }
             if (data.s3InfoList.length == 1) {
-              access.endpoint = s3[0].endpoint 
-              access.region = s3[0].region 
-              access.accessKey = s3[0].accessKey
+              access.endpoint = data.s3InfoList[0].endpoint 
+              access.region = data.s3InfoList[0].region 
+              access.accessKey = data.s3InfoList[0].accessKey
               s3InfoTable.value = false;
             }
         } 
@@ -560,7 +584,7 @@ const initS3Info = async() => {
         }
         storageTable.value = true
         listObject()
-        return
+        return;
       }
     } 
     s3Init.value = true;
@@ -591,7 +615,7 @@ const listObject = () => {
       url: "/storage/object/list",
       method: "POST",
       data: {
-          bucket: access.sub,
+          bucket: access.bucket,
           idToken: access.id_token,
           accessKey: access.accessKey,
           accessSecret: access.accessSecret,
@@ -607,10 +631,10 @@ const listObject = () => {
   axios(option).then(function (response) {
       const listObject:ListObject[] = response.data
       const filterObject = listObject.filter( obj => {
-            return !obj.key.startsWith(access.sub)
+            return !obj.key.startsWith(access.bucket)
         })
       data.files = filterObject;
-      
+      // data.files = response.data
   })   
 }
 
@@ -620,7 +644,7 @@ const deleteS3 = (index:number, row: ListObject) => {
         url: "/storage/object/delete",
         method: "POST",
         data: {
-            bucket: access.sub,
+            bucket: access.bucket,
             key: row.key,
             idToken: access.id_token,
             accessKey: access.accessKey,
@@ -641,6 +665,56 @@ const deleteS3 = (index:number, row: ListObject) => {
     })   
 }
 
+const handleSelectChange = (val: ListObject[]) => {
+  multipleSelect.value = val;
+  selected.splice(0, selected.length);
+  for(let i of multipleSelect.value) {
+    selected.push(i.key);
+  }
+}
+
+const multipleSelect = ref<ListObject[]>([])
+
+const selected:string[] = [];
+
+const DeleteSelect = () => {
+  const option = {
+    baseURL: env.apiUrl,
+    url: "/storage/object/delete",
+    method: "POST",
+    data: {
+      bucket: access.bucket,
+      key: selected.toString(),
+      idToken: access.id_token,
+      accessKey: access.accessKey,
+      accessSecret: access.accessSecret,
+      endpoint: access.endpoint, 
+      region: access.region,
+      platform: access.platform
+    },
+    headers: {
+      // 'Authorization': 'Bearer '+ access.access_token,
+      "Content-Type": "application/json"
+    },
+  }
+  axios(option).then(function (response) {
+    var count = response.data;
+    if (count == selected.length) {
+      selected.forEach(function(item, index){
+        data.files.forEach(function(i, ind){
+            if (item === i.key) {
+              data.files.splice(ind, 1)
+            }
+        }) 
+      });
+      if (data.files.length == 0) {
+          listObject();
+      } 
+    }
+  })
+    
+}
+
 const download = (row: ListObject) => {
   if (access.platform == "" || access.platform == "default") {
     downloadUrl(row);
@@ -654,7 +728,7 @@ const getObjectUrl = (row: ListObject) =>{
         method: 'POST',
         url: env.storageUrl + "/storage/object/url" ,
         data: {    
-            bucket: access.sub,
+            bucket: access.bucket,
             key: row.key,
             idToken: access.id_token,
             accessKey: access.accessKey,
@@ -681,7 +755,7 @@ const getObjectUrl = (row: ListObject) =>{
 }
 
 function downloadUrl (row: ListObject) {
-    const url = env.storageUrl + "/storage/object?bucket=" + access.sub + "&key=" + row.key + "&idToken=" + access.id_token;
+    const url = env.storageUrl + "/storage/object?bucket=" + access.bucket + "&key=" + row.key + "&idToken=" + access.id_token;
     const aLink = document.createElement('a');
       aLink.style.display = 'none';
       aLink.href = url;
@@ -698,7 +772,7 @@ function downloadObject (row: ListObject)  {
         url: env.storageUrl + "/storage/object/download" ,
         responseType: 'blob',
         data: {    
-            bucket: access.sub,
+            bucket: access.bucket,
             key: row.key,
             idToken: access.id_token,
             accessKey: access.accessKey,
