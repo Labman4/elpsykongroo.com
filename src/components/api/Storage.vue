@@ -89,6 +89,7 @@
         <el-form-item label="platform" :label-width=visible.formLabelWidth>
           <el-select v-model="s3FormData.platform" placeholder="default" :allow-create=true :filterable=true>
             <el-option label="cloudflare R2" value="cloudflare" />
+            <el-option label="synology C2" value="c2" />
             <el-option label="oracle" value="oracle" />
             <el-option label="minio" value="minio" />
           </el-select>      
@@ -406,10 +407,10 @@ function* chunks(file, chunkSize) {
 const upload = async (options: UploadRequestOptions) => {
     if (options.file.size > 1024*1024*10) {
       // be careful minio must big than 5mb 
-      if (access.platform == "" || access.platform == "default" || access.platform == "cloudflare" ) {
+      if (access.platform == "" || access.platform == "default" || access.platform == "cloudflare" || access.platform == "c2" ) {
         chunkedUpload(options, 1024*1024*5);
       } else {
-        chunkedUpload(options, 1024*1024*5);
+        chunkedUpload(options, 1024*1024*2);
       }
     } else {
         const option = {
@@ -478,10 +479,16 @@ const saveS3Info = async() => {
 const loadS3Info = async(row: s3Info) => {
   access.accessKey = row.accessKey
   access.endpoint = row.endpoint
-  access.region = row.region       
-  access.platform = row.platform
-  s3Secret.value = ""
-  saveS3InfoForm.value = true;
+  access.region = row.region
+ if (access.platform == row.platform && s3Init.value) {
+    listObject()
+    saveS3Warning.value = false
+    storageTable.value = true
+  } else {
+    access.platform = row.platform      
+    s3Secret.value = ""
+    saveS3InfoForm.value = true;
+  }
 }
 
 const cancelLoad = () => {
