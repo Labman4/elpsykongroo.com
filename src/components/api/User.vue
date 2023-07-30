@@ -280,7 +280,7 @@ const loadGroups = (row: User) => {
   groupTable.value = true
   Ids.value = row.id
   const option = {
-    baseURL: env.apiUrl,
+    baseURL: env.authUrl,
     url: "auth/group/user/" + row.id,
     method: "GET",
     headers: {
@@ -297,7 +297,7 @@ const loadAuthorities = (row: User) => {
   authorityTable.value = true
   Ids.value = row.id
   const option = {
-    baseURL: env.apiUrl,
+    baseURL: env.authUrl,
     url: "auth/user/authority/" + row.username,
     method: "GET",
     headers: {
@@ -313,7 +313,7 @@ async function loadUserInfo (row: User) {
   Object.assign(dynamicClaimForm, inituserInfoTable())
   userInfoTableData.username = row.username
   const option = {
-    baseURL: env.apiUrl,
+    baseURL: env.authUrl,
     url: "auth/user/info/" + row.username,
     method: "GET",
     headers: {
@@ -360,7 +360,7 @@ const updateUserInfo = () => {
   }
   userInfoTableData.claims = JSON.stringify(Object.fromEntries(newclaimMap));
   const option = {
-    baseURL: env.apiUrl,
+    baseURL: env.authUrl,
     url: "auth/user/info",
     method: "POST",
     data: userInfoTableData,
@@ -411,7 +411,7 @@ const deleteClaim = (rmkey:string) => {
     //   }
     //}
     const option = {
-      baseURL: env.apiUrl,
+      baseURL: env.authUrl,
       url: "auth/user/info",
       method: "POST",
       data: userInfoTableData,
@@ -442,7 +442,7 @@ const lockUser = (row: User) => {
     row.locked = "true"
   }
   const option = {
-    baseURL: env.apiUrl,
+    baseURL: env.authUrl,
     url: "auth/user",
     method: "POST",
     data: row,
@@ -473,7 +473,7 @@ const loadUser = () => {
 const updateUser = () =>{
     userFormData.username = selectUserName[0].username;
     const option = {
-      baseURL: env.apiUrl,
+      baseURL: env.authUrl,
       url: "auth/user",
       method: "POST",
       data: userFormData,
@@ -508,7 +508,7 @@ const updateUser = () =>{
 const userList = () => {
     userTable.value = true;
     const option = {
-      baseURL: env.apiUrl,
+      baseURL: env.authUrl,
       url: "/auth/user",
       method: "GET",
       params: {

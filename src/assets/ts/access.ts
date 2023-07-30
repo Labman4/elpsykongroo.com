@@ -23,6 +23,7 @@ export const access = reactive(
     endpoint: "",
     region: "",
     platform: "default",
+    bucket: "",
     update(token:string, expires_in:number) {
       this.access_token = token;
       this.expires_in = expires_in;

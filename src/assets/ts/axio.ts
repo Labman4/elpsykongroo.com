@@ -3,7 +3,6 @@ import { toggleDark } from '~/composables';
 import { access } from './access';
 import { env } from './env';
 import { handleCookie } from './handleAuthCode';
-import { refreshlogin } from './login';
 import { visible } from './visible';
 const timeCount= ref(0);
 
@@ -65,7 +64,7 @@ axios.interceptors.response.use(function (response) {
         } 
       }).catch(function(error){
         if(handleCookie().length == 0) {
-          ElMessageBox.alert("session expired, please login agian");
+          // ElMessageBox.alert("session expired, please login agian");
           return;
         } else {
           visible.refreshlogin = true

@@ -722,7 +722,7 @@ const handleClientSetting = (data) => {
 
 const DeleteClient = (index: number, row: AuthClient) => {
   const option = {
-    baseURL: env.apiUrl,
+    baseURL: env.authUrl,
     url: "/auth/client/" + row.clientId,
     method: "DELETE",
     headers: {
@@ -738,7 +738,7 @@ const DeleteClient = (index: number, row: AuthClient) => {
 
 const DeleteReigster = (index: number, row: AuthClientRegister) => {
   const option = {
-    baseURL: env.apiUrl,
+    baseURL: env.authUrl,
     url: "/auth/client/register/" + row.registrationId,
     method: "DELETE",
     headers: {
@@ -757,7 +757,7 @@ const clientAdd = (formEl: FormInstance | undefined)  => {
   formEl.validate((valid) => {
     if (valid) {
       const option = {
-        baseURL: env.apiUrl,
+        baseURL: env.authUrl,
         url: "/auth/client",
         method: "PUT",
         data: clientForm,
@@ -827,7 +827,7 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
   formEl.validate((valid) => {
     if (valid) {
       const option = {
-        baseURL: env.apiUrl,
+        baseURL: env.authUrl,
         url: "/auth/client/register",
         method: "PUT",
         data: authRegister,
@@ -863,7 +863,7 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
 const authClientRegisterList = () => {
   authClientRegisterTable.value = true;
   const option = {
-    baseURL: env.apiUrl,
+    baseURL: env.authUrl,
     url: "/auth/client/register",
     method: "GET",
     // params: {
@@ -884,7 +884,7 @@ const authClientRegisterList = () => {
 const authClientList = () =>  {
   authClientTable.value = true;
   const option = {
-    baseURL: env.apiUrl,
+    baseURL: env.authUrl,
     url: "/auth/client",
     method: "GET",
     // params: {
