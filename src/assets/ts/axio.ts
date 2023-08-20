@@ -33,11 +33,7 @@ axios.interceptors.response.use(function (response) {
       if (error.response.data === 'no access') {
         ElMessageBox.alert("no access, please ensure and retry")
       } else if (handleCookie().length != 0) {
-        if(access.refresh_token != "" && access.refresh_token != undefined) {
-          refresh()
-        } else {
           visible.refreshlogin = true
-        }
       } else {
         refreshToken(); 
         return  
@@ -65,7 +61,8 @@ axios.interceptors.response.use(function (response) {
       },
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
-      },  
+      }, 
+      //not work, need client_credentials 
       withCredentials: true           
     }
     axios(refreshOption).then(function (response) {
@@ -84,7 +81,7 @@ axios.interceptors.response.use(function (response) {
   const countDown = () => {
     timeCount.value = window.setInterval(() => {
       access.expires_in--;
-      if(access.expires_in == 10) {
+      if(access.expires_in == 10 && handleCookie().length == 0) {
         refreshToken();
       } else if(access.expires_in == 0) {
         clearAcess();
