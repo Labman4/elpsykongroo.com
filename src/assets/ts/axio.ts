@@ -35,7 +35,8 @@ axios.interceptors.response.use(function (response) {
       } else if (handleCookie().length != 0) {
         visible.refreshlogin = true
       } else {
-        refreshToken();   
+        refreshToken(); 
+        return  
       }
     } else {
       console.error(error);
@@ -44,7 +45,7 @@ axios.interceptors.response.use(function (response) {
   });
 
   const refreshToken = () => {
-    if(access.refresh_token != "") {
+    if(access.refresh_token != "" && access.refresh_token != undefined) {
       const refreshOption = {
         baseURL: env.authUrl,
         url: "/oauth2/token",
@@ -64,8 +65,7 @@ axios.interceptors.response.use(function (response) {
         } 
       }).catch(function(error){
         if(handleCookie().length == 0) {
-          // ElMessageBox.alert("session expired, please login agian");
-          return;
+          ElMessageBox.alert("session expired, please login agian");
         } else {
           visible.refreshlogin = true
         }
