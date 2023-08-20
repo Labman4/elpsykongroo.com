@@ -33,7 +33,11 @@ axios.interceptors.response.use(function (response) {
       if (error.response.data === 'no access') {
         ElMessageBox.alert("no access, please ensure and retry")
       } else if (handleCookie().length != 0) {
-        visible.refreshlogin = true
+        if(access.refresh_token != "" && access.refresh_token != undefined) {
+          refresh()
+        } else {
+          visible.refreshlogin = true
+        }
       } else {
         refreshToken(); 
         return  
@@ -46,31 +50,35 @@ axios.interceptors.response.use(function (response) {
 
   const refreshToken = () => {
     if(access.refresh_token != "" && access.refresh_token != undefined) {
-      const refreshOption = {
-        baseURL: env.authUrl,
-        url: "/oauth2/token",
-        method: "POST",
-        data: {
-          grant_type: 'refresh_token',
-          refresh_token: access.refresh_token,
-        },
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },  
-        withCredentials: true           
-      }
-      axios(refreshOption).then(function (response) {
-        if(response.data.access_token != "") {
-          access.update(response.data.access_token, response.data.expires_in);
-        } 
-      }).catch(function(error){
+      refresh()
+    }
+  }
+  
+  const refresh = () => {
+    const refreshOption = {
+      baseURL: env.authUrl,
+      url: "/oauth2/token",
+      method: "POST",
+      data: {
+        grant_type: 'refresh_token',
+        refresh_token: access.refresh_token,
+      },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },  
+      withCredentials: true           
+    }
+    axios(refreshOption).then(function (response) {
+      if(response.data.access_token != "") {
+        access.update(response.data.access_token, response.data.expires_in);
+      } 
+    }).catch(function(error){
         if(handleCookie().length == 0) {
           ElMessageBox.alert("session expired, please login agian");
         } else {
           visible.refreshlogin = true
         }
       })
-    }
   }
 
   const countDown = () => {
