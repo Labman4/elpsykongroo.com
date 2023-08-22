@@ -38,7 +38,7 @@
         :data=uploadInfo
         :auto-upload=true
         multiple
-        :before-upload="zipOrNot"	
+        :before-upload="encryptOrNot"	
         :on-preview="handlePreview"
         :on-remove="handleRemove"
         :before-remove="beforeRemove"
@@ -289,8 +289,8 @@ const continueUpload:UploadProps['onError'] = async (error: Error, file: UploadF
     })   
 }
 
-const zipOrNot: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
-  return ElMessageBox.prompt('1',{
+const encryptOrNot: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
+  return ElMessageBox.prompt('need encrypt by yourself?',{
     inputValue: ""
   }).then(({ value }) =>  {
       isEncrypt.value = true
