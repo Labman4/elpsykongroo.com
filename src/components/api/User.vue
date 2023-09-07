@@ -1,7 +1,7 @@
 <template>
-  <el-dialog v-model="userTable" title="User" width="75%">
+  <el-dialog v-model="visible.userTable" title="User" width="75%">
     <el-button type="" @click="loadUser()">update</el-button>
-    <el-table :data="datas.users" @selection-change="handleUserSelectChange" >
+    <el-table :data="data.user" @selection-change="handleUserSelectChange" >
       <el-table-column type="selection"/>
       <el-table-column property="username" label="username"/>
       <el-table-column property="nickName" label="nick"/>
@@ -58,7 +58,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="userForm = false">Cancel</el-button>
-        <el-button type="primary" @click="updateUser()" >
+        <el-button type="primary" @click="updateUser(userFormData, selectUserName[0].username)" >
           Confirm
         </el-button>
       </span>
@@ -148,6 +148,7 @@ import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
 import { visible } from '~/assets/ts/visible';
 import { axios } from '~/assets/ts/axio';
+import { listUser, updateUser, userFormData, data } from '~/assets/ts/commonApi';
 import { ElDialog, ElButton, ElTable, ElTableColumn, ElPagination, ElForm, ElFormItem, ElInput, FormInstance } from 'element-plus';
 import bcrypt from 'bcryptjs';
 import Group from '~/components/api/Group.vue';
@@ -156,10 +157,10 @@ import Authority from '~/components/api/Authority.vue';
 const group = ref<InstanceType<typeof Group> | null>(null)
 const authority = ref<InstanceType<typeof Authority> | null>(null)
 
-
 const userPage = {
   "pageNumber": 1,
   "pageSize": 20,
+  "order": 0
 };
 
 const groupPage = {
@@ -174,7 +175,6 @@ const authorityPage = {
 
 const claimForm = ref(false);
 const userForm = ref(false);
-const userTable = ref(false);
 const authorityTable = ref(false);
 const groupTable = ref(false);
 const array = ref([])
@@ -191,28 +191,9 @@ const datas = reactive({users, groups, authorities, transfer, array});
 const claims = ref({});
 let dynamicClaimForm = reactive(claims);
 
-interface User {
-  id: string
-  email: string
-  nickName: string
-  username: string
-  password: string
-  createTime: string
-  updateTime: string
-  locked: string
-}
-
 const initclaimFormData = () => ({
   key: "",
   value: ""
-})
-
-let inituserFormData  = () => ({
-  email: "",
-  nickName: "",
-  username: "",
-  password: "",
-  locked: false,
 })
 
 let inituserInfoTable  = () => ({
@@ -241,8 +222,6 @@ let inituserInfoTable  = () => ({
 })
 
 let userInfoTableData = reactive(inituserInfoTable());
-
-let userFormData = reactive(inituserFormData());
 
 let claimFormData = reactive(initclaimFormData());
 
@@ -284,7 +263,7 @@ const loadGroups = (row: User) => {
     url: "auth/group/user/" + row.id,
     method: "GET",
     headers: {
-    'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function(response){
@@ -301,7 +280,7 @@ const loadAuthorities = (row: User) => {
     url: "auth/user/authority/" + row.username,
     method: "GET",
     headers: {
-    'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function(response){
@@ -317,7 +296,7 @@ async function loadUserInfo (row: User) {
     url: "auth/user/info/" + row.username,
     method: "GET",
     headers: {
-    'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function(response){
@@ -379,7 +358,6 @@ const updateUserInfo = () => {
 
 const addClaim = () => {
   dynamicClaimForm.value[claimFormData.key] = claimFormData.value;
-
   // userinfoRef.value?.$forceUpdate();
   claimForm.value = false;
 }
@@ -470,59 +448,9 @@ const loadUser = () => {
   }
 }
 
-const updateUser = () =>{
-    userFormData.username = selectUserName[0].username;
-    const option = {
-      baseURL: env.authUrl,
-      url: "auth/user",
-      method: "POST",
-      data: userFormData,
-      headers: {
-        'Authorization': 'Bearer '+ access.access_token
-      },
-    }
-    if (userFormData.password == "" || userFormData.password == undefined){
-        axios(option).then(function (response) {
-          if(response.status == 200) {
-            userForm.value = false;
-          }
-        })
-    } else if (userFormData.password.startsWith("{bcrypt}")) {
-        axios(option).then(function (response) {
-          if(response.status == 200) {
-            userForm.value = false;
-          }
-        })
-    } else {
-        bcrypt.hash(userFormData.password, 10).then(function(hash) {
-          userFormData.password = '{bcrypt}' + hash ;
-          axios(option).then(function (response) {
-            if(response.status == 200) {
-              userForm.value = false;
-            }
-          })
-        });
-    }
-}
-
-const userList = () => {
-    userTable.value = true;
-    const option = {
-      baseURL: env.authUrl,
-      url: "/auth/user",
-      method: "GET",
-      params: {
-        pageNumber: userPage.pageNumber-1,
-        pageSize: userPage.pageSize,
-        order: 0
-      },
-      headers: {
-      'Authorization': 'Bearer '+ access.access_token
-      }
-    }
-    axios(option).then(function (response) {
-      datas.users=response.data;
-    })
+const userList = async() => {
+    visible.userTable = true;
+    data.user = await listUser(userPage.pageNumber-1, userPage.pageSize, userPage.order)
 }
 
 const userPageChange = (newPage: number) => {
@@ -564,7 +492,7 @@ const handleUserSelectChange = (val: User[]) => {
 }
 
 defineExpose({
-  userList, loadUserInfo
+  loadUserInfo
 })
 
 </script> 

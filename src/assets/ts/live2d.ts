@@ -79,10 +79,6 @@ async function load() {
 // app.renderer.view.style.top = '6.8%';
 
 
-
-
-
-
 var scaleInit;
 // 
 var store = {

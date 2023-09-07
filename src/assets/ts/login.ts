@@ -4,7 +4,7 @@ import axios from "axios";
 import { env } from "~/assets/ts/env";
 import * as webauthnJson from "@github/webauthn-json";
 import { visible } from "~/assets/ts/visible";
-import { ElMessage, ElNotification } from 'element-plus';
+import { ElMessageBox, ElNotification } from 'element-plus';
 import { handleCookie, getAccessToken } from './handleAuthCode';
 import { toggleDark } from '~/composables';
 import jwt_decode from "jwt-decode";

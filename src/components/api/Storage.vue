@@ -87,7 +87,7 @@
     align-center>
     <span>need to connect to s3 from other platform?</span>
     <el-form :model="s3FormData">
-        <el-form-item label="platform" :label-width=visible.formLabelWidth>
+        <el-form-item label="platform" :label-width=visible.labelWidth>
           <el-select v-model="s3FormData.platform" placeholder="default" :allow-create=true :filterable=true>
             <el-option label="cloudflare R2" value="cloudflare" />
             <el-option label="synology C2" value="c2" />
@@ -95,16 +95,16 @@
             <el-option label="minio" value="minio" />
           </el-select>      
         </el-form-item>
-        <el-form-item label="accessKey" :label-width=visible.formLabelWidth>
+        <el-form-item label="accessKey" :label-width=visible.labelWidth>
           <el-input v-model="s3FormData.accessKey"/>       
         </el-form-item>
-        <el-form-item label="accessSecret" :label-width=visible.formLabelWidth>
+        <el-form-item label="accessSecret" :label-width=visible.labelWidth>
           <el-input v-model="s3FormData.accessSecret" />
         </el-form-item>
-        <el-form-item label="endpoint" :label-width=visible.formLabelWidth>
+        <el-form-item label="endpoint" :label-width=visible.labelWidth>
           <el-input v-model="s3FormData.endpoint" />
         </el-form-item>
-        <el-form-item label="region" :label-width=visible.formLabelWidth>
+        <el-form-item label="region" :label-width=visible.labelWidth>
           <el-input v-model="s3FormData.region" />
         </el-form-item>
         <!-- <el-form-item label="bucket" :label-width=visible.formLabelWidth v-if="s3FormData.platform != 'default'">
@@ -135,7 +135,7 @@
       </el-button>
     </span>
     </template>
-</el-dialog>
+  </el-dialog>
 
 <el-dialog
     v-model="saveS3InfoForm"
@@ -144,10 +144,10 @@
     align-center>
     <span>need secret to load exist s3 Info</span>
     <el-form :model="s3FormData">
-        <el-form-item label="secret" :label-width=visible.formLabelWidth>
+        <el-form-item label="secret" :label-width=visible.labelWidth>
           <el-input v-model="s3Secret"/>       
         </el-form-item>
-        <el-form-item label="bucket" :label-width=visible.formLabelWidth>
+        <el-form-item label="bucket" :label-width=visible.labelWidth>
           <el-input v-model="access.bucket"/>       
         </el-form-item>
       </el-form>
@@ -165,7 +165,7 @@
 import { axios } from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
-import { ElMessage, ElMessageBox, ElNotification, ElPopconfirm, popconfirmEmits, popconfirmProps, UploadFile, UploadProps, UploadRawFile, UploadRequestOptions, UploadUserFile } from 'element-plus';
+import { ElMessage, ElMessageBox, ElNotification, UploadFile, UploadProps, UploadRawFile, UploadRequestOptions, UploadUserFile } from 'element-plus';
 import { dayjs } from 'element-plus';
 import { visible } from '~/assets/ts/visible'
 import { setObject, deleteObject, getObject, openDB } from '~/assets/ts/indexDB'
@@ -542,7 +542,7 @@ const upload = async (options: UploadRequestOptions) => {
               platform: access.platform
           },
           headers: {
-              // 'Authorization': 'Bearer '+ access.access_token,
+              'Authorization': 'Bearer '+ access.access_token,
               "Content-Type": "multipart/form-data"
           }
       }
