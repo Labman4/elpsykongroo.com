@@ -12,17 +12,18 @@ import jwt_decode from "jwt-decode";
 const qrcodeLogin = () => {
     visible.qrcode = true
     const option = {
-        baseURL: env.authUrl,
-        url: "/qrcode",
+        baseURL: env.messageUrl,
+        url: "message/publicKey",
         method: "GET",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
         },   
     }
     axios(option).then(async function(response){
-      access.code_verifier = response.data.split("*")[0]
+    //   access.code_verifier = response.data.split("*")[0]
+      access.code_verifier = response.data
       access.qrcodeUrl = env.authUrl + "/login/qrcode?text=" + response.data
-    //   console.log(access.qrcodeUrl)
+      console.log(access.qrcodeUrl)
       checkToken();
     });
 }
