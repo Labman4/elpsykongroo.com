@@ -56,7 +56,6 @@ const listUser = async(pageNumber, pageSize, order) => {
     }
     await axios(option).then(function (response) {
         user = response.data
-        visible.userTable = true
         data.users = user
     })
     console.log("common", data)
@@ -93,7 +92,7 @@ const noticeListByUser = async(user, draft) => {
     notices.forEach( obj => {
         obj.timestamp = dayjs(obj.timestamp).format("YYYY-MM-DD HH:mm:ss")
     })
-    // data.notification = notices 
+    data.notification = notices 
   })
   return notices
 }
@@ -148,7 +147,6 @@ const topicList = async() => {
   await axios(option).then(function(response){
     topics = response.data
     visible.topicLoad = false
-    visible.topicTable = true
     data.topic = topics
   })
   return topics
