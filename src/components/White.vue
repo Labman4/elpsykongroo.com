@@ -105,6 +105,7 @@
     <QrcodeVue :value=access.qrcodeUrl :size="200" level="H" />  
   
   </el-dialog>
+  <Notice></Notice>
 </template>
 
 <script lang="ts" setup >
@@ -120,6 +121,7 @@ import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
 import { loadUser, noticeListByUser, updateUser, loadUserInfo } from '~/assets/ts/commonApi';
 import { userFormData } from '~/assets/ts/dataInterface'
+import Notice from '~/components/api/Notice.vue';
 
 const username = ref("")
 const userForm = ref(false)
