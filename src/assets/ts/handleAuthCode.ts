@@ -61,7 +61,6 @@ if (code != null && state != null) {
   }
 
   function openaiPkceCode(code) {
-    console.log(code)
     var codeVerifier;
     codeVerifier = "841aa35355d86c55c1a948831ab90f23f80f71c65a08feb0dc4830a066fd55d36422c464bc58128edecf2f0bf5e0baadfda1168f8cb5883bd8ff6745454afe8b";
     if (window.sessionStorage.getItem("code_verifier") != null) {
@@ -85,7 +84,6 @@ if (code != null && state != null) {
         withCredentials: true                  
     }
       axios(authOption).then(function (response) {
-        console.log(response.data)
       }) 
   }
 
@@ -142,7 +140,7 @@ async function deleteCookie(name) {
           toggleDark();
           countDown();
         }
-      }).catch()
+      }).catch(function(error) { console.log(error)})
     }
   }
 

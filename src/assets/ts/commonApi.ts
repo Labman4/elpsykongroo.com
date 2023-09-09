@@ -58,7 +58,6 @@ const listUser = async(pageNumber, pageSize, order) => {
         user = response.data
         data.users = user
     })
-    console.log("common", data)
     return user
 }
 
@@ -76,7 +75,7 @@ const noticeListByUser = async(user, draft) => {
       'Authorization': 'Bearer '+ access.access_token
     },
   }
-  if (user == "anyone") {
+  if (user == "") {
       option = {
           baseURL: env.messageUrl,
           url: "notice/user",

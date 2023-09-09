@@ -61,7 +61,6 @@ async function encryptData(data, text) {
 async function encryptDataCombineIv(data, text) {
     const key = await generateFixedKey(text);
     const plaintextData = new Uint8Array(data);
-    console.log("before encrypt", plaintextData.length)
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const params = {
         name: 'AES-GCM',
@@ -72,13 +71,11 @@ async function encryptDataCombineIv(data, text) {
         key,
         plaintextData
     );
-    console.log("after encrypt", encryptedData.byteLength)
 
     // if (first == 0) {
         const result = new Uint8Array(iv.length + encryptedData.byteLength);
         result.set(iv);
         result.set(new Uint8Array(encryptedData), iv.length);
-        console.log("after add iv", result.length)
         return {
             cipher: result,
             ciphertext: result.slice(0, result.length - 16),

@@ -3,7 +3,7 @@
     <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.sub == '' ">  <User /></el-icon>
     <el-icon class="whiteMode" v-if="access.sub != '' " @click="openUser()"> {{ access.sub }} </el-icon>
     <el-badge class="message" :is-dot=visible.isDot v-if="access.sub == '' ">
-      <el-icon @click="noticeListByUser('anyone', false), visible.noticeDrawer = true"><Message/></el-icon>
+      <el-icon @click="noticeListByUser('', false), visible.noticeDrawer = true"><Message/></el-icon>
     </el-badge>
     <el-badge class="message" :is-dot=visible.isDot v-if="access.sub != '' ">
       <el-icon @click="noticeListByUser(access.sub, false), visible.noticeDrawer = true"><Message/></el-icon>

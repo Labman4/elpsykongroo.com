@@ -22,7 +22,6 @@ function openDB(databaseName, version, storageName) {
         }    
     } 
       request.onerror = function(event) {
-        console.log(request)
         const error = request.error;
         reject(error);
       };
