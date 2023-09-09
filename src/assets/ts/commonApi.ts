@@ -1,30 +1,14 @@
 
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
-import { User, notification, topic  } from '~/assets/ts/interface';
 import { axios } from '~/assets/ts/axio';
 import { dayjs } from 'element-plus';
 import { visible } from '~/assets/ts/visible';
 import bcrypt from 'bcryptjs';
-
-let inituserFormData  = () => ({
-  email: "",
-  nickName: "",
-  username: "",
-  password: "",
-  locked: false,
-})
-
-let userFormData = reactive(inituserFormData());
-
-const notification:notification[] = [];
-const user:User[] = []
-const topic:topic[] = []
-
-const data = reactive({notification,user, topic});
+import { userInfoTableData, dynamicClaimForm, inituserInfoTable, data } from '~/assets/ts/dataInterface'
 
 const loadUser = async() => {
-  let response
+  let user
   const option = {
     baseURL: env.authUrl,
     url: "auth/user/" + access.sub,
@@ -34,10 +18,27 @@ const loadUser = async() => {
     },
   }
   await axios(option).then(function (response) {
-    response = response.data
+    user = response.data
   })
-  return response
+  return user
 }
+
+const findUser = async(name) => {
+  let user
+  const option = {
+      baseURL: env.authUrl,
+      url: "/auth/user/" + name,
+      method: "GET",
+      headers: {
+        'Authorization': 'Bearer '+ access.access_token
+      }
+    }
+    await axios(option).then(function (response) {
+      user = response.data
+    })
+    return user
+}
+
 const listUser = async(pageNumber, pageSize, order) => {
     let user
     const option = {
@@ -56,24 +57,9 @@ const listUser = async(pageNumber, pageSize, order) => {
     await axios(option).then(function (response) {
         user = response.data
         visible.userTable = true
-        data.user = user
+        data.users = user
     })
-    return user
-}
-
-const findUser = async(name) => {
-  let user
-  const option = {
-      baseURL: env.authUrl,
-      url: "/auth/user/" + name,
-      method: "GET",
-      headers: {
-      'Authorization': 'Bearer '+ access.access_token
-      }
-    }
-    await axios(option).then(function (response) {
-      user = response.data
-    })
+    console.log("common", data)
     return user
 }
 
@@ -167,6 +153,7 @@ const topicList = async() => {
   })
   return topics
 }
+
 const updateUser = (userFormData, username) => {
   userFormData.username = username;
   const option = {
@@ -201,4 +188,46 @@ const updateUser = (userFormData, username) => {
       });
   }
 }
-export { listUser, findUser, loadUser, updateUser, noticeListByUser, noticeList, topicList, userFormData, data};
+
+async function loadUserInfo (username:string) {
+  Object.assign(dynamicClaimForm, inituserInfoTable())
+  userInfoTableData.username = username
+  const option = {
+    baseURL: env.authUrl,
+    url: "auth/user/info/" + username,
+    method: "GET",
+    headers: {
+      'Authorization': 'Bearer '+ access.access_token
+    },
+  }
+  axios(option).then(function(response){
+    if (response.data == null) {
+        dynamicClaimForm.value = inituserInfoTable();
+        visible.userInfoForm = true;
+    } else {
+      const userinfo = response.data
+      for (var key in userinfo) {
+        // if(key == "claim") {
+        //   const claims = JSON.parse(userinfo[key]);
+        //   for (var key in claims) {
+        //     if(true === claims[key]) {
+        //       claims[key] = "true"
+        //     } else if (false === claims[key]) {
+        //       claims[key] = "false"
+        //     } 
+        //   }
+        // }
+        if(true === userinfo[key]) {
+            userinfo[key] = "true"
+        } else if (false === userinfo[key]) {
+            userinfo[key] = "false"
+        } 
+      }
+      dynamicClaimForm.value = userinfo;
+      visible.userInfoForm = true;
+    }
+  })
+  return dynamicClaimForm.value
+}
+
+export { listUser, findUser, loadUser, updateUser, loadUserInfo, noticeListByUser, noticeList, topicList};

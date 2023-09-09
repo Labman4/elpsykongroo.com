@@ -52,7 +52,6 @@ if ("serviceWorker" in navigator) {
                             serviceWorkerRegistration : registration 
                         })
                         .then((currentToken) => {
-                            console.log(currentToken)
                             access.registerToken = currentToken                       
                             const fcmOption = {
                                 baseURL: env.messageUrl,
@@ -67,8 +66,7 @@ if ("serviceWorker" in navigator) {
                                     "Content-Type": "application/json"
                                 }
                             }
-                            axios(fcmOption).then(function (response) {
-                            })          
+                            axios(fcmOption)
                         })
                     }
                 }

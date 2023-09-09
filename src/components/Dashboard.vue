@@ -89,6 +89,8 @@
         
         </el-menu>
       </el-scrollbar>
+      <Notice ref="notice"></Notice>
+      <User ref="user"></User>
       <IP ref="ip"></IP>
       <Record ref="record"></Record>
       <AuthClient ref="authClient"></AuthClient>
@@ -101,13 +103,13 @@
         </el-main>
       </el-container>
     </el-container>
+  
   </template>
   
 <script lang="ts" setup>
-
 import { access } from '~/assets/ts/access';
 import { ref } from 'vue';
-import { Timer, Operation, SwitchButton, Expand, Fold, Menu, UploadFilled, MessageBox, Notification} from '@element-plus/icons-vue';
+import { Timer, Operation, SwitchButton, Expand, Fold, Menu, UploadFilled, MessageBox} from '@element-plus/icons-vue';
 import IP from '~/components/api/IP.vue';
 import Record from '~/components/api/Record.vue';
 import AuthClient from '~/components/api/AuthClient.vue';
@@ -115,8 +117,9 @@ import User from '~/components/api/User.vue';
 import Group from '~/components/api/Group.vue';
 import Authority from '~/components/api/Authority.vue';
 import Storage from '~/components/api/Storage.vue';
-import { listUser, noticeList, topicList, data } from '~/assets/ts/commonApi';
-import { visible } from '~/assets/ts/visible';
+import Notice from '~/components/api/Notice.vue';
+
+import { listUser, noticeList, topicList } from '~/assets/ts/commonApi';
 import { logout } from '~/assets/ts/login';
 
 const storage = ref<InstanceType<typeof Storage> | null>(null)
@@ -125,6 +128,7 @@ const record = ref<InstanceType<typeof Record> | null>(null)
 const authClient = ref<InstanceType<typeof AuthClient> | null>(null)
 const group = ref<InstanceType<typeof Group> | null>(null)
 const authority = ref<InstanceType<typeof Authority> | null>(null)
+const user = ref<InstanceType<typeof User> | null>(null)
 const notice = ref<InstanceType<typeof Notice> | null>(null)
 const isCollapse = ref(true)
 

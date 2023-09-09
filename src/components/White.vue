@@ -1,12 +1,12 @@
 <template>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
     <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.sub == '' ">  <User /></el-icon>
-    <el-icon class="whiteMode" v-if="access.sub != '' " @click="loadUser()"> {{ access.sub }} </el-icon>
+    <el-icon class="whiteMode" v-if="access.sub != '' " @click="openUser()"> {{ access.sub }} </el-icon>
     <el-badge class="message" :is-dot=visible.isDot v-if="access.sub == '' ">
-      <el-icon @click="noticeListByUser('anyone', false)"><Message/></el-icon>
+      <el-icon @click="noticeListByUser('anyone', false), visible.noticeDrawer = true"><Message/></el-icon>
     </el-badge>
     <el-badge class="message" :is-dot=visible.isDot v-if="access.sub != '' ">
-      <el-icon @click="noticeListByUser(access.sub, false)"><Message/></el-icon>
+      <el-icon @click="noticeListByUser(access.sub, false), visible.noticeDrawer = true"><Message/></el-icon>
     </el-badge>
     <el-dialog v-model="visible.webauthnFormVisible" width="65%">
       <el-form 
@@ -40,7 +40,6 @@
         <el-form-item label="email" :label-width=visible.userFormLabelWidth :inline="true">
           <el-input v-model="userFormData.email"/>       
           <el-button type="primary" @click="validateEmail()" v-if="!access.email_verified && userFormData.email != 'null'">validate</el-button>
-
         </el-form-item>
         <el-form-item label="nickName" :label-width=visible.userFormLabelWidth>
           <el-input v-model="userFormData.nickName" />
@@ -51,7 +50,7 @@
         <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
           <el-input v-model="userFormData.username" />
         </el-form-item>  -->
-        <el-button type="primary" @click="loadInfo()">userInfo</el-button>
+        <el-button type="primary" @click="loadUserInfo(username)">userInfo</el-button>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -106,8 +105,6 @@
     <QrcodeVue :value=access.qrcodeUrl :size="200" level="H" />  
   
   </el-dialog>
-  <user ref="u"></user>
-  <notice ref="n"></notice>
 </template>
 
 <script lang="ts" setup >
@@ -118,28 +115,13 @@ import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
 import axios from 'axios';
 import * as webauthnJson from "@github/webauthn-json";
-import bcrypt from 'bcryptjs';
 import { ElNotification } from 'element-plus';
-import user from '~/components/api/User.vue';
-import notice from '~/components/api/Notice.vue';
 import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
-import { listUser, findUser, noticeListByUser, updateUser, userFormData } from '~/assets/ts/commonApi';
+import { loadUser, noticeListByUser, updateUser, loadUserInfo } from '~/assets/ts/commonApi';
+import { userFormData } from '~/assets/ts/dataInterface'
 
-const u = ref<InstanceType<typeof user> | null>(null)
-const n = ref<InstanceType<typeof notice> | null>(null)
-
-const userr:User = {
-  id: "",
-  email: "",
-  nickName: "",
-  username: "",
-  password: "",
-  createTime: "",
-  updateTime: "",
-  locked: ""
-}
-
+const username = ref("")
 const userForm = ref(false)
 
 const svg = `
@@ -153,17 +135,13 @@ const svg = `
         " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
       `
 
-const loadUser = async() => {
-  const user:User = await findUser(access.sub)
-  userFormData.email = user.email
-  userFormData.nickName = user.nickName
-  userFormData.password = user.password
-  userr.username = user.username
+const openUser = async() => {
+  const currentUser = await loadUser()
+  userFormData.email = currentUser.email
+  userFormData.nickName = currentUser.nickName
+  userFormData.password = currentUser.password
+  username.value = currentUser.username
   userForm.value = true
-}
-
-async function loadInfo () {
-  await u.value?.loadUserInfo(userr)
 }
 
 const validateEmail = () => {
@@ -224,7 +202,6 @@ const addAuthenticator = () => {
       })
   })
 }
-
 </script>
 
 <style scoped>

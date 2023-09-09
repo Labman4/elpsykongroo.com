@@ -22,5 +22,6 @@ export const visible = reactive(
     "userTable": false,
     "noticeTable": false,
     "topicTable": false,
-    "topicLoad": true
+    "topicLoad": true,
+    "noticeDrawer": false
 })

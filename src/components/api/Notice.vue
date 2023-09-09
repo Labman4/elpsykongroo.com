@@ -1,5 +1,5 @@
 <template>
-    <el-drawer v-model="noticeDrawer" :show-close="false">
+    <el-drawer v-model="visible.noticeDrawer" :show-close="false">
     <template #header="{ close, titleId, titleClass }">
       <h4 :id="titleId" :class="titleClass">message list</h4>
       <el-button type="danger" @click="close">
@@ -70,7 +70,7 @@
             placeholder="Please enter a keyword"
             remote-show-suffix
             :remote-method="topicList"
-            :loading="topicLoad">
+            :loading="visible.topicLoad">
             <el-option
                 v-for="item in data.topic"
                 :key="item.name"
@@ -108,10 +108,9 @@
             placeholder="Please enter a keyword"
             remote-show-suffix
             :remote-method="userList"
-            :filter-method="userfilter"
             :loading="userLoad">
             <el-option
-                v-for="item in data.user"
+                v-for="item in data.users"
                 :key="item.username"
                 :label="item.username"
                 :value="item.username"
@@ -136,7 +135,7 @@
     v-model="visible.topicTable"
     width="80%"
     align-center>
-    <el-button type="" @click="openTopicAdd()">Add</el-button>
+    <el-button type="" @click="topicDialog = true">Add</el-button>
     <el-table :data="data.topic" @selection-change="">
       <el-table-column type="selection"/>
       <el-table-column property="name" label="name"/>
@@ -158,7 +157,7 @@
     v-model="visible.noticeTable"
     width="80%"
     align-center>
-    <el-button type="" @click="openNoticeAdd()">Add</el-button>
+    <el-button type="" @click="notificationDialog = true">Add</el-button>
     <el-table :data="data.notification" @selection-change="">
       <el-table-column type="selection"/>
       <!-- <el-table-column property="id" label="id"/> -->
@@ -186,15 +185,14 @@ import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
 import { visible } from '~/assets/ts/visible';
 import { axios } from '~/assets/ts/axio';
-import { listUser, User, findUser, noticeListByUser, data, noticeList, topicList} from '~/assets/ts/commonApi';
+import { listUser, findUser, noticeList, topicList} from '~/assets/ts/commonApi';
 import { CircleCloseFilled } from '@element-plus/icons-vue';
-import { dayjs } from 'element-plus';
+import { data } from '~/assets/ts/dataInterface'
 
 const userLoad = ref(true)
 const noticeDialog = ref(false)
 const notificationDialog = ref(false)
 const topicDialog = ref(false)
-const noticeDrawer = ref(false)
 const noticeBody = ref("")
 const noticeImg = ref("")
 
@@ -217,27 +215,6 @@ let initTopicForm  = () => ({
 
 let topicForm = reactive(initTopicForm());
 
-const openNotice = () => {
-  noticeDrawer.value = true
-  if (access.sub == "" || access.sub == undefined) {
-    noticeListByUser("anyone", false)
-  } else {
-    noticeListByUser(access.sub, false)
-  }
-}
-
-const openTopic= () => {
-    topicTable.value = true
-    topicList()
-}
-
-const openTopicAdd = () => {
-    topicDialog.value = true
-}
-
-const openNoticeAdd = () => {
-    notificationDialog.value = true
-}
 const openTitle = (img, body) => {
     noticeBody.value = body
     noticeImg.value = img
@@ -245,12 +222,12 @@ const openTitle = (img, body) => {
 }
 
 const userList = async() => {
-   data.user = await listUser()
+   data.users = await listUser(0, 10, 0)
    userLoad.value = false
 }
 
 const userfilter = async() => {
-   data.user = await findUser("1")
+   data.users = await findUser("")
 }
 
 const addNotice = () => {

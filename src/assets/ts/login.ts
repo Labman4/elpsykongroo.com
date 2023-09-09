@@ -23,7 +23,7 @@ const qrcodeLogin = () => {
     //   access.code_verifier = response.data.split("*")[0]
       access.code_verifier = response.data
       access.qrcodeUrl = env.authUrl + "/login/qrcode?text=" + response.data
-      console.log(access.qrcodeUrl)
+    //   console.log(access.qrcodeUrl)
       checkToken();
     });
 }
