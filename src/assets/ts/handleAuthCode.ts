@@ -3,6 +3,102 @@ import { axios, countDown } from "./axio";
 import { toggleDark } from "~/composables";
 import { env } from "./env";
 import jwt_decode from "jwt-decode";
+import { initializeApp } from "firebase/app";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import { visible } from "./visible";
+import { ElNotification } from "element-plus";
+import 'virtual:svg-icons-register'
+// import { registerSW } from 'virtual:pwa-register';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCRthXUaRcPNWmYYq3NokfWVBRzm8uC09U",
+    authDomain: "elpsykonngroo.firebaseapp.com",
+    projectId: "elpsykonngroo",
+    storageBucket: "elpsykonngroo.appspot.com",
+    messagingSenderId: "1035237568740",
+    appId: "1:1035237568740:web:75eb3c160355379a97bcf1"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const messaging = getMessaging(firebaseApp);
+
+const register = async() => {
+  console.log("start register")
+    if ("serviceWorker" in navigator) {
+      // registerSW();
+      navigator.serviceWorker
+        .register(    
+          import.meta.env.VITE_PWA_MODE === 'production' ? '/firebase-messaging-sw.js' : '/dev-sw.js?dev-sw',
+          { type: import.meta.env.VITE_PWA_MODE  === 'production' ? 'classic' : 'module' }
+        )
+        .then((registration) => {
+        if ("Notification" in window ) {
+          window.Notification.requestPermission().then((permission) => {
+              if (permission === 'granted') {
+                console.log("notice enable")
+                navigator.serviceWorker.ready.then((registration) => {
+                  registration.showNotification("register ready");
+                });
+                  if ('PushManager' in window) {
+                    console.log("push enable")
+                      getToken(messaging, {
+                          vapidKey: env.publicKey,
+                          serviceWorkerRegistration : registration 
+                      })
+                      .then((currentToken) => {
+                        console.log("register token")
+
+                          access.registerToken = currentToken                       
+                          const fcmOption = {
+                              baseURL: env.messageUrl,
+                              url: "notice/register",
+                              method: "PUT",
+                              params: {
+                                  token: currentToken,
+                                  timestamp: Date.now(),
+                                  user: access.sub
+                              },
+                              headers: {
+                                  "Content-Type": "application/json"
+                              }
+                          }
+                          axios(fcmOption)
+                      })
+                  }
+              }
+          });
+      }      
+    });  
+  }
+} 
+
+onMessage(messaging, (payload) => {
+  console.log(payload)
+  ElNotification({
+    title: payload.notification?.title,
+    message: payload.notification?.body,
+    duration: 5000,
+  })
+  visible.isDot = true
+});
+
+window.addEventListener('message', function(event) {
+  // 在这里处理收到的消息
+  // event.data 包含了发送的数据
+  // event.source 包含了发送消息的窗口或 iframe 的引用
+  // event.origin 包含了消息的来源地址
+
+  // 例如，可以检查消息来源和数据类型来确保安全性
+  // if (event.origin !== 'https://example.com') {
+  //   console.error('来自不受信任的来源的消息');
+  //   return;
+  // }
+
+  if (typeof event.data === 'object' && event.data.message) {
+    const message = event.data.message;
+    visible.isDot = true;
+  }
+});
 
 const callbackUrl = window.location.href;
 const code = new URL(callbackUrl).searchParams.get('code');
@@ -104,11 +200,12 @@ async function deleteCookie(name) {
   document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
-  (function access () {
-    getAccessToken ()
+  (async function access () {
+     await getAccessToken ()
+     await register()
   })()
 
-  function getAccessToken () {
+  async function getAccessToken () {
     var key = handleCookie();
     if (key.length > 0) {
       key = atob(key.split("|")[0]);
