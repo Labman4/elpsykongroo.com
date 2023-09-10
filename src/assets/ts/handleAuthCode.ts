@@ -22,7 +22,7 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const messaging = getMessaging(firebaseApp);
 
-const register = async() => {
+const register = async(username) => {
   console.log("start register")
     if ("serviceWorker" in navigator) {
       // registerSW();
@@ -56,7 +56,7 @@ const register = async() => {
                               params: {
                                   token: currentToken,
                                   timestamp: Date.now(),
-                                  user: access.sub
+                                  user: username
                               },
                               headers: {
                                   "Content-Type": "application/json"
@@ -202,7 +202,7 @@ async function deleteCookie(name) {
 
   (async function access () {
      await getAccessToken ()
-     await register()
+     register("")
   })()
 
   async function getAccessToken () {
@@ -221,7 +221,7 @@ async function deleteCookie(name) {
         },   
         withCredentials: true                  
       }
-      axios(tokenOption).then(function (response) {
+      axios(tokenOption).then(async function (response) {
         if(response.data.at != "") {
           access.update(response.data.at, 1200);
           access.refresh_token = response.data.rt;
@@ -234,6 +234,7 @@ async function deleteCookie(name) {
           access.email_verified = jwt["email_verified"]
           access.client_id = jwt["azp"]
           access.expires_in = jwt["exp"] - jwt["iat"]
+          await register(response.data.u)
           toggleDark();
           countDown();
         }
