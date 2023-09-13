@@ -8,6 +8,8 @@ export const env = reactive(
     redirectUrl: import.meta.env.VITE_CNAME,
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
     oauth2ProxyPkceUrl: import.meta.env.VITE_OAUTH2_PROXY_PKCE_URL,
-    oauth2ProxyUrl: import.meta.env.VITE_OAUTH2_PROXY_URL
-
+    oauth2ProxyUrl: import.meta.env.VITE_OAUTH2_PROXY_URL,
+    pwaMode: import.meta.env.VITE_PWA_MODE,
+    messageUrl: import.meta.env.VITE_MESSAGE_URL,
+    publicKey: import.meta.env.VITE_PUBLIC_KEY
 })

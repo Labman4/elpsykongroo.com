@@ -33,50 +33,53 @@ axios.interceptors.response.use(function (response) {
       if (error.response.data === 'no access') {
         ElMessageBox.alert("no access, please ensure and retry")
       } else if (handleCookie().length != 0) {
-        visible.refreshlogin = true
+          visible.refreshlogin = true
       } else {
-        refreshToken();   
+        refreshToken(); 
+        return  
       }
-    } else {
-      console.error(error);
-    }
+    } 
     return Promise.reject(error);
   });
 
   const refreshToken = () => {
-    if(access.refresh_token != "") {
-      const refreshOption = {
-        baseURL: env.authUrl,
-        url: "/oauth2/token",
-        method: "POST",
-        data: {
-          grant_type: 'refresh_token',
-          refresh_token: access.refresh_token,
-        },
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },  
-        withCredentials: true           
-      }
-      axios(refreshOption).then(function (response) {
-        if(response.data.access_token != "") {
-          access.update(response.data.access_token, response.data.expires_in);
-        } 
-      }).catch(function(error){
+    if(access.refresh_token != "" && access.refresh_token != undefined) {
+      refresh()
+    }
+  }
+  
+  const refresh = () => {
+    const refreshOption = {
+      baseURL: env.authUrl,
+      url: "/oauth2/token",
+      method: "POST",
+      data: {
+        grant_type: 'refresh_token',
+        refresh_token: access.refresh_token,
+      },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }, 
+      //not work, need client_credentials 
+      withCredentials: true           
+    }
+    axios(refreshOption).then(function (response) {
+      if(response.data.access_token != "") {
+        access.update(response.data.access_token, response.data.expires_in);
+      } 
+    }).catch(function(error){
         if(handleCookie().length == 0) {
-          // ElMessageBox.alert("session expired, please login agian");
-          return;
+          ElMessageBox.alert("session expired, please login agian");
         } else {
           visible.refreshlogin = true
         }
       })
-    }
   }
 
   const countDown = () => {
     timeCount.value = window.setInterval(() => {
       access.expires_in--;
-      if(access.expires_in == 10) {
+      if(access.expires_in == 10 && handleCookie().length == 0) {
         refreshToken();
       } else if(access.expires_in == 0) {
         clearAcess();

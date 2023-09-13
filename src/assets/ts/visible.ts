@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 
 export const visible = reactive(
 {
+    "isDot": false,
     "webauthnFormVisible": false,
     "authFormVisible": false,
     "loading": false,
@@ -9,12 +10,18 @@ export const visible = reactive(
     "refreshlogin": false,
     "qrcode": false,
     "userInfoForm": false,
-    "formLabelWidth": "100px",
+    "labelWidth": "100px",
     "ipFormLabelWidth": "100px",
     "userFormLabelWidth": "100px",
     "groupFormLabelWidth": "100px",
     "authorityFormLabelWidth": "100px",
     "authClientFormWidth": "100px",
     "authClientRegisterFormWidth": "100px",
-    "width": window.innerWidth
+    "width": window.innerWidth,
+    "userForm": false,
+    "userTable": false,
+    "noticeTable": false,
+    "topicTable": false,
+    "topicLoad": true,
+    "noticeDrawer": false
 })

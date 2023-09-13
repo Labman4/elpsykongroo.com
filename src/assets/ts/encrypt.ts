@@ -1,10 +1,7 @@
 async function generateSHA256ByInput(text) {
-    var keyData;
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    keyData = hashBuffer.slice(0, 256 / 8); 
-    return keyData;
+    return await crypto.subtle.digest('SHA-256', data);
 }
   
 async function computeFileSHA256(file:ArrayBuffer) {
@@ -61,6 +58,38 @@ async function encryptData(data, text) {
     };
 }
   
+async function encryptDataCombineIv(data, text) {
+    const key = await generateFixedKey(text);
+    const plaintextData = new Uint8Array(data);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const params = {
+        name: 'AES-GCM',
+        iv: iv,
+    };
+    const encryptedData = await crypto.subtle.encrypt(
+        params,
+        key,
+        plaintextData
+    );
+
+    // if (first == 0) {
+        const result = new Uint8Array(iv.length + encryptedData.byteLength);
+        result.set(iv);
+        result.set(new Uint8Array(encryptedData), iv.length);
+        return {
+            cipher: result,
+            ciphertext: result.slice(0, result.length - 16),
+            tag: result.slice(result.length-16, result.length)
+        };
+    // } else {
+    //     return {
+    //         cipher: encryptedData,
+    //         ciphertext: encryptedData.slice(0, encryptedData.byteLength -16),
+    //         tag: encryptedData.slice(encryptedData.byteLength - 16, encryptedData.byteLength)
+    //     };    
+    // }  
+}
+
 async function decryptData(ciphertext, iv, text) {
     const key = await generateFixedKey(text);
     const decryptionParams = {
@@ -72,8 +101,18 @@ async function decryptData(ciphertext, iv, text) {
         key,
         base64ToArrayBuffer(ciphertext)
     );
-    const decoder = new TextDecoder();
-    const plaintext = decoder.decode(decryptedData);
-    return plaintext;
+    return new TextDecoder().decode(decryptedData);
 }
-export { encryptData, decryptData, computeFileSHA256 }
+  
+async function decryptDataWithoutIv(encryptedData, text) {
+  const key = await generateFixedKey(text);
+  const iv = encryptedData.slice(0, 12);    
+  const ciphertext = encryptedData.slice(12);
+  const decryptedData = await window.crypto.subtle.decrypt(    
+    {name: 'AES-GCM', iv },
+    key,
+    ciphertext)     
+    return decryptedData;
+}
+
+export { encryptData, decryptData, computeFileSHA256, encryptDataCombineIv, decryptDataWithoutIv }

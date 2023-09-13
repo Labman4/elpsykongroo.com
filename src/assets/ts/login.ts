@@ -4,7 +4,7 @@ import axios from "axios";
 import { env } from "~/assets/ts/env";
 import * as webauthnJson from "@github/webauthn-json";
 import { visible } from "~/assets/ts/visible";
-import { ElMessage, ElNotification } from 'element-plus';
+import { ElMessageBox, ElNotification } from 'element-plus';
 import { handleCookie, getAccessToken } from './handleAuthCode';
 import { toggleDark } from '~/composables';
 import jwt_decode from "jwt-decode";
@@ -12,15 +12,16 @@ import jwt_decode from "jwt-decode";
 const qrcodeLogin = () => {
     visible.qrcode = true
     const option = {
-        baseURL: env.authUrl,
-        url: "/qrcode",
+        baseURL: env.messageUrl,
+        url: "message/publicKey",
         method: "GET",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
         },   
     }
     axios(option).then(async function(response){
-      access.code_verifier = response.data.split("*")[0]
+    //   access.code_verifier = response.data.split("*")[0]
+      access.code_verifier = response.data
       access.qrcodeUrl = env.authUrl + "/login/qrcode?text=" + response.data
     //   console.log(access.qrcodeUrl)
       checkToken();

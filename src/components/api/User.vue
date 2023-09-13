@@ -1,7 +1,7 @@
 <template>
-  <el-dialog v-model="userTable" title="User" width="75%">
+  <el-dialog v-model="visible.userTable" title="User" width="75%">
     <el-button type="" @click="loadUser()">update</el-button>
-    <el-table :data="datas.users" @selection-change="handleUserSelectChange" >
+    <el-table :data="data.users" @selection-change="handleUserSelectChange" >
       <el-table-column type="selection"/>
       <el-table-column property="username" label="username"/>
       <el-table-column property="nickName" label="nick"/>
@@ -11,7 +11,7 @@
       <el-table-column property="updateTime" label="updateTime"/>
       <el-table-column label="userInfo">
         <template #default="scope">
-          <el-button size="small" type="info" @click="loadUserInfo(scope.row)">detail</el-button>
+          <el-button size="small" type="info" @click="loadUserInfo(scope.row.username)">detail</el-button>
         </template>
       </el-table-column>
       <el-table-column label="permissions">
@@ -58,7 +58,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="userForm = false">Cancel</el-button>
-        <el-button type="primary" @click="updateUser()" >
+        <el-button type="primary" @click="updateUser(userFormData, selectUserName[0].username)" >
           Confirm
         </el-button>
       </span>
@@ -67,7 +67,7 @@
 
   <el-dialog v-model="visible.userInfoForm" title="userInfo"  width="80%">
     <el-button type="" @click="claimForm = true">Add</el-button>
-    <el-form ref="userinfoRef" :model="dynamicClaimForm" >
+    <el-form :model="dynamicClaimForm" >
       <el-form-item v-for="(value, key) in dynamicClaimForm"
         :key="key"
         :label="key"
@@ -148,18 +148,20 @@ import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
 import { visible } from '~/assets/ts/visible';
 import { axios } from '~/assets/ts/axio';
-import { ElDialog, ElButton, ElTable, ElTableColumn, ElPagination, ElForm, ElFormItem, ElInput, FormInstance } from 'element-plus';
-import bcrypt from 'bcryptjs';
+import { listUser, updateUser,loadUserInfo } from '~/assets/ts/commonApi';
+import { ElDialog, ElButton, ElTable, ElTableColumn, ElPagination, ElForm, ElFormItem, ElInput } from 'element-plus';
 import Group from '~/components/api/Group.vue';
 import Authority from '~/components/api/Authority.vue';
+import { user, group, authority } from '~/assets/ts/interface';
+import { data, userInfoTableData, dynamicClaimForm, userFormData, inituserInfoTable } from '~/assets/ts/dataInterface'
 
 const group = ref<InstanceType<typeof Group> | null>(null)
 const authority = ref<InstanceType<typeof Authority> | null>(null)
 
-
 const userPage = {
   "pageNumber": 1,
   "pageSize": 20,
+  "order": 0
 };
 
 const groupPage = {
@@ -174,7 +176,6 @@ const authorityPage = {
 
 const claimForm = ref(false);
 const userForm = ref(false);
-const userTable = ref(false);
 const authorityTable = ref(false);
 const groupTable = ref(false);
 const array = ref([])
@@ -185,98 +186,27 @@ let Ids = ref("")
 const groups = ref([{}])
 const authorities = ref([{}])
 
-const users = [{}];
-const datas = reactive({users, groups, authorities, transfer, array});
-
-const claims = ref({});
-let dynamicClaimForm = reactive(claims);
-
-interface User {
-  id: string
-  email: string
-  nickName: string
-  username: string
-  password: string
-  createTime: string
-  updateTime: string
-  locked: string
-}
+const datas = reactive({groups, authorities, transfer, array});
 
 const initclaimFormData = () => ({
   key: "",
   value: ""
 })
 
-let inituserFormData  = () => ({
-  email: "",
-  nickName: "",
-  username: "",
-  password: "",
-  locked: false,
-})
-
-let inituserInfoTable  = () => ({
-  sub: "",
-  name: "",
-  given_name: "",
-  family_name: "",
-  middle_name: "",
-  nickname: "",
-  preferred_username: "",
-  profile: "",
-  picture: "",
-  website: "",
-  email: "",
-  email_verified: "",
-  gender: "",
-  birthdate: "",
-  zoneinfo: "",
-  locale: "",
-  phone_number: "",
-  phone_number_verified: "",
-  address: "",
-  updated_at: "",
-  claims: "",
-  username: ""
-})
-
-let userInfoTableData = reactive(inituserInfoTable());
-
-let userFormData = reactive(inituserFormData());
-
 let claimFormData = reactive(initclaimFormData());
 
-const userinfoRef = ref<FormInstance>();
 
-interface Group {
-  groupName: string
-  id: string
-}
-
-interface Authority {
-    authority: string
-    id: string
-}
-
-// const openGroup = (row: Group) => {
-//   group.value?.GroupList(row.groupName, Ids.value);
-// }
-
-// const openAuthority = (row: Authority) => {
-//   authority.value?.AuthorityList(row.authority, Ids.value);
-// }
-
-const deleteGroup = (index: number, row: Group) => {
+const deleteGroup = (index: number, row: group) => {
   group.value?.updateGroup(row.groupName, Ids.value, true);
   datas.groups.splice(index, 1)
 }
 
-const deleteAuthority = (index: number, row: Authority) => {
+const deleteAuthority = (index: number, row: authority) => {
   authority.value?.updateAuthority(row.authority, Ids.value, true);
   datas.authorities.splice(index, 1)
 }
 
-const loadGroups = (row: User) => {
+const loadGroups = (row: user) => {
   groupTable.value = true
   Ids.value = row.id
   const option = {
@@ -284,7 +214,7 @@ const loadGroups = (row: User) => {
     url: "auth/group/user/" + row.id,
     method: "GET",
     headers: {
-    'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function(response){
@@ -292,8 +222,7 @@ const loadGroups = (row: User) => {
   })
 }
 
-
-const loadAuthorities = (row: User) => {
+const loadAuthorities = (row: user) => {
   authorityTable.value = true
   Ids.value = row.id
   const option = {
@@ -301,51 +230,11 @@ const loadAuthorities = (row: User) => {
     url: "auth/user/authority/" + row.username,
     method: "GET",
     headers: {
-    'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function(response){
     datas.authorities = response.data
-  })
-}
-
-async function loadUserInfo (row: User) {
-  Object.assign(dynamicClaimForm, inituserInfoTable())
-  userInfoTableData.username = row.username
-  const option = {
-    baseURL: env.authUrl,
-    url: "auth/user/info/" + row.username,
-    method: "GET",
-    headers: {
-    'Authorization': 'Bearer '+ access.access_token
-    },
-  }
-  axios(option).then(function(response){
-    if (response.data == null) {
-        dynamicClaimForm.value = inituserInfoTable();
-        visible.userInfoForm = true;
-    } else {
-      const userinfo = response.data
-      for (var key in userinfo) {
-        // if(key == "claim") {
-        //   const claims = JSON.parse(userinfo[key]);
-        //   for (var key in claims) {
-        //     if(true === claims[key]) {
-        //       claims[key] = "true"
-        //     } else if (false === claims[key]) {
-        //       claims[key] = "false"
-        //     } 
-        //   }
-        // }
-        if(true === userinfo[key]) {
-            userinfo[key] = "true"
-        } else if (false === userinfo[key]) {
-            userinfo[key] = "false"
-        } 
-      }
-      dynamicClaimForm.value = userinfo;
-      visible.userInfoForm = true;
-    }
   })
 }
 
@@ -379,8 +268,6 @@ const updateUserInfo = () => {
 
 const addClaim = () => {
   dynamicClaimForm.value[claimFormData.key] = claimFormData.value;
-
-  // userinfoRef.value?.$forceUpdate();
   claimForm.value = false;
 }
 
@@ -435,7 +322,7 @@ const resetUseInfo = (username:string) => {
   userInfoTableData.username = username;
 }
 
-const lockUser = (row: User) => {
+const lockUser = (row: user) => {
   if(row.locked == "true") {
     row.locked = "false"
   } else {
@@ -470,59 +357,9 @@ const loadUser = () => {
   }
 }
 
-const updateUser = () =>{
-    userFormData.username = selectUserName[0].username;
-    const option = {
-      baseURL: env.authUrl,
-      url: "auth/user",
-      method: "POST",
-      data: userFormData,
-      headers: {
-        'Authorization': 'Bearer '+ access.access_token
-      },
-    }
-    if (userFormData.password == "" || userFormData.password == undefined){
-        axios(option).then(function (response) {
-          if(response.status == 200) {
-            userForm.value = false;
-          }
-        })
-    } else if (userFormData.password.startsWith("{bcrypt}")) {
-        axios(option).then(function (response) {
-          if(response.status == 200) {
-            userForm.value = false;
-          }
-        })
-    } else {
-        bcrypt.hash(userFormData.password, 10).then(function(hash) {
-          userFormData.password = '{bcrypt}' + hash ;
-          axios(option).then(function (response) {
-            if(response.status == 200) {
-              userForm.value = false;
-            }
-          })
-        });
-    }
-}
-
-const userList = () => {
-    userTable.value = true;
-    const option = {
-      baseURL: env.authUrl,
-      url: "/auth/user",
-      method: "GET",
-      params: {
-        pageNumber: userPage.pageNumber-1,
-        pageSize: userPage.pageSize,
-        order: 0
-      },
-      headers: {
-      'Authorization': 'Bearer '+ access.access_token
-      }
-    }
-    axios(option).then(function (response) {
-      datas.users=response.data;
-    })
+const userList = async() => {
+    visible.userTable = true;
+    data.users = await listUser(userPage.pageNumber-1, userPage.pageSize, userPage.order)
 }
 
 const userPageChange = (newPage: number) => {
@@ -551,20 +388,16 @@ const authorityPageSizeChange = (newPage: number) => {
   authorityPage.pageSize = newPage;
 }
 
-const selectUserName:User[] = [];
+const selectUserName:user[] = [];
 
-const multipleUserSelect = ref<User[]>([])
+const multipleUserSelect = ref<user[]>([])
 
-const handleUserSelectChange = (val: User[]) => {
+const handleUserSelectChange = (val: user[]) => {
   multipleUserSelect.value = val ;
   selectUserName.splice(0, selectUserName.length);
   for(let i of multipleUserSelect.value) {
     selectUserName.push(i);
   }
 }
-
-defineExpose({
-  userList, loadUserInfo
-})
 
 </script> 

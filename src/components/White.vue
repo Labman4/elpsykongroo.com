@@ -1,8 +1,13 @@
 <template>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
     <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.sub == '' ">  <User /></el-icon>
-    <el-icon class="whiteMode" v-if="access.sub != '' " @click="loadUser()"> {{ access.sub }} </el-icon>
-
+    <el-icon class="whiteMode" v-if="access.sub != '' " @click="openUser()"> {{ access.sub }} </el-icon>
+    <el-badge class="message" :is-dot=visible.isDot v-if="access.sub == '' ">
+      <el-icon @click="noticeListByUser('', false), visible.noticeDrawer = true"><Message/></el-icon>
+    </el-badge>
+    <el-badge class="message" :is-dot=visible.isDot v-if="access.sub != '' ">
+      <el-icon @click="noticeListByUser(access.sub, false), visible.noticeDrawer = true"><Message/></el-icon>
+    </el-badge>
     <el-dialog v-model="visible.webauthnFormVisible" width="65%">
       <el-form 
         v-loading="visible.loading"
@@ -35,7 +40,6 @@
         <el-form-item label="email" :label-width=visible.userFormLabelWidth :inline="true">
           <el-input v-model="userFormData.email"/>       
           <el-button type="primary" @click="validateEmail()" v-if="!access.email_verified && userFormData.email != 'null'">validate</el-button>
-
         </el-form-item>
         <el-form-item label="nickName" :label-width=visible.userFormLabelWidth>
           <el-input v-model="userFormData.nickName" />
@@ -46,12 +50,12 @@
         <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
           <el-input v-model="userFormData.username" />
         </el-form-item>  -->
-        <el-button type="primary" @click="loadInfo()">userInfo</el-button>
+        <el-button type="primary" @click="loadUserInfo(username)">userInfo</el-button>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="userForm = false">Cancel</el-button>
-          <el-button type="primary" @click="updateUser()" >
+          <el-button type="primary" @click="updateUser(userFormData, access.sub)" >
             Confirm
           </el-button>
           <el-button type="danger" @click="logout()" >
@@ -101,57 +105,25 @@
     <QrcodeVue :value=access.qrcodeUrl :size="200" level="H" />  
   
   </el-dialog>
-  <user ref="u"></user>
-
+  <Notice></Notice>
 </template>
 
 <script lang="ts" setup >
-import { User, Iphone } from '@element-plus/icons-vue';
+import { User, Iphone, Message } from '@element-plus/icons-vue';
 import { webauthnRegister, webauthnLogin, tmpLogin, logout, qrcodeLogin } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
 import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
 import axios from 'axios';
 import * as webauthnJson from "@github/webauthn-json";
-import bcrypt from 'bcryptjs';
 import { ElNotification } from 'element-plus';
-import user from '~/components/api/User.vue';
 import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
- 
-const u = ref<InstanceType<typeof user> | null>(null)
+import { loadUser, noticeListByUser, updateUser, loadUserInfo } from '~/assets/ts/commonApi';
+import { userFormData } from '~/assets/ts/dataInterface'
+import Notice from '~/components/api/Notice.vue';
 
-const userr:User = {
-  id: "",
-  email: "",
-  nickName: "",
-  username: "",
-  password: "",
-  createTime: "",
-  updateTime: "",
-  locked: ""
-}
-
-interface User {
-  id: string
-  email: string
-  nickName: string
-  username: string
-  password: string
-  createTime: string
-  updateTime: string
-  locked: string
-}
-
-let inituserFormData  = () => ({
-  email: "",
-  nickName: "",
-  username: "",
-  password: "",
-  locked: false,
-})
-
-let userFormData = reactive(inituserFormData());
+const username = ref("")
 const userForm = ref(false)
 
 const svg = `
@@ -165,26 +137,13 @@ const svg = `
         " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
       `
 
-const loadUser = () => {
-  const option = {
-      baseURL: env.authUrl,
-      url: "auth/user/" + access.sub,
-      method: "GET",
-      headers: {
-      'Authorization': 'Bearer '+ access.access_token
-      },
-  }
-  axios(option).then(function(response){
-      userFormData.email = response.data.email
-      userFormData.nickName = response.data.nickName
-      userFormData.password = response.data.passowrd
-      userr.username = response.data.username
-      userForm.value = true
-  })
-}
-
-async function loadInfo () {
-  await u.value?.loadUserInfo(userr)
+const openUser = async() => {
+  const currentUser = await loadUser()
+  userFormData.email = currentUser.email
+  userFormData.nickName = currentUser.nickName
+  userFormData.password = currentUser.password
+  username.value = currentUser.username
+  userForm.value = true
 }
 
 const validateEmail = () => {
@@ -200,10 +159,8 @@ const validateEmail = () => {
         'Authorization': 'Bearer '+ access.access_token
       },
   }
-  axios(option).then(function(response){
-  })
+  axios(option)
 }
-
 
 const addAuthenticator = () => {
   const option = {
@@ -247,42 +204,6 @@ const addAuthenticator = () => {
       })
   })
 }
-
-const updateUser = () =>{
-  userFormData.username = access.sub;
-  const option = {
-      baseURL: env.authUrl,
-      url: "auth/user/patch",
-      method: "PATCH",
-      data: userFormData,
-      headers: {
-      'Authorization': 'Bearer '+ access.access_token
-      },
-    }
-    if (userFormData.password == "" || userFormData.password == undefined){
-        axios(option).then(function (response) {
-          if(response.status == 200) {
-            userForm.value = false;
-          }
-        })
-    } else if (userFormData.password.startsWith("{bcrypt}")) {
-        axios(option).then(function (response) {
-          if(response.status == 200) {
-            userForm.value = false;
-          }
-        })
-    } else {
-        bcrypt.hash(userFormData.password, 10).then(function(hash) {
-          userFormData.password = '{bcrypt}' + hash ;
-          axios(option).then(function (response) {
-            if(response.status == 200) {
-              userForm.value = false;
-            }
-          })
-        });
-    }
-}
-
 </script>
 
 <style scoped>
@@ -291,6 +212,10 @@ const updateUser = () =>{
     color: #409EFF;
   }
   .whiteMode {
+    position:absolute;right: 80px; top:15px;
+    color: #409EFF;
+  }
+  .message {
     position:absolute;right: 50px; top:15px;
     color: #409EFF;
   }

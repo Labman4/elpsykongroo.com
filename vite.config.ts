@@ -15,6 +15,7 @@ import Unocss from 'unocss/vite'
 // import dynamicImport from 'vite-plugin-dynamic-import';
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
+import { VitePWA } from 'vite-plugin-pwa'
 
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
@@ -112,6 +113,21 @@ export default defineConfig({
     },
   },
   plugins: [
+    VitePWA({
+      srcDir: 'public',
+      strategies: 'injectManifest',
+      filename: 'firebase-messaging-sw.js',
+      injectRegister: null,
+      registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true,
+        type: 'module',
+        navigateFallback: 'index.html'
+      },
+      workbox: {
+        sourcemap: true
+      }
+    }),
     // nodeResolve({ preferBuiltins: false }),
     // nodeResolve({
     //   dedupe: ["is-plain-object", "false"]

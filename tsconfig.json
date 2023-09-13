@@ -15,7 +15,7 @@
       "~/*": ["src/*"]
     },
     "skipLibCheck": true,
-    "types": ["vite-plugin-svg-icons/client", "vite/client"],
+    "types": ["vite-plugin-svg-icons/client", "vite/client", "vite-plugin-pwa/client"],
     "noImplicitAny": false,
     "allowJs": true,
     "isolatedModules": true,

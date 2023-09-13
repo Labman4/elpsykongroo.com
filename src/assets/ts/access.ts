@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 
 export const access = reactive(
 {
+    registerToken: "",
     access_token: "",
     refresh_token: "",
     id_token: "",

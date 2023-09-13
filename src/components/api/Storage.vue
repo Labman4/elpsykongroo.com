@@ -38,6 +38,7 @@
         :data=uploadInfo
         :auto-upload=true
         multiple
+        :before-upload="encryptOrNot"	
         :on-preview="handlePreview"
         :on-remove="handleRemove"
         :before-remove="beforeRemove"
@@ -86,7 +87,7 @@
     align-center>
     <span>need to connect to s3 from other platform?</span>
     <el-form :model="s3FormData">
-        <el-form-item label="platform" :label-width=visible.formLabelWidth>
+        <el-form-item label="platform" :label-width=visible.labelWidth>
           <el-select v-model="s3FormData.platform" placeholder="default" :allow-create=true :filterable=true>
             <el-option label="cloudflare R2" value="cloudflare" />
             <el-option label="synology C2" value="c2" />
@@ -94,16 +95,16 @@
             <el-option label="minio" value="minio" />
           </el-select>      
         </el-form-item>
-        <el-form-item label="accessKey" :label-width=visible.formLabelWidth>
+        <el-form-item label="accessKey" :label-width=visible.labelWidth>
           <el-input v-model="s3FormData.accessKey"/>       
         </el-form-item>
-        <el-form-item label="accessSecret" :label-width=visible.formLabelWidth>
+        <el-form-item label="accessSecret" :label-width=visible.labelWidth>
           <el-input v-model="s3FormData.accessSecret" />
         </el-form-item>
-        <el-form-item label="endpoint" :label-width=visible.formLabelWidth>
+        <el-form-item label="endpoint" :label-width=visible.labelWidth>
           <el-input v-model="s3FormData.endpoint" />
         </el-form-item>
-        <el-form-item label="region" :label-width=visible.formLabelWidth>
+        <el-form-item label="region" :label-width=visible.labelWidth>
           <el-input v-model="s3FormData.region" />
         </el-form-item>
         <!-- <el-form-item label="bucket" :label-width=visible.formLabelWidth v-if="s3FormData.platform != 'default'">
@@ -134,7 +135,7 @@
       </el-button>
     </span>
     </template>
-</el-dialog>
+  </el-dialog>
 
 <el-dialog
     v-model="saveS3InfoForm"
@@ -143,10 +144,10 @@
     align-center>
     <span>need secret to load exist s3 Info</span>
     <el-form :model="s3FormData">
-        <el-form-item label="secret" :label-width=visible.formLabelWidth>
+        <el-form-item label="secret" :label-width=visible.labelWidth>
           <el-input v-model="s3Secret"/>       
         </el-form-item>
-        <el-form-item label="bucket" :label-width=visible.formLabelWidth>
+        <el-form-item label="bucket" :label-width=visible.labelWidth>
           <el-input v-model="access.bucket"/>       
         </el-form-item>
       </el-form>
@@ -164,11 +165,11 @@
 import { axios } from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
-import { ElMessage, ElMessageBox, ElNotification, UploadFile, UploadProps, UploadRequestOptions, UploadUserFile } from 'element-plus';
+import { ElMessage, ElMessageBox, ElNotification, UploadFile, UploadProps, UploadRawFile, UploadRequestOptions, UploadUserFile } from 'element-plus';
 import { dayjs } from 'element-plus';
 import { visible } from '~/assets/ts/visible'
 import { setObject, deleteObject, getObject, openDB } from '~/assets/ts/indexDB'
-import { encryptData, decryptData, computeFileSHA256 } from '~/assets/ts/encrypt'
+import { encryptData, decryptData, computeFileSHA256, encryptDataCombineIv, decryptDataWithoutIv } from '~/assets/ts/encrypt'
 
 interface ListObject {
     "key": string
@@ -192,6 +193,9 @@ const s3Form = ref(false)
 const s3Init = ref(false)
 const saveS3InfoForm = ref(false)
 const s3Secret = ref("")
+const isZip = ref(false)
+const isEncrypt = ref(false)
+const password = ref("")
 
 let initS3FormData  = () => ({
   accessKey: "",
@@ -285,6 +289,15 @@ const continueUpload:UploadProps['onError'] = async (error: Error, file: UploadF
     })   
 }
 
+const encryptOrNot: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
+  return ElMessageBox.prompt('need encrypt by yourself?',{
+    inputValue: ""
+  }).then(({ value }) =>  {
+      isEncrypt.value = true
+      password.value = value
+    })
+}
+
 const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
   return ElMessageBox.confirm(
     `Cancel the transfer of ${uploadFile.name} ?`
@@ -327,31 +340,122 @@ const getUploadId = async (fileName, sha256, partCount, partNum) => {
 }
 
 async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
-    const fileName = options.file.name;
+    let fileName = options.file.name;
+    let tagList, tag, result;
+    if (isZip.value) {
+      fileName = options.file.name + ".zip"
+    }
     var uploadId;
     if (access.platform != "" && access.platform != "default") {
       const upload = await getUploadId(fileName, "", "", "");
       uploadId = upload;
     }
     var partCount = Math.ceil(options.file.size / chunkSize);
+    if (isEncrypt.value) {
+      tagList = new Map()
+      tag = new Uint8Array(16) 
+      abortMultiPart(options.file.name, uploadId)
+      const upload = await getUploadId(fileName, "", "", "");
+      uploadId = upload;
+    }
+    // const sortedChunksArray = await sortChunks(options.file, chunkSize);
     var completeSize = 0;
     for (const { index, chunk } of chunks(options.file, chunkSize)) {
-        chunk.arrayBuffer().then(async function(arrayBuffer) {
+          chunk.arrayBuffer().then(async function(arrayBuffer) {  
           const sha256 = await computeFileSHA256(arrayBuffer)
           var checkUpload = await getUploadId(fileName, sha256, partCount, index)
           if (checkUpload == "" || checkUpload == undefined) {
               completeSize ++;
           } else if (access.platform != "" && access.platform != "default" && access.platform != "cloudflare" && uploadId != checkUpload) {
               listObject()
-          } else {          
+          } else if (isZip.value) {
+              // const zip = new JSZip()
+              // zip.file(options.file.name + (index + 1) + ".zip", chunk); 
+              // zip.generateAsync({type:"blob"}).then(function(content) {
+                // uploadPart(content, options.file.name + ".zip", partCount, index, uploadId, "")
+              // });
+          } else if (isEncrypt.value && password.value != "") {
+              const byteData = await readFileAsArrayBuffer(chunk);
+              const cipherResp = await encryptDataCombineIv(byteData, password.value)
+              // if (index == 0) {
+              //   tagList.set(index, cipherResp.tag)
+              // } else {
+              //   tagList.set(index, new Uint8Array(cipherResp.tag))
+              // }
+              // if (index === partCount - 1) {
+                // console.log("last", tagList)
+                // const sortedArray = Array.from(tagList.entries());
+                // sortedArray.sort((a, b) => a[0] - b[0]);
+                // const sortedMap = new Map(sortedArray);                
+                // for (let i = 0; i < sortedMap.size - 1; i++) {
+                //   const tag = await bitwiseXOR(sortedMap.get(i), sortedMap.get(i+1))
+                //   sortedMap.set(i+1, new Uint8Array(tag))
+                // }
+                // console.log("after", sortedMap)
+                // result = new Uint8Array(cipherResp.ciphertext.byteLength + 16);
+                // result.set(new Uint8Array(cipherResp.ciphertext))
+                // result.set(sortedMap.get(index), cipherResp.ciphertext.byteLength)
+                // uploadPart(result, options.file.name, partCount, index, uploadId, "")
+              // } else {
+                // console.log("first", tagList)
+                uploadPart(cipherResp.cipher, options.file.name, partCount, index, uploadId, "")
+              // }
+          }
+           else {   
             uploadPart(chunk, options.file.name, partCount, index, uploadId, "")
           }
           if (completeSize == partCount) {
             uploadPart(chunk, options.file.name, partCount, index, uploadId, "")
           }
-      })
+        })
     }  
 }    
+
+async function sortTagList(tagList) {
+  return new Promise((resolve, reject) => {
+    const sortedArray = Array.from(tagList.entries());
+    sortedArray.sort((a, b) => a[0] - b[0]);
+    const sortedMap = new Map(sortedArray);
+    console.log("before",sortedMap)
+    resolve(sortedMap);
+  });
+}
+
+async function sortChunks(file, chunkSize) {
+  return new Promise((resolve, reject) => {
+    const chunksArray = Array.from(chunks(file, chunkSize));
+    const sortedChunksArray = chunksArray.sort((a, b) => a.index - b.index);
+    resolve(sortedChunksArray);
+  });
+}
+
+async function bitwiseXOR(arr1, arr2) {
+  return new Promise((resolve, reject) => {
+    const result = new Uint8Array(arr1.length);
+    for (let i = 0; i < arr1.length; i++) {
+      result[i] = arr1[i] ^ arr2[i];
+    }
+    console.log("xor", result)
+    resolve(result);
+  });
+}
+  
+function readFileAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      resolve(event.target?.result);
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function uint8ArrayToFile(uint8Array, fileName, mimeType = 'application/octet-stream') {
+  const blob = new Blob([uint8Array], { type: mimeType });
+  const file = new File([blob], fileName, { type: mimeType });
+  return file;
+}
 
 const uploadPart = (chunk, filename, partCount, partNum, uploadId, offset) => {
       const option = {
@@ -366,13 +470,14 @@ const uploadPart = (chunk, filename, partCount, partNum, uploadId, offset) => {
             partNum: partNum,
             idToken: access.id_token,
             uploadId: uploadId,
-            mode: "stream",
             accessKey: access.accessKey,
             accessSecret: access.accessSecret,
             endpoint: access.endpoint, 
             region: access.region,
             platform: access.platform,
-            offset: offset
+            offset: offset,
+            mode: "stream"
+
         },
         headers: {
             'Authorization': 'Bearer '+ access.access_token,
@@ -405,7 +510,7 @@ function* chunks(file, chunkSize) {
 }
 
 const upload = async (options: UploadRequestOptions) => {
-    if (options.file.size > 1024*1024*10) {
+    if (options.file.size > 1024*1024*5) {
       // be careful minio must big than 5mb 
       if (access.platform == "" || access.platform == "default" || access.platform == "cloudflare" || access.platform == "c2" ) {
         chunkedUpload(options, 1024*1024*5);
@@ -413,27 +518,35 @@ const upload = async (options: UploadRequestOptions) => {
         chunkedUpload(options, 1024*1024*2);
       }
     } else {
-        const option = {
-            baseURL: env.storageUrl,
-            url: "/storage/object",
-            method: "POST",
-            data: {
-                data: options.file,
-                bucket: access.bucket,
-                mode: "stream",
-                idToken: access.id_token,
-                accessKey: access.accessKey,
-                accessSecret: access.accessSecret,
-                endpoint: access.endpoint, 
-                region: access.region,
-                platform: access.platform
-            },
-            headers: {
-                'Authorization': 'Bearer '+ access.access_token,
-                "Content-Type": "multipart/form-data"
-            }
-        }
-        await axios(option);   
+      let fileData;
+      if (isEncrypt.value && password.value != "") {
+        const byteData = await readFileAsArrayBuffer(options.file);
+        const cipherResp = await encryptDataCombineIv(byteData, password.value)
+        fileData = uint8ArrayToFile(cipherResp.cipher, options.file.name)
+      } else {
+        fileData = options.file
+      }
+      const option = {
+          baseURL: env.storageUrl,
+          url: "/storage/object",
+          method: "POST",
+          data: {
+              data: fileData,
+              bucket: access.bucket,
+              mode: "stream",
+              idToken: access.id_token,
+              accessKey: access.accessKey,
+              accessSecret: access.accessSecret,
+              endpoint: access.endpoint, 
+              region: access.region,
+              platform: access.platform
+          },
+          headers: {
+              'Authorization': 'Bearer '+ access.access_token,
+              "Content-Type": "multipart/form-data"
+          }
+      }
+      axios(option);   
    }
 }
 
@@ -645,6 +758,30 @@ const listObject = () => {
   })   
 }
 
+const abortMultiPart = (name, uploadId) => {
+  const option = {
+      baseURL: env.apiUrl,
+      url: "/storage/object/abort",
+      method: "POST",
+      data: {
+          bucket: access.bucket,
+          key: name,
+          idToken: access.id_token,
+          accessKey: access.accessKey,
+          accessSecret: access.accessSecret,
+          endpoint: access.endpoint, 
+          region: access.region,
+          platform: access.platform,
+          uploadId: uploadId
+      },
+      headers: {
+          'Authorization': 'Bearer '+ access.access_token,
+          "Content-Type": "application/json"
+      }
+  }
+  axios(option)
+}
+
 const deleteS3 = (index:number, row: ListObject) => {
     const option = {
         baseURL: env.apiUrl,
@@ -700,7 +837,7 @@ const DeleteSelect = () => {
       platform: access.platform
     },
     headers: {
-      // 'Authorization': 'Bearer '+ access.access_token,
+      'Authorization': 'Bearer '+ access.access_token,
       "Content-Type": "application/json"
     },
   }
@@ -793,7 +930,10 @@ function downloadObject (row: ListObject)  {
             "Content-Type": "application/json"
         },
     }).then(async function(response){
-        // fileDownload(response.data, row.key);
+        // const bytedata = await readFileAsArrayBuffer(response.data)
+        // const byteArray = await decryptDataWithoutIv(bytedata, "1")
+        // const file = uint8ArrayToFile(bytedata, row.key)
+        // const url = URL.createObjectURL(file);
         const url = URL.createObjectURL(response.data);
         const a = document.createElement('a');
         a.style.display = 'none';
