@@ -275,7 +275,7 @@ async function logout() {
     access.grant_type = "";
     access.expires_in = 5;
     access.sub = "";
-    await revoke();
+    // await revoke();
     oidclogout();
     access.id_token = "";
     access.access_token = "";
