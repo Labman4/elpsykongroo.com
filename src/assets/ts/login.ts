@@ -4,7 +4,7 @@ import axios from "axios";
 import { env } from "~/assets/ts/env";
 import * as webauthnJson from "@github/webauthn-json";
 import { visible } from "~/assets/ts/visible";
-import { ElMessageBox, ElNotification } from 'element-plus';
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import { handleCookie, getAccessToken } from './handleAuthCode';
 import { toggleDark } from '~/composables';
 import jwt_decode from "jwt-decode";
@@ -269,21 +269,21 @@ const tmpLogin = () => {
     axios(option);
 }
 
- function logout() {
+async function logout() {
     ElMessage('you will logout in 3s');
     toggleDark();
     access.grant_type = "";
     access.expires_in = 5;
     access.sub = "";
+    await revoke();
     oidclogout();
-    revoke();
     access.id_token = "";
     access.access_token = "";
     access.refresh_token = "";
     window.location.href = env.redirectUrl
 }
 
- function revoke() {
+ async function revoke() {
     const option = {
         baseURL: env.authUrl,
         url: "/oauth2/revoke",
