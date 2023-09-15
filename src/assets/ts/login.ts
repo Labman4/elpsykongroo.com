@@ -322,7 +322,7 @@ function revoke() {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
           }, 
-        // withCredentials: true,
+        withCredentials: true,
         // auth : { 
         //     username : env.clientId,
         //     password : env.clientSecret 
