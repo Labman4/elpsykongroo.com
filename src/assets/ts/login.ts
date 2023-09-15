@@ -275,11 +275,11 @@ async function logout() {
     access.grant_type = "";
     access.expires_in = 5;
     access.sub = "";
-    // await revoke();
-    oidclogout();
-    access.id_token = "";
+    await revoke();
     access.access_token = "";
     access.refresh_token = "";
+    await oidclogout();
+    access.id_token = "";
     window.location.href = env.redirectUrl
 }
 
@@ -295,16 +295,20 @@ async function logout() {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
         }, 
+        // auth : { 
+        //     username : env.clientId,
+        //     password : env.clientSecret 
+        // } ,  
         // withCredentials: true                
         // auth : { 
         //     username : "pkce", 
         //     password : "" 
         // } ,      
     }
-    axios(option);
+    await axios(option);
 }
 
- function oidclogout() {
+ async function oidclogout() {
     const option = {
         baseURL: env.authUrl,
         url: "/connect/logout",
@@ -317,9 +321,13 @@ async function logout() {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
           }, 
-        withCredentials: true                
+        // withCredentials: true,
+        // auth : { 
+        //     username : env.clientId,
+        //     password : env.clientSecret 
+        // } ,                      
     }
-    axios(option);
+    await axios(option)
  }
 
 export { webauthnLogin, webauthnRegister, refreshlogin, logout, tmpLogin, qrcodeLogin }
