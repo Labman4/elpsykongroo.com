@@ -4,7 +4,7 @@ import axios from "axios";
 import { env } from "~/assets/ts/env";
 import * as webauthnJson from "@github/webauthn-json";
 import { visible } from "~/assets/ts/visible";
-import { ElMessageBox, ElNotification } from 'element-plus';
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import { handleCookie, getAccessToken } from './handleAuthCode';
 import { toggleDark } from '~/composables';
 import jwt_decode from "jwt-decode";
@@ -269,21 +269,21 @@ const tmpLogin = () => {
     axios(option);
 }
 
- function logout() {
+async function logout() {
     ElMessage('you will logout in 3s');
     toggleDark();
     access.grant_type = "";
     access.expires_in = 5;
     access.sub = "";
-    oidclogout();
-    revoke();
-    access.id_token = "";
+    await revoke();
+    await oidclogout();
     access.access_token = "";
-    access.refresh_token = "";
+    access.refresh_token = "";  
+    access.id_token = "";
     window.location.href = env.redirectUrl
 }
 
- function revoke() {
+async function revoke() {
     const option = {
         baseURL: env.authUrl,
         url: "/oauth2/revoke",
@@ -295,16 +295,20 @@ const tmpLogin = () => {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
         }, 
+        // auth : { 
+        //     username : env.clientId,
+        //     password : env.clientSecret 
+        // } ,  
         // withCredentials: true                
         // auth : { 
         //     username : "pkce", 
         //     password : "" 
         // } ,      
     }
-    axios(option);
+   await axios(option);
 }
 
- function oidclogout() {
+async function oidclogout() {
     const option = {
         baseURL: env.authUrl,
         url: "/connect/logout",
@@ -317,9 +321,13 @@ const tmpLogin = () => {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
           }, 
-        withCredentials: true                
+        withCredentials: true,
+        // auth : { 
+        //     username : env.clientId,
+        //     password : env.clientSecret 
+        // } ,                      
     }
-    axios(option);
+    await axios(option)
  }
 
 export { webauthnLogin, webauthnRegister, refreshlogin, logout, tmpLogin, qrcodeLogin }
