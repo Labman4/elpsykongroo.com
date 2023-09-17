@@ -82,8 +82,7 @@ const DeleteSelect= () => {
     },
   }
   axios(option).then(function (response) {
-    var count = response.data;
-    if (count == selectRecord.length) {
+    if (response.status == 200) {
       selectRecord.forEach(function(item, index){
         data.records.forEach(function(i, ind){
             if (item === i.id) {
@@ -126,8 +125,7 @@ const DeleteRecord = (index: number, row: Record) => {
     },
   }
   axios(option).then(function (response) {
-    var count = response.data;
-    if (count > 0) {
+    if (response.status == 200) {
       data.records.splice(index, 1);
     }
   })
