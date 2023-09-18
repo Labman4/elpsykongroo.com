@@ -93,9 +93,12 @@ window.addEventListener('message', function(event) {
   //   console.error('来自不受信任的来源的消息');
   //   return;
   // }
+  console.log(event.origin)
+  console.log(event.data)
 
-  if (typeof event.data === 'object' && event.data.message) {
+  if (typeof event.data === 'object' && event.data) {
     const message = event.data.message;
+    console.log(message)
     visible.isDot = true;
   }
 });
