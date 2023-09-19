@@ -58,7 +58,7 @@
             </el-sub-menu>
             <el-sub-menu index="2-4" >
               <template #title><span>permission</span></template>
-              <el-menu-item index="2-4-1" @click="listUser(0, 10, 0), visible.userTable = true">user</el-menu-item>
+              <el-menu-item index="2-4-1" @click="visible.userTable = true, listUser(0, 10, 0)">user</el-menu-item>
               <el-menu-item index="2-4-2" @click="openGroup()">group</el-menu-item>
               <el-menu-item index="2-4-3" @click="openAuthority()">authority</el-menu-item>
             </el-sub-menu>
@@ -75,8 +75,8 @@
               <span>Message</span> 
             </template>
             <el-menu-item-group>
-              <el-menu-item index="4-1"  @click="noticeList([],'')">notification</el-menu-item>
-              <el-menu-item index="4-2"  @click="topicList(), visible.topicTable = true">topic</el-menu-item>
+              <el-menu-item index="4-1"  @click="visible.noticeTable = true, noticeList([],'')">notification</el-menu-item>
+              <el-menu-item index="4-2"  @click="visible.topicTable = true, topicList()">topic</el-menu-item>
             </el-menu-item-group>
           </el-sub-menu>
           <el-menu-item index="5" v-if="access.expires_in > 0">

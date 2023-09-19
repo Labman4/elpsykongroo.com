@@ -60,7 +60,8 @@ const register = async(username) => {
                               },
                               headers: {
                                   "Content-Type": "application/json"
-                              }
+                              },
+                              withCredentials: true               
                           }
                           axios(fcmOption)
                       })

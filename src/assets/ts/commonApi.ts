@@ -115,7 +115,6 @@ const noticeList = async(topic:string[], draft:boolean) => {
     notices.forEach( obj => {
         obj.timestamp = dayjs(obj.timestamp).format("YYYY-MM-DD HH:mm:ss")
     })
-    visible.noticeTable = true
     data.notification = notices 
   //      window.Notification.requestPermission().then(function(permssion) {
   //     console.log(permssion)

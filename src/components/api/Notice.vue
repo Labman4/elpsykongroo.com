@@ -202,7 +202,7 @@ let initNoticeForm  = () => ({
     imageUrl: "",
     timestamp: "",
     topic: "",
-    draft: ""
+    draft: "true"
 })
 
 let noticeForm = reactive(initNoticeForm());
