@@ -8,6 +8,8 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { visible } from "./visible";
 import { ElNotification } from "element-plus";
 import 'virtual:svg-icons-register'
+import axiosRetry from 'axios-retry';
+
 // import { registerSW } from 'virtual:pwa-register';
 
 const firebaseConfig = {
@@ -36,9 +38,9 @@ const register = async(username) => {
           window.Notification.requestPermission().then((permission) => {
               if (permission === 'granted') {
                 console.log("notice enable")
-                navigator.serviceWorker.ready.then((registration) => {
-                  registration.showNotification("register ready");
-                });
+                // navigator.serviceWorker.ready.then((registration) => {
+                //   registration.showNotification("register ready");
+                // });
                   if ('PushManager' in window) {
                     console.log("push enable")
                       getToken(messaging, {
@@ -47,7 +49,6 @@ const register = async(username) => {
                       })
                       .then((currentToken) => {
                         console.log("register token")
-
                           access.registerToken = currentToken                       
                           const fcmOption = {
                               baseURL: env.messageUrl,
@@ -59,20 +60,33 @@ const register = async(username) => {
                                   user: username
                               },
                               headers: {
-                                  "Content-Type": "application/json"
+                                  "Content-Type": "application/json",
+                                  // "X-Xsrf-Token":  handleCsrf()
                               },
                               withCredentials: true               
-                          }
-                          axios(fcmOption)
+                            }
+                          const client = axios.create(fcmOption)
+                          axiosRetry(client, 
+                            { retries: 1, retryCondition: (error) => {
+                              if (error.response.status === 403) {
+                                return true
+                              }
+                              return false
+                              }  
+                            });
+                          client(fcmOption)
                       })
                   }
               }
           });
       }      
-    });  
+    }).catch(function(error){
+      console.log("register failed");
+      }) 
   }
 } 
 
+const handle403 = 
 onMessage(messaging, (payload) => {
   console.log(payload)
   ElNotification({
@@ -200,6 +214,11 @@ if (code != null && state != null) {
     return key;
   }
 
+  const handleCsrf = () => {
+    const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+    return csrfToken
+  }
+  
 async function deleteCookie(name) {
   document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
@@ -252,6 +271,6 @@ async function deleteCookie(name) {
   }
  
 
-export { code, pkceCode, handleCookie, deleteCookie, getAccessToken }
+export { code, pkceCode, handleCookie, deleteCookie, getAccessToken, handleCsrf,register }
 
 

@@ -8,6 +8,7 @@ import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import { handleCookie, getAccessToken } from './handleAuthCode';
 import { toggleDark } from '~/composables';
 import jwt_decode from "jwt-decode";
+import axiosRetry from 'axios-retry';
 
 const qrcodeLogin = () => {
     visible.qrcode = true
@@ -173,7 +174,16 @@ async function webauthnLogin() {
             },
             withCredentials: true               
         }
-        axios(loginOption).then(async function (response) {
+        const client = axios.create(loginOption)
+        axiosRetry(client, 
+          { retries: 1, retryCondition: (error) => {
+            if (error.response.status === 403) {
+              return true
+            }
+            return false
+            }  
+          });
+        client(loginOption).then(async function (response) {
             if(response.data == 200) {
                 if(handleCookie().length == 0) {
                     refreshlogin(access.username);

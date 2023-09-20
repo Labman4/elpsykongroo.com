@@ -2,7 +2,7 @@
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
 import { axios } from '~/assets/ts/axio';
-import { dayjs } from 'element-plus';
+import { dayjs, ElLoading } from 'element-plus';
 import { visible } from '~/assets/ts/visible';
 import bcrypt from 'bcryptjs';
 import { userInfoTableData, dynamicClaimForm, inituserInfoTable, data } from '~/assets/ts/dataInterface'
@@ -186,6 +186,7 @@ const updateUser = (userFormData, username) => {
 }
 
 async function loadUserInfo (username:string) {
+  const loadingInstance = ElLoading.service({ fullscreen: true })
   Object.assign(dynamicClaimForm, inituserInfoTable())
   userInfoTableData.username = username
   const option = {
@@ -197,9 +198,12 @@ async function loadUserInfo (username:string) {
     },
   }
   axios(option).then(function(response){
+    nextTick(() => {
+      // Loading should be closed asynchronously
+      loadingInstance.close()
+    })
     if (response.data == null) {
         dynamicClaimForm.value = inituserInfoTable();
-        visible.userInfoForm = true;
     } else {
       const userinfo = response.data
       for (var key in userinfo) {
@@ -220,8 +224,8 @@ async function loadUserInfo (username:string) {
         } 
       }
       dynamicClaimForm.value = userinfo;
-      visible.userInfoForm = true;
     }
+    visible.userInfoForm = true
   })
   return dynamicClaimForm.value
 }

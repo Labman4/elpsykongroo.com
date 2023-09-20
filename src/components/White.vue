@@ -10,8 +10,8 @@
     </el-badge>
     <el-dialog v-model="visible.webauthnFormVisible" width="65%">
       <el-form 
-        v-loading="visible.loading"
-        element-loading-text="Logining..."
+        :v-loading=visible.loading
+        :element-loading-text=visible.loadingText
         :element-loading-spinner="svg"
         element-loading-svg-view-box="-10, -10, 50, 50"
         element-loading-background="rgba(122, 122, 122, 0.8)"
@@ -26,8 +26,8 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="visible.loading=false">cancel</el-button>
-          <el-button @click="webauthnLogin()">login</el-button>
-          <el-button type="primary" @click="webauthnRegister()" >
+          <el-button @click="webauthnLogin(), visible.loadingText= 'logining...'">login</el-button>
+          <el-button type="primary" @click="webauthnRegister(), visible.loadingText= 'registering...'" >
             register
           </el-button>
         </span>
@@ -105,7 +105,6 @@
     <QrcodeVue :value=access.qrcodeUrl :size="200" level="H" />  
   
   </el-dialog>
-  <Notice></Notice>
 </template>
 
 <script lang="ts" setup >
@@ -121,7 +120,6 @@ import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
 import { loadUser, noticeListByUser, updateUser, loadUserInfo } from '~/assets/ts/commonApi';
 import { userFormData } from '~/assets/ts/dataInterface'
-import Notice from '~/components/api/Notice.vue';
 
 const username = ref("")
 const userForm = ref(false)

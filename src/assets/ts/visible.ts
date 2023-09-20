@@ -23,5 +23,6 @@ export const visible = reactive(
     "noticeTable": false,
     "topicTable": false,
     "topicLoad": true,
-    "noticeDrawer": false
+    "noticeDrawer": false,
+    "loadingText": "Logining"
 })
