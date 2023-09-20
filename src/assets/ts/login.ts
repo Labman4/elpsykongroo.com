@@ -64,6 +64,15 @@ const loginWithToken = () => {
         },
         withCredentials: true                        
     }
+    const client = axios.create(option)
+    axiosRetry(client, 
+      { retries: 1, retryCondition: (error) => {
+        if (error.response.status === 403) {
+          return true
+        }
+        return false
+        }  
+      });
     axios(option).then(async function(response){
         redirectOauthProxy("")
     })

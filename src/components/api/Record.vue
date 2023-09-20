@@ -1,5 +1,5 @@
 <template>
-    <el-dialog v-model="recordTable" title="records" width="70%">
+    <el-dialog v-model="recordTable" title="records" width="85%">
     <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
     <el-button type="" @click="recordForm = true">batch</el-button>
     <el-button type="" @click="recordList(recordPage.order)">refresh</el-button>

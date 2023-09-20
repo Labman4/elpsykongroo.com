@@ -86,7 +86,6 @@ const register = async(username) => {
   }
 } 
 
-const handle403 = 
 onMessage(messaging, (payload) => {
   console.log(payload)
   ElNotification({
