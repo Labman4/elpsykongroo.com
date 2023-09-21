@@ -11,5 +11,7 @@ export const env = reactive(
     oauth2ProxyUrl: import.meta.env.VITE_OAUTH2_PROXY_URL,
     pwaMode: import.meta.env.VITE_PWA_MODE,
     messageUrl: import.meta.env.VITE_MESSAGE_URL,
-    publicKey: import.meta.env.VITE_PUBLIC_KEY
+    publicKey: import.meta.env.VITE_PUBLIC_KEY,
+    clientId: import.meta.env.VITE_CLIENT_ID,
+    clientSecret: import.meta.env.VITE_CLIENT_SECRET
 })

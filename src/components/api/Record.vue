@@ -1,7 +1,9 @@
 <template>
-    <el-dialog v-model="recordTable" title="records" width="70%">
+    <el-dialog v-model="recordTable" title="records" width="85%">
     <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
-    <el-table :data="data.records" @selection-change="handleRecordSelectChange">
+    <el-button type="" @click="recordForm = true">batch</el-button>
+    <el-button type="" @click="recordList(recordPage.order)">refresh</el-button>
+    <el-table :data="data.records" @selection-change="handleRecordSelectChange" @row-click="openRecord">
       <el-table-column type="selection"/>
       <el-table-column property="accessPath" label="path"  width="170px"/>
       <el-table-column property="userAgent" label="userAgent"  width="300px"/>
@@ -23,17 +25,37 @@
       @update:current-page="recordPageChange"
       @update:page-size="recordPageSizeChange"/>
   </el-dialog>
+
+  <el-dialog v-model="recordForm" title="" width="75%">
+    <el-form :model="recordFormData">
+      <el-form-item label="address" :label-width="visible.labelWidth">
+        <el-input v-model="recordFormData.sourceIP" autocomplete="off" @keyup.enter="DeleteCustom" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="recordForm = false">Cancel</el-button>
+        <el-button type="danger" @click="DeleteCustom">delete</el-button>
+      </span>
+    </template>
+  </el-dialog>
+  <el-dialog v-model="recordHeader" title="" width="75%">
+      <pre>{{ requestHeader }}</pre>
+  </el-dialog>
   <IP ref="ip"></IP>
 
 </template>
 
 <script lang="ts" setup>
 import { axios } from '~/assets/ts/axio';
+import { visible } from '~/assets/ts/visible';
 import { dayjs } from 'element-plus';
 import { access } from '~/assets/ts/access';
 import { env } from '~/assets/ts/env';
 import IP from '~/components/api/IP.vue';
-
+const recordForm = ref(false)
+const recordHeader = ref(false)
+const requestHeader = ref("")
 const ip = ref<InstanceType<typeof IP> | null>(null)
 
 const records:Record[]= [];
@@ -41,6 +63,15 @@ const records:Record[]= [];
 const recordTable =ref(false);
 
 const data = reactive({records})
+
+const recordFormData =  reactive({
+  timestamp: "",
+  id: "",
+  accessPath: "",
+  sourceIP: "",
+  userAgent: "",
+  requestHeader: {}
+})
 
 const recordPage = {
   "pageNumber": 1,
@@ -52,8 +83,9 @@ interface Record {
   timestamp: string
   id: string
   accessPath: string
-  sourIP: string
+  sourceIP: string
   userAgent: string
+  requestHeader: object
 }
 
 const handleRecordSelectChange = (val: Record[]) => {
@@ -82,8 +114,7 @@ const DeleteSelect= () => {
     },
   }
   axios(option).then(function (response) {
-    var count = response.data;
-    if (count == selectRecord.length) {
+    if (response.status == 200) {
       selectRecord.forEach(function(item, index){
         data.records.forEach(function(i, ind){
             if (item === i.id) {
@@ -116,6 +147,27 @@ const DeleteSelect= () => {
     
 }
 
+const DeleteCustom = () => {
+  const option = {
+    baseURL: env.apiUrl,
+    url: "/record/" + recordFormData.sourceIP,
+    method: "DELETE",
+    headers: {
+      'Authorization': 'Bearer '+ access.access_token
+    },
+  }
+  axios(option).then(function (response) {
+    if (response.status == 200) {
+      recordList(recordPage.order)
+    }
+  })
+}
+
+const openRecord = (row, column, event) => {
+    recordHeader.value = true
+    requestHeader.value = JSON.stringify(row.requestHeader, null, 2)  
+    console.log(requestHeader.value)
+}
 const DeleteRecord = (index: number, row: Record) => {
   const option = {
     baseURL: env.apiUrl,
@@ -126,8 +178,7 @@ const DeleteRecord = (index: number, row: Record) => {
     },
   }
   axios(option).then(function (response) {
-    var count = response.data;
-    if (count > 0) {
+    if (response.status == 200) {
       data.records.splice(index, 1);
     }
   })

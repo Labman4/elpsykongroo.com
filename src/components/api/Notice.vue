@@ -1,12 +1,5 @@
 <template>
-    <el-drawer v-model="visible.noticeDrawer" :show-close="false">
-    <template #header="{ close, titleId, titleClass }">
-      <h4 :id="titleId" :class="titleClass">message list</h4>
-      <el-button type="danger" @click="close">
-        <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
-        Close
-      </el-button>
-    </template>
+    <el-drawer v-model="visible.noticeDrawer" :show-close="true" :with-header="true" size="40%">
         <el-timeline  >
             <el-timeline-item
             v-for="(notification, index) in data.notification"
@@ -202,7 +195,7 @@ let initNoticeForm  = () => ({
     imageUrl: "",
     timestamp: "",
     topic: "",
-    draft: ""
+    draft: "true"
 })
 
 let noticeForm = reactive(initNoticeForm());

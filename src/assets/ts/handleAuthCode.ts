@@ -8,6 +8,8 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { visible } from "./visible";
 import { ElNotification } from "element-plus";
 import 'virtual:svg-icons-register'
+import axiosRetry from 'axios-retry';
+
 // import { registerSW } from 'virtual:pwa-register';
 
 const firebaseConfig = {
@@ -23,54 +25,80 @@ const firebaseApp = initializeApp(firebaseConfig);
 const messaging = getMessaging(firebaseApp);
 
 const register = async(username) => {
-  console.log("start register")
     if ("serviceWorker" in navigator) {
       // registerSW();
-      navigator.serviceWorker
-        .register(    
-          import.meta.env.VITE_PWA_MODE === 'production' ? '/firebase-messaging-sw.js' : '/dev-sw.js?dev-sw',
-          { type: import.meta.env.VITE_PWA_MODE  === 'production' ? 'classic' : 'module' }
-        )
-        .then((registration) => {
-        if ("Notification" in window ) {
-          window.Notification.requestPermission().then((permission) => {
-              if (permission === 'granted') {
-                console.log("notice enable")
-                navigator.serviceWorker.ready.then((registration) => {
-                  registration.showNotification("register ready");
-                });
-                  if ('PushManager' in window) {
-                    console.log("push enable")
-                      getToken(messaging, {
-                          vapidKey: env.publicKey,
-                          serviceWorkerRegistration : registration 
-                      })
-                      .then((currentToken) => {
-                        console.log("register token")
-
-                          access.registerToken = currentToken                       
-                          const fcmOption = {
-                              baseURL: env.messageUrl,
-                              url: "notice/register",
-                              method: "PUT",
-                              params: {
-                                  token: currentToken,
-                                  timestamp: Date.now(),
-                                  user: username
-                              },
-                              headers: {
-                                  "Content-Type": "application/json"
-                              }
-                          }
-                          axios(fcmOption)
-                      })
-                  }
-              }
+      navigator.serviceWorker.getRegistration().then(registration => {
+        if (registration && registration.active) {
+          registration.active.addEventListener('statechange', event => {
+            if (event.target.state === 'activated') {
+              registerSw(username)
+            }
           });
-      }      
-    });  
+        } else {
+          registerSw(username)
+        }
+      });
+
   }
 } 
+
+const registerSw = (username) => {
+  console.log("start register")
+  navigator.serviceWorker
+    .register(    
+      import.meta.env.VITE_PWA_MODE === 'production' ? '/firebase-messaging-sw.js' : '/dev-sw.js?dev-sw',
+      { type: import.meta.env.VITE_PWA_MODE  === 'production' ? 'classic' : 'module' })
+    .then((registration) => {
+        if ("Notification" in window ) {
+            window.Notification.requestPermission().then((permission) => {
+          if (permission === 'granted') {
+            console.log("notice enable")
+            // navigator.serviceWorker.ready.then((registration) => {
+            //   registration.showNotification("register ready");
+            // });
+              if ('PushManager' in window) {
+                console.log("push enable")
+                  getToken(messaging, {
+                      vapidKey: env.publicKey,
+                      serviceWorkerRegistration : registration 
+                  })
+                  .then((currentToken) => {
+                    console.log("register token")
+                      access.registerToken = currentToken                       
+                      const fcmOption = {
+                          baseURL: env.messageUrl,
+                          url: "notice/register",
+                          method: "PUT",
+                          params: {
+                              token: currentToken,
+                              timestamp: Date.now(),
+                              user: username
+                          },
+                          headers: {
+                              "Content-Type": "application/json",
+                              // "X-Xsrf-Token":  handleCsrf()
+                          },
+                          withCredentials: true               
+                        }
+                      const client = axios.create(fcmOption)
+                      axiosRetry(client, 
+                        { retries: 1, retryCondition: (error) => {
+                          if (error.response.status === 403) {
+                            return true
+                          }
+                          return false
+                          }  
+                        });
+                      client(fcmOption)
+                  })
+              }
+          }
+      });
+    }})
+    .catch(function(error){
+        console.log("register failed");
+    }) 
+}
 
 onMessage(messaging, (payload) => {
   console.log(payload)
@@ -93,9 +121,12 @@ window.addEventListener('message', function(event) {
   //   console.error('来自不受信任的来源的消息');
   //   return;
   // }
+  console.log(event.origin)
+  console.log(event.data)
 
-  if (typeof event.data === 'object' && event.data.message) {
+  if (typeof event.data === 'object' && event.data) {
     const message = event.data.message;
+    console.log(message)
     visible.isDot = true;
   }
 });
@@ -196,6 +227,11 @@ if (code != null && state != null) {
     return key;
   }
 
+  const handleCsrf = () => {
+    const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+    return csrfToken
+  }
+  
 async function deleteCookie(name) {
   document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
@@ -248,6 +284,6 @@ async function deleteCookie(name) {
   }
  
 
-export { code, pkceCode, handleCookie, deleteCookie, getAccessToken }
+export { code, pkceCode, handleCookie, deleteCookie, getAccessToken, handleCsrf,register }
 
 
