@@ -65,7 +65,7 @@ const registerSw = (username) => {
                           },
                           headers: {
                               "Content-Type": "application/json",
-                              // "X-Xsrf-Token":  handleCsrf()
+                              "X-Xsrf-Token":  handleCsrf()
                           },
                           withCredentials: true               
                         }
