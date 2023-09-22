@@ -24,21 +24,10 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const messaging = getMessaging(firebaseApp);
 
-const register = async(username) => {
-    if ("serviceWorker" in navigator) {
-      // registerSW();
-      navigator.serviceWorker.getRegistration().then(registration => {
-        if (registration && registration.active) {
-          registration.active.addEventListener('statechange', event => {
-            if (event.target.state === 'activated') {
-              registerSw(username)
-            }
-          });
-        } else {
-          registerSw(username)
-        }
-      });
 
+const register = async(username) => {
+  if ("serviceWorker" in navigator) {
+    registerSw(username);
   }
 } 
 
@@ -47,7 +36,7 @@ const registerSw = (username) => {
   navigator.serviceWorker
     .register(    
       import.meta.env.VITE_PWA_MODE === 'production' ? '/firebase-messaging-sw.js' : '/dev-sw.js?dev-sw',
-      { type: import.meta.env.VITE_PWA_MODE  === 'production' ? 'classic' : 'module' })
+      { type: import.meta.env.VITE_PWA_MODE  === 'production' ? 'classic' : 'module', updateViaCache: 'none'  })
     .then((registration) => {
         if ("Notification" in window ) {
             window.Notification.requestPermission().then((permission) => {
@@ -284,6 +273,6 @@ async function deleteCookie(name) {
   }
  
 
-export { code, pkceCode, handleCookie, deleteCookie, getAccessToken, handleCsrf,register }
+export { code, pkceCode, handleCookie, deleteCookie, getAccessToken, handleCsrf, register }
 
 
