@@ -31,8 +31,7 @@ const register = async(username) => {
   }
 } 
 
-const registerSw = (username) => {
-  deleteCookie("XSRF-TOKEN")
+const registerSw = async(username) => {
   console.log("start register")
   navigator.serviceWorker
     .register(    
@@ -52,8 +51,11 @@ const registerSw = (username) => {
                       vapidKey: env.publicKey,
                       serviceWorkerRegistration : registration 
                   })
-                  .then((currentToken) => {
+                  .then(async(currentToken) => {
                     console.log("register token")
+                    const result = await deleteCookie("XSRF-TOKEN")
+                    console.log(result)
+                    if (result) {
                       access.registerToken = currentToken                       
                       const fcmOption = {
                           baseURL: env.messageUrl,
@@ -80,6 +82,7 @@ const registerSw = (username) => {
                           }  
                         });
                       client(fcmOption)
+                    }    
                   })
               }
           }
@@ -222,9 +225,29 @@ if (code != null && state != null) {
     return csrfToken
   }
   
-async function deleteCookie(name) {
-  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-}
+
+  async function deleteCookie(cookieName) {
+    return new Promise((resolve, reject) => {
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      const deletedCookie = getCookie(cookieName);
+      if (!deletedCookie) {
+        resolve(true);
+      } else {
+        reject(false);
+      }
+    });
+  }
+
+  function getCookie(cookieName) {
+    const cookies = document.cookie.split('; ');
+    for (const cookie of cookies) {
+      const [name, value] = cookie.split('=');
+      if (name === cookieName) {
+        return value;
+      }
+    }
+    return null;
+  }
 
   (async function access () {
      await getAccessToken ()
