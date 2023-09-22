@@ -68,7 +68,7 @@ const registerSw = async(username) => {
                           },
                           headers: {
                               "Content-Type": "application/json",
-                              "X-Xsrf-Token":  handleCsrf()
+                              // "X-Xsrf-Token":  handleCsrf()
                           },
                           withCredentials: true               
                         }
@@ -251,7 +251,7 @@ if (code != null && state != null) {
 
   (async function access () {
      await getAccessToken ()
-     register("")
+     await register("")
   })()
 
   async function getAccessToken () {
