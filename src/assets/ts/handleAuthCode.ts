@@ -32,6 +32,7 @@ const register = async(username) => {
 } 
 
 const registerSw = (username) => {
+  deleteCookie("XSRF-TOKEN")
   console.log("start register")
   navigator.serviceWorker
     .register(    
