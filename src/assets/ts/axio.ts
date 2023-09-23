@@ -7,6 +7,7 @@ import { handleCookie, handleCsrf } from './handleAuthCode';
 import { visible } from './visible';
 const timeCount= ref(0);
 let csrfToken
+let retry = 0;
 // const source = axios.CancelToken.source();
 
 axios.interceptors.request.use(config => {
@@ -20,14 +21,17 @@ axios.interceptors.request.use(config => {
 });
 
 axios.interceptors.response.use(function (response) {
-      // if (response.status === 302) {
+    // if (response.status === 302) {
     //   console.log(response)
     //   return axios.get(response.headers.location)
     // }
     csrfToken = response.headers['x-csrf-token'];
-    if (response.status == 403) {
+    if (response.status == 403 && retry < 1) {
+      retry ++
       axios(response.config)
-    }   
+    } else {
+      retry = 0
+    }
     return response;
   }, function (error) {
     if (axios.isCancel(error)) {
