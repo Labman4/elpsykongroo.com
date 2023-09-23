@@ -7,8 +7,6 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { visible } from "./visible";
 import { ElNotification } from "element-plus";
-import 'virtual:svg-icons-register'
-import axiosRetry from 'axios-retry';
 
 // import { registerSW } from 'virtual:pwa-register';
 
@@ -51,38 +49,23 @@ const registerSw = async(username) => {
                       vapidKey: env.publicKey,
                       serviceWorkerRegistration : registration 
                   })
-                  .then(async(currentToken) => {
-                    console.log("register token")
-                    const result = await deleteCookie("XSRF-TOKEN")
-                    console.log(result)
-                    if (result) {
-                      access.registerToken = currentToken                       
-                      const fcmOption = {
-                          baseURL: env.messageUrl,
-                          url: "notice/register",
-                          method: "PUT",
-                          params: {
-                              token: currentToken,
-                              timestamp: Date.now(),
-                              user: username
-                          },
-                          headers: {
-                              "Content-Type": "application/json",
-                              // "X-Xsrf-Token":  handleCsrf()
-                          },
-                          withCredentials: true               
-                        }
-                      const client = axios.create(fcmOption)
-                      axiosRetry(client, 
-                        { retries: 1, retryCondition: (error) => {
-                          if (error.response.status === 403) {
-                            return true
-                          }
-                          return false
-                          }  
-                        });
-                      client(fcmOption)
-                    }    
+                  .then((currentToken) => {
+                      access.registerToken = currentToken
+                      const option = {
+                        baseURL: env.messageUrl,
+                        url: "notice/register",
+                        method: "PUT",
+                        params: {
+                            token: currentToken,
+                            timestamp: Date.now(),
+                            user: username
+                        },
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        withCredentials: true,             
+                      }                
+                      axios(option)
                   })
               }
           }
