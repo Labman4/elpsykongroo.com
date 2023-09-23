@@ -232,11 +232,13 @@ if (code != null && state != null) {
     return null;
   }
 
-  (async function access () {
-     await getAccessToken ()
-     await register("")
-  })()
-
+document.addEventListener('DOMContentLoaded', function() {
+    (async function access () {
+      await getAccessToken ()
+      await register("")
+   })()
+}); 
+ 
   async function getAccessToken () {
     var key = handleCookie();
     if (key.length > 0) {
