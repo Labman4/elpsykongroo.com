@@ -26,11 +26,14 @@ axios.interceptors.response.use(function (response) {
     //   return axios.get(response.headers.location)
     // }
     csrfToken = response.headers['x-csrf-token'];
-    if (response.status == 403 && retry < 1) {
+ 
+    if (response.status == 403 && retry == 0) {
       retry ++
-      axios(response.config)
     } else {
       retry = 0
+    }
+    if (retry != 0) {
+      axios(response.config)
     }
     return response;
   }, function (error) {
