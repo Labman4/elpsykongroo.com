@@ -232,11 +232,9 @@ if (code != null && state != null) {
     return null;
   }
 
-document.addEventListener('DOMContentLoaded', function() {
-    (async function access () {
-      await getAccessToken ()
+document.addEventListener('DOMContentLoaded', async function() {
+      await getAccessToken()
       await register("")
-   })()
 }); 
  
   async function getAccessToken () {
