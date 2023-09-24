@@ -63,7 +63,7 @@ const loginWithToken = () => {
         },
         withCredentials: true                        
     }  
-    axios(option).then(async function(response){
+    axios(option).then(function(response){
         if (response.status == 200) {
             redirectOauthProxy("")
         }
