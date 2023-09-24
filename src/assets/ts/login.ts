@@ -49,7 +49,7 @@ async function checkToken () {
     }
 }
 
-const loginWithToken = () => {
+const loginWithToken = async () => {
     const option = {
         baseURL: env.authUrl,
         url: "/login/token",
@@ -63,11 +63,10 @@ const loginWithToken = () => {
         },
         withCredentials: true                        
     }  
-    axios(option).then(function(response){
-        if (response.status == 200) {
-            redirectOauthProxy("")
-        }
-    })
+    const response = await axios(option)
+    if (response.status == 200) {
+      redirectOauthProxy("")
+    }
 }
 
 const callbackUrl = window.location.href;

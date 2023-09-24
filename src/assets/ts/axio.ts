@@ -20,7 +20,7 @@ axios.interceptors.request.use(config => {
   return config;
 });
 
-axios.interceptors.response.use(function (response) {
+axios.interceptors.response.use(async function (response) {
     // if (response.status === 302) {
     //   console.log(response)
     //   return axios.get(response.headers.location)
@@ -33,7 +33,7 @@ axios.interceptors.response.use(function (response) {
       retry = 0
     }
     if (retry != 0) {
-      axios(response.config)
+      response = await axios(response.config)
     }
     return response;
   }, function (error) {
