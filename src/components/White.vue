@@ -10,7 +10,7 @@
     </el-badge>
     <el-dialog v-model="visible.webauthnFormVisible" width="65%">
       <el-form 
-        :v-loading=visible.loading
+        v-loading=visible.loading
         :element-loading-text=visible.loadingText
         :element-loading-spinner="svg"
         element-loading-svg-view-box="-10, -10, 50, 50"
