@@ -6,21 +6,35 @@ import { env } from './env';
 import { handleCookie, handleCsrf } from './handleAuthCode';
 import { visible } from './visible';
 const timeCount= ref(0);
-
+let csrfToken
+let retry = 0;
 // const source = axios.CancelToken.source();
 
-// axios.interceptors.request.use(config => {
-//   config.headers['X-Requested-With'] = 'XMLHttpRequest';
-//   // config.cancelToken = source.token;
+axios.interceptors.request.use(config => {
+  if (csrfToken) {
+    config.headers['X-CSRF-TOKEN'] = csrfToken;
+  }
+  config.validateStatus = function (status) {
+    return status >= 200 && status < 500; // default
+  }       
+  return config;
+});
 
-//   return config;
-// });
-
-axios.interceptors.response.use(function (response) {
+axios.interceptors.response.use(async function (response) {
     // if (response.status === 302) {
     //   console.log(response)
     //   return axios.get(response.headers.location)
     // }
+    csrfToken = response.headers['x-csrf-token'];
+ 
+    if (response.status == 403 && retry == 0) {
+      retry ++
+    } else {
+      retry = 0
+    }
+    if (retry != 0) {
+      response = await axios(response.config)
+    }
     return response;
   }, function (error) {
     if (axios.isCancel(error)) {
@@ -40,6 +54,7 @@ axios.interceptors.response.use(function (response) {
         return  
       }
     }
+     
     return error
   });
 

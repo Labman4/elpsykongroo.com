@@ -1,22 +1,29 @@
+import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
+import { clientsClaim } from 'workbox-core';
+
 import { initializeApp } from "firebase/app";
 import { getMessaging, onBackgroundMessage } from "firebase/messaging/sw";
-import { precacheAndRoute } from 'workbox-precaching'
 
-precacheAndRoute(self.__WB_MANIFEST)
+precacheAndRoute(self.__WB_MANIFEST);
+
+cleanupOutdatedCaches();
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCRthXUaRcPNWmYYq3NokfWVBRzm8uC09U",
-    authDomain: "elpsykonngroo.firebaseapp.com",
-    projectId: "elpsykonngroo",
-    storageBucket: "elpsykonngroo.appspot.com",
-    messagingSenderId: "1035237568740",
-    appId: "1:1035237568740:web:75eb3c160355379a97bcf1"
-  };
+  apiKey: "AIzaSyCRthXUaRcPNWmYYq3NokfWVBRzm8uC09U",
+  authDomain: "elpsykonngroo.firebaseapp.com",
+  projectId: "elpsykonngroo",
+  storageBucket: "elpsykonngroo.appspot.com",
+  messagingSenderId: "1035237568740",
+  appId: "1:1035237568740:web:75eb3c160355379a97bcf1"
+};
 
-const app = initializeApp(firebaseConfig);
+const firebaseApp = initializeApp(firebaseConfig);
 
-// // // // Initialize Firebase Cloud Messaging and get a reference to the service
-const messaging = getMessaging(app)
+const messaging = getMessaging(firebaseApp);
+
+self.skipWaiting();
+clientsClaim();
+
 
 onBackgroundMessage(messaging, (payload)  => {
   if (Notification.permission !== "granted") {
@@ -53,14 +60,3 @@ onBackgroundMessage(messaging, (payload)  => {
   }
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
 });
-
-
-// self.addEventListener('push', (event) => {
-//   const options = {
-//     body: event.data.text(),
-//   };
-
-//   event.waitUntil(
-//     self.registration.showNotification('Push Notification', options)
-//   );
-// });

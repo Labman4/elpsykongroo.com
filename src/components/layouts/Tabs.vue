@@ -3,9 +3,9 @@
       <el-tab-pane label="Home" name="Home">
           <Home/>
       </el-tab-pane>
-      <!-- <el-tab-pane label="Blog" name="Blog"></el-tab-pane>
+      <el-tab-pane label="Blog" name="Blog"></el-tab-pane>
       <el-tab-pane label="Daily" name="Daily"></el-tab-pane>
-      <el-tab-pane label="Else" name="Else">
+      <!-- <el-tab-pane label="Else" name="Else">
         <div id="paypal"></div>
       </el-tab-pane> -->
       <!-- <el-tab-pane label="Dashboard" name="Dashboard">

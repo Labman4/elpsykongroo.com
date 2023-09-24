@@ -430,8 +430,8 @@ const updateGroupAuthority = () => {
             ids: groupsIds.value
         },
         headers: {
-        'Authorization': 'Bearer '+ access.access_token,
-        "Content-Type": "application/x-www-form-urlencoded"
+            'Authorization': 'Bearer '+ access.access_token,
+            "Content-Type": "application/x-www-form-urlencoded"
         },
     }
     axios(Authorityoption).then(function (response) {

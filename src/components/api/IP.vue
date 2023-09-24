@@ -92,7 +92,7 @@ function addIp() {
       address: ipFormData.address,
     },
     headers: {
-    'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function(response){
@@ -115,7 +115,7 @@ const DeleteIP = (address) => {
       id: "",
     },
     headers: {
-    'Authorization': 'Bearer '+ access.access_token
+      'Authorization': 'Bearer '+ access.access_token
     },
   }
   axios(option).then(function (response) {
@@ -151,7 +151,7 @@ const ipBlock = (index: number, address, black, id) => {
         "id": id
       },
       headers: {
-      'Authorization': 'Bearer '+ access.access_token
+        'Authorization': 'Bearer '+ access.access_token
       },
     }
     axios(option).then(function (response) {
@@ -174,8 +174,7 @@ const ipBlock = (index: number, address, black, id) => {
         order: ipPage.order
       },
       headers: {
-      'Authorization': 'Bearer '+ access.access_token,
-      "x-real-ip": "131.186.44.191"
+        'Authorization': 'Bearer '+ access.access_token,
       },
     }
     axios(option).then(function (response) {

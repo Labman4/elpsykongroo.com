@@ -8,7 +8,6 @@ import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import { handleCookie, getAccessToken } from './handleAuthCode';
 import { toggleDark } from '~/composables';
 import jwt_decode from "jwt-decode";
-import axiosRetry from 'axios-retry';
 
 const qrcodeLogin = () => {
     visible.qrcode = true
@@ -31,7 +30,7 @@ const qrcodeLogin = () => {
 
 async function checkToken () {
     var eventSource = new EventSource(env.apiUrl + "/public/token/qrcode?text=" + access.code_verifier, { withCredentials: true });
-    eventSource.onmessage = (e) => {
+    eventSource.onmessage = async (e) => {
         var tokens = e.data.split("&&")
         access.access_token = tokens[0];
         access.id_token = tokens[1];
@@ -45,12 +44,16 @@ async function checkToken () {
         eventSource.close();
         visible.qrcode = false;
         if (access.sub != "") {
-            loginWithToken();
+           const resp = await loginWithToken();
+           console.log(resp)
+           if (resp.data == 200) {
+                redirectOauthProxy("")
+           }
         }
     }
 }
 
-const loginWithToken = () => {
+const loginWithToken = async () => {
     const option = {
         baseURL: env.authUrl,
         url: "/login/token",
@@ -63,19 +66,8 @@ const loginWithToken = () => {
             "Content-Type": "application/x-www-form-urlencoded"
         },
         withCredentials: true                        
-    }
-    const client = axios.create(option)
-    axiosRetry(client, 
-      { retries: 1, retryCondition: (error) => {
-        if (error.response.status === 403) {
-          return true
-        }
-        return false
-        }  
-      });
-    axios(option).then(async function(response){
-        redirectOauthProxy("")
-    })
+    }  
+    return await axios(option)
 }
 
 const callbackUrl = window.location.href;
@@ -119,7 +111,7 @@ const webauthnRegister = () => {
                 // "Access-Control-Allow-Origin": "*",
                 // "Access-Control-Allow-Credentials": "true"
             },
-            // withCredentials: true                        
+            withCredentials: true                        
         }
         axios(registerOption).then(async function (response) {
             if (response.data == 409) {
@@ -179,20 +171,11 @@ async function webauthnLogin() {
                 username: access.username,
             },
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/x-www-form-urlencoded",
             },
-            withCredentials: true               
-        }
-        const client = axios.create(loginOption)
-        axiosRetry(client, 
-          { retries: 1, retryCondition: (error) => {
-            if (error.response.status === 403) {
-              return true
-            }
-            return false
-            }  
-          });
-        client(loginOption).then(async function (response) {
+            withCredentials: true          
+        } 
+        axios(loginOption).then(async function (response) {
             if(response.data == 200) {
                 if(handleCookie().length == 0) {
                     refreshlogin(access.username);
@@ -213,7 +196,7 @@ async function webauthnLogin() {
             } else if(response.data == 404) {
                 ElMessageBox.alert("the user is not exist")
                 visible.loading = false;
-            } else {    
+            } else if (response.status != 403){    
                 var publicKeyCredential;
                 publicKeyCredential = await webauthnJson.get(response.data).catch((error) => {console.log(error)});
                 if (publicKeyCredential != null) {
@@ -258,7 +241,7 @@ async function webauthnLogin() {
 }
 
 const refreshlogin = (username) => {
-    if (document.domain != "localhost") {
+    if (document.domain != "localhost" && document.domain != "127.0.0.1") {
         redirectOauthProxy(username);
     } else {
         pkce();

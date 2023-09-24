@@ -7,8 +7,6 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { visible } from "./visible";
 import { ElNotification } from "element-plus";
-import 'virtual:svg-icons-register'
-import axiosRetry from 'axios-retry';
 
 // import { registerSW } from 'virtual:pwa-register';
 
@@ -24,30 +22,19 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const messaging = getMessaging(firebaseApp);
 
-const register = async(username) => {
-    if ("serviceWorker" in navigator) {
-      // registerSW();
-      navigator.serviceWorker.getRegistration().then(registration => {
-        if (registration && registration.active) {
-          registration.active.addEventListener('statechange', event => {
-            if (event.target.state === 'activated') {
-              registerSw(username)
-            }
-          });
-        } else {
-          registerSw(username)
-        }
-      });
 
+const register = async(username) => {
+  if ("serviceWorker" in navigator) {
+    registerSw(username);
   }
 } 
 
-const registerSw = (username) => {
+const registerSw = async(username) => {
   console.log("start register")
   navigator.serviceWorker
     .register(    
       import.meta.env.VITE_PWA_MODE === 'production' ? '/firebase-messaging-sw.js' : '/dev-sw.js?dev-sw',
-      { type: import.meta.env.VITE_PWA_MODE  === 'production' ? 'classic' : 'module' })
+      { type: import.meta.env.VITE_PWA_MODE  === 'production' ? 'classic' : 'module', updateViaCache: 'none'  })
     .then((registration) => {
         if ("Notification" in window ) {
             window.Notification.requestPermission().then((permission) => {
@@ -63,33 +50,22 @@ const registerSw = (username) => {
                       serviceWorkerRegistration : registration 
                   })
                   .then((currentToken) => {
-                    console.log("register token")
-                      access.registerToken = currentToken                       
-                      const fcmOption = {
-                          baseURL: env.messageUrl,
-                          url: "notice/register",
-                          method: "PUT",
-                          params: {
-                              token: currentToken,
-                              timestamp: Date.now(),
-                              user: username
-                          },
-                          headers: {
-                              "Content-Type": "application/json",
-                              // "X-Xsrf-Token":  handleCsrf()
-                          },
-                          withCredentials: true               
-                        }
-                      const client = axios.create(fcmOption)
-                      axiosRetry(client, 
-                        { retries: 1, retryCondition: (error) => {
-                          if (error.response.status === 403) {
-                            return true
-                          }
-                          return false
-                          }  
-                        });
-                      client(fcmOption)
+                      access.registerToken = currentToken
+                      const option = {
+                        baseURL: env.messageUrl,
+                        url: "notice/register",
+                        method: "PUT",
+                        params: {
+                            token: currentToken,
+                            timestamp: Date.now(),
+                            user: username
+                        },
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        withCredentials: true,             
+                      }                
+                      axios(option)
                   })
               }
           }
@@ -232,15 +208,35 @@ if (code != null && state != null) {
     return csrfToken
   }
   
-async function deleteCookie(name) {
-  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-}
 
-  (async function access () {
-     await getAccessToken ()
-     register("")
-  })()
+  async function deleteCookie(cookieName) {
+    return new Promise((resolve, reject) => {
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      const deletedCookie = getCookie(cookieName);
+      if (!deletedCookie) {
+        resolve(true);
+      } else {
+        reject(false);
+      }
+    });
+  }
 
+  function getCookie(cookieName) {
+    const cookies = document.cookie.split('; ');
+    for (const cookie of cookies) {
+      const [name, value] = cookie.split('=');
+      if (name === cookieName) {
+        return value;
+      }
+    }
+    return null;
+  }
+
+document.addEventListener('DOMContentLoaded', async function() {
+      await getAccessToken()
+      await register("")
+}); 
+ 
   async function getAccessToken () {
     var key = handleCookie();
     if (key.length > 0) {
@@ -284,6 +280,6 @@ async function deleteCookie(name) {
   }
  
 
-export { code, pkceCode, handleCookie, deleteCookie, getAccessToken, handleCsrf,register }
+export { code, pkceCode, handleCookie, deleteCookie, getAccessToken, handleCsrf, register }
 
 
