@@ -1,7 +1,7 @@
 <template>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
-    <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.sub == '' ">  <User /></el-icon>
-    <el-icon class="whiteMode" v-if="access.sub != '' " @click="openUser()"> {{ access.sub }} </el-icon>
+    <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.sub == ''|| access.sub == undefined ">  <User /></el-icon>
+    <el-icon class="whiteMode" v-if="access.sub != '' && access != undefined " @click="openUser()"> {{ access.sub }} </el-icon>
     <el-badge class="message" :is-dot=visible.isDot v-if="access.sub == '' ">
       <el-icon @click="noticeListByUser('', false), visible.noticeDrawer = true"><Message/></el-icon>
     </el-badge>
