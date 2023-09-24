@@ -15,7 +15,7 @@ axios.interceptors.request.use(config => {
     config.headers['X-CSRF-TOKEN'] = csrfToken;
   }
   config.validateStatus = function (status) {
-    return status >= 200 && status < 500; // default
+    return status >= 200 && status < 500 && status != 401; // default
   }       
   return config;
 });
