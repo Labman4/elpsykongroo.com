@@ -30,7 +30,7 @@ const qrcodeLogin = () => {
 
 async function checkToken () {
     var eventSource = new EventSource(env.apiUrl + "/public/token/qrcode?text=" + access.code_verifier, { withCredentials: true });
-    eventSource.onmessage = (e) => {
+    eventSource.onmessage = async (e) => {
         var tokens = e.data.split("&&")
         access.access_token = tokens[0];
         access.id_token = tokens[1];
@@ -44,7 +44,11 @@ async function checkToken () {
         eventSource.close();
         visible.qrcode = false;
         if (access.sub != "") {
-            loginWithToken();
+           const resp = await loginWithToken();
+           console.log(resp)
+           if (resp.data == 200) {
+                redirectOauthProxy("")
+           }
         }
     }
 }
@@ -63,11 +67,7 @@ const loginWithToken = async () => {
         },
         withCredentials: true                        
     }  
-    const response = await axios(option)
-    console.log(response)
-    if (response.data == 200) {
-      redirectOauthProxy("")
-    }
+    return await axios(option)
 }
 
 const callbackUrl = window.location.href;
@@ -241,7 +241,7 @@ async function webauthnLogin() {
 }
 
 const refreshlogin = (username) => {
-    if (document.domain != "localhost") {
+    if (document.domain != "localhost" && document.domain != "127.0.0.1") {
         redirectOauthProxy(username);
     } else {
         pkce();
