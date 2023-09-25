@@ -14,7 +14,7 @@
         <el-input v-model="search" size="small" placeholder="Type to search"  @keyup.enter="filterByParam" />
       </template>
       <template #default="scope">
-        <el-button size="small" type="" @click="openRecord(scope.row)">Delete</el-button>
+        <el-button size="small" type="" @click="openRecord(scope.row)">headers</el-button>
         <el-button size="small" type="danger" @click="DeleteRecord(scope.$index, scope.row)">Delete</el-button>
         <el-button size="small" type="danger" @click="block(scope.$index, scope.row.sourceIP, 'false', '')">lock</el-button>
       </template>
