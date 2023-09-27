@@ -189,7 +189,7 @@ const addAuthenticator = () => {
             // "Access-Control-Allow-Origin": "*",
             // "Access-Control-Allow-Credentials": "true"
         }, 
-        // withCredentials: true                        
+        withCredentials: true                        
     }
     axios(finishOption).then(function (response) { 
       if (response.data == 200) {
