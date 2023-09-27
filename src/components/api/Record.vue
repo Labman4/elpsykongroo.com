@@ -3,7 +3,7 @@
     <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
     <el-button type="" @click="recordForm = true">batch</el-button>
     <el-button type="" @click="recordList(recordPage.order)">refresh</el-button>
-    <el-table :data="data.records" @selection-change="handleRecordSelectChange" @row-click="openRecord">
+    <el-table :data="data.records" @selection-change="handleRecordSelectChange">
       <el-table-column type="selection"/>
       <el-table-column property="accessPath" label="path"  width="170px"/>
       <el-table-column property="userAgent" label="userAgent"  width="300px"/>
@@ -14,6 +14,7 @@
         <el-input v-model="search" size="small" placeholder="Type to search"  @keyup.enter="filterByParam" />
       </template>
       <template #default="scope">
+        <el-button size="small" type="" @click="openRecord(scope.row)">headers</el-button>
         <el-button size="small" type="danger" @click="DeleteRecord(scope.$index, scope.row)">Delete</el-button>
         <el-button size="small" type="danger" @click="block(scope.$index, scope.row.sourceIP, 'false', '')">lock</el-button>
       </template>
@@ -163,7 +164,7 @@ const DeleteCustom = () => {
   })
 }
 
-const openRecord = (row, column, event) => {
+const openRecord = (row) => {
     recordHeader.value = true
     requestHeader.value = JSON.stringify(row.requestHeader, null, 2)  
     console.log(requestHeader.value)

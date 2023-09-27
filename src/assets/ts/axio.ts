@@ -15,7 +15,7 @@ axios.interceptors.request.use(config => {
     config.headers['X-CSRF-TOKEN'] = csrfToken;
   }
   config.validateStatus = function (status) {
-    return status >= 200 && status < 500; // default
+    return status >= 200 && status < 500 && status != 401; // default
   }       
   return config;
 });
@@ -47,7 +47,7 @@ axios.interceptors.response.use(async function (response) {
     if (error.response != undefined && error.response.status === 401) {
       if (error.response.data === 'no access') {
         ElMessageBox.alert("no access, please ensure and retry")
-      } else if (handleCookie().length != 0) {
+      } else if (handleCookie().length != 0 && access.sub != "" && access.sub != undefined) {
           visible.refreshlogin = true
       } else {
         refreshToken(); 
