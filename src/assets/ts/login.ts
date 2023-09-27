@@ -140,7 +140,7 @@ const finishauth = (publicKeyCredential) => {
             // "Access-Control-Allow-Origin": "*",
             // "Access-Control-Allow-Credentials": "true"
         }, 
-        // withCredentials: true                        
+        withCredentials: true                        
     }
     axios(option).then(function (response) {
         visible.loading = false;
@@ -272,8 +272,9 @@ const tmpLogin = () => {
         },
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
-        },   
-    }
+        },
+        withCredentials: true          
+   }
     axios(option);
 }
 
@@ -307,7 +308,7 @@ async function revoke() {
         //     username : env.clientId,
         //     password : env.clientSecret 
         // } ,  
-        // withCredentials: true                
+        withCredentials: true                
         // auth : { 
         //     username : "pkce", 
         //     password : "" 
