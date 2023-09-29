@@ -1,7 +1,7 @@
 <template>
   <el-dialog v-model="storageTable" title="Object"  width="80%">
     <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
-    <el-button type="" @click="openUpload()">upload</el-button>
+    <el-button type="" @click="uploadForm = true">upload</el-button>
     <el-button type="" @click="s3Form = true">connect</el-button>
     <el-button type="" @click="s3InfoTable = true">load</el-button>
     <el-button @click="listObject()">refresh</el-button>
@@ -39,8 +39,6 @@
         :auto-upload=true
         multiple
         :before-upload="encryptOrNot"	
-        :on-preview="handlePreview"
-        :on-remove="handleRemove"
         :before-remove="beforeRemove"
         :limit="10"
         :on-success="refreshList"
@@ -165,7 +163,7 @@
 import { axios } from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
-import { ElMessage, ElMessageBox, ElNotification, UploadFile, UploadProps, UploadRawFile, UploadRequestOptions, UploadUserFile } from 'element-plus';
+import { ElMessageBox, ElNotification, UploadFile, UploadProps, UploadRawFile, UploadRequestOptions, UploadUserFile } from 'element-plus';
 import { dayjs } from 'element-plus';
 import { visible } from '~/assets/ts/visible'
 import { setObject, deleteObject, getObject, openDB } from '~/assets/ts/indexDB'
@@ -240,63 +238,23 @@ const kb = (row: ListObject) => {
    
 }
 
-const handleRemove: UploadProps['onRemove'] = (file, uploadFiles) => {
-}
-
-const handlePreview: UploadProps['onPreview'] = (uploadFile) => {
-}
-
-const handleExceed: UploadProps['onExceed'] = (files, uploadFiles) => {
-  ElMessage.warning(
-    `The limit is 3, you selected ${files.length} files this time, add up to ${
-      files.length + uploadFiles.length
-    } totally`
-  )
-}
-
 const refreshList = (response: any, uploadFile: UploadFile) => {
     listObject();
 }
 
-const continueUpload:UploadProps['onError'] = async (error: Error, file: UploadFile, uploadFiles: UploadFile[]) => {
-    console.log(error)
-    var uploadId;
-    if (access.platform == "" || access.platform == "default") {
-      uploadId = await getUploadId(file.name, "", "", "");
-    }
-    const option = {
-        baseURL: env.storageUrl,
-        url: "/storage/object",
-        method: "POST",
-        data: {
-            data: file,
-            bucket: access.bucket,
-            mode: "stream",
-            idToken: access.id_token,
-            accessKey: access.accessKey,
-            accessSecret: access.accessSecret,
-            endpoint: access.endpoint,
-            region: access.region,
-            platform: access.platform,
-            uploadId: uploadId
-        },
-        headers: {
-            'Authorization': 'Bearer '+ access.access_token,
-            "Content-Type": "multipart/form-data"
-        }
-    }
-    axios(option).then(function (response) {
-    })   
-}
-
 const encryptOrNot: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
-  return ElMessageBox.prompt('need encrypt by yourself?',{
-    inputValue: ""
-  }).then(({ value }) =>  {
-      isEncrypt.value = true
-      password.value = value
+  return new Promise((resolve, reject) => {
+    ElMessageBox.prompt("keep the below empty if not", 'need encrypt by yourself?',{
+      inputValue: "",
+      confirmButtonText: "continue",
+      showCancelButton: false
+    }).then(({ value, action }) => {
+        isEncrypt.value = true;
+        password.value = value;
+        resolve();
     })
-}
+  });
+};
 
 const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
   return ElMessageBox.confirm(
@@ -305,10 +263,6 @@ const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
     () => true,
     () => false
   )
-}
-
-const openUpload = () => {
-    uploadForm.value = true;
 }
 
 const getUploadId = async (fileName, sha256, partCount, partNum) => {
@@ -411,34 +365,32 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
     }  
 }    
 
-async function sortTagList(tagList) {
-  return new Promise((resolve, reject) => {
-    const sortedArray = Array.from(tagList.entries());
-    sortedArray.sort((a, b) => a[0] - b[0]);
-    const sortedMap = new Map(sortedArray);
-    console.log("before",sortedMap)
-    resolve(sortedMap);
-  });
-}
+// async function sortTagList(tagList) {
+//   return new Promise((resolve, reject) => {
+//     const sortedArray = Array.from(tagList.entries());
+//     sortedArray.sort((a, b) => a[0] - b[0]);
+//     const sortedMap = new Map(sortedArray);
+//     resolve(sortedMap);
+//   });
+// }
 
-async function sortChunks(file, chunkSize) {
-  return new Promise((resolve, reject) => {
-    const chunksArray = Array.from(chunks(file, chunkSize));
-    const sortedChunksArray = chunksArray.sort((a, b) => a.index - b.index);
-    resolve(sortedChunksArray);
-  });
-}
+// async function sortChunks(file, chunkSize) {
+//   return new Promise((resolve, reject) => {
+//     const chunksArray = Array.from(chunks(file, chunkSize));
+//     const sortedChunksArray = chunksArray.sort((a, b) => a.index - b.index);
+//     resolve(sortedChunksArray);
+//   });
+// }
 
-async function bitwiseXOR(arr1, arr2) {
-  return new Promise((resolve, reject) => {
-    const result = new Uint8Array(arr1.length);
-    for (let i = 0; i < arr1.length; i++) {
-      result[i] = arr1[i] ^ arr2[i];
-    }
-    console.log("xor", result)
-    resolve(result);
-  });
-}
+// async function bitwiseXOR(arr1, arr2) {
+//   return new Promise((resolve, reject) => {
+//     const result = new Uint8Array(arr1.length);
+//     for (let i = 0; i < arr1.length; i++) {
+//       result[i] = arr1[i] ^ arr2[i];
+//     }
+//     resolve(result);
+//   });
+// }
   
 function readFileAsArrayBuffer(file) {
   return new Promise((resolve, reject) => {
