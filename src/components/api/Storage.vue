@@ -305,7 +305,7 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
       uploadId = upload;
     }
     var partCount = Math.ceil(options.file.size / chunkSize);
-    if (isEncrypt.value) {
+    if (isEncrypt.value && password.value != "" ) {
       tagList = new Map()
       tag = new Uint8Array(16) 
       abortMultiPart(options.file.name, uploadId)
