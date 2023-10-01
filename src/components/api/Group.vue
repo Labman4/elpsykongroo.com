@@ -1,5 +1,5 @@
 <template>
-    <el-dialog v-model="groupTable" title="group" width="75%">
+    <el-dialog v-model="groupTable" :width=visible.dialogWidth>
         <el-button type="" @click="groupForm = true">add</el-button>
         <el-table :data="datas.groups">
         <el-table-column property="groupName" label="groupName" width="auto"/>
@@ -17,9 +17,10 @@
         @update:current-page="groupPageChange"
         @update:page-size="groupPageSizeChange"/>
     </el-dialog>
-    <el-dialog v-model="groupForm" title="group" width="75%">
+
+    <el-dialog v-model="groupForm" :width=visible.dialogWidth>
         <el-form :model="groupFormData">
-            <el-form-item label="name" :label-width=visible.groupFormLabelWidth>
+            <el-form-item label="name" :label-width=visible.labelWidth>
                 <el-input v-model="groupFormData.name" />
             </el-form-item>
         </el-form>
@@ -31,8 +32,7 @@
         </template>
     </el-dialog>
 
-
-    <el-dialog v-model="groupTransfer" width="75%">
+    <el-dialog v-model="groupTransfer" :width=visible.dialogWidth>
         <el-transfer
             v-model="datas.array"
             style="text-align: left; display: inline-block"
@@ -62,7 +62,6 @@
             </template>
         </el-transfer>                          
     </el-dialog>
-    <!-- <User ref="user"></User> -->
 </template>
 
 <script lang="ts" setup>

@@ -8,11 +8,11 @@
       <!-- <el-tab-pane label="Else" name="Else">
         <div id="paypal"></div>
       </el-tab-pane> -->
-      <!-- <el-tab-pane label="Dashboard" name="Dashboard">
+      <!-- <el-tab-pane label="Dashboard" name="Dashboard" v-if="visible.width > 768 && access.permission != undefined && access.permission.includes('admin')">
         <Dashboard class="hidden-sm-and-down"/>
         <span class="hidden-md-and-up">not support</span>
       </el-tab-pane> -->
-      <el-tab-pane label="Dashboard" name="Dashboard" v-if="visible.width > 768 && access.permission != undefined && access.permission.includes('admin')">
+      <el-tab-pane label="Dashboard" name="Dashboard">
         <Dashboard class="hidden-sm-and-down"/>
         <span class="hidden-md-and-up">not support</span>
       </el-tab-pane>
@@ -24,6 +24,5 @@ import { ref } from 'vue';
 import { access } from '~/assets/ts/access';
 import { visible } from '~/assets/ts/visible';
 
-// import { loadPaypal } from "~/assets/ts/paypal"
 const activeName = ref('Home');
 </script>

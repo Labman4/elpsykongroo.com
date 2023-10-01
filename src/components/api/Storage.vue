@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="storageTable" title="Object"  width="80%">
+  <el-dialog v-model="storageTable" :width=visible.dialogWidth>
     <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
     <el-button type="" @click="uploadForm = true">upload</el-button>
     <el-button type="" @click="s3Form = true">connect</el-button>
@@ -27,7 +27,7 @@
     </template> -->
   </el-dialog>
 
-  <el-dialog v-model="uploadForm" title="upload"  width="80%">
+  <el-dialog v-model="uploadForm" :width=visible.dialogWidth>
     <el-upload
         v-model:file-list="fileList"
         class="upload-demo"
@@ -53,7 +53,7 @@
     </el-upload>
 </el-dialog>
 
-<el-dialog v-model="s3InfoTable" title="S3 Info"  width="80%">
+<el-dialog v-model="s3InfoTable" :width=visible.dialogWidth>
     <el-button type="" @click="getS3Info()">refresh</el-button>
     <el-table :data="data.s3InfoList">
       <el-table-column property="accessKey" label="accessKey"/>
@@ -80,8 +80,7 @@
 
 <el-dialog
     v-model="s3Form"
-    title="Warning"
-    width="80%"
+    :width=visible.dialogWidth
     align-center>
     <span>need to connect to s3 from other platform?</span>
     <el-form :model="s3FormData">
@@ -121,8 +120,7 @@
 
   <el-dialog
     v-model="saveS3Warning"
-    title="Warning"
-    width="80%"
+    :width=visible.dialogWidth
     align-center>
     <span>need to save your s3 info on local device?</span>
     <template #footer>
@@ -137,8 +135,7 @@
 
 <el-dialog
     v-model="saveS3InfoForm"
-    title="Warning"
-    width="80%"
+    :width=visible.dialogWidth
     align-center>
     <span>need secret to load exist s3 Info</span>
     <el-form :model="s3FormData">

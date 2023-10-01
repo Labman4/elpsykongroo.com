@@ -3,10 +3,10 @@
     <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.sub == ''|| access.sub == undefined ">  <User /></el-icon>
     <el-icon class="whiteMode" v-if="access.sub != '' && access.sub != undefined " @click="openUser()"> {{ access.sub }} </el-icon>
     <el-badge class="message" :is-dot=visible.isDot v-if="access.sub == '' ">
-      <el-icon @click="noticeListByUser('', false), visible.noticeDrawer = true"><Message/></el-icon>
+      <el-icon @click="visible.noticeDrawer = true, noticeListByUser('', false)"><Message/></el-icon>
     </el-badge>
     <el-badge class="message" :is-dot=visible.isDot v-if="access.sub != '' ">
-      <el-icon @click="noticeListByUser(access.sub, false), visible.noticeDrawer = true"><Message/></el-icon>
+      <el-icon @click="visible.noticeDrawer = true, noticeListByUser(access.sub, false)"><Message/></el-icon>
     </el-badge>
     <el-dialog v-model="visible.webauthnFormVisible" width="65%">
       <el-form 
@@ -37,14 +37,14 @@
     <el-dialog v-model="userForm" title="user" width="80%" >
       <el-button type="primary" @click="addAuthenticator()">add authenticator</el-button>
       <el-form :model="userFormData">
-        <el-form-item label="email" :label-width=visible.userFormLabelWidth :inline="true">
+        <el-form-item label="email" :label-width=visible.labelWidth :inline="true">
           <el-input v-model="userFormData.email"/>       
           <el-button type="primary" @click="validateEmail()" v-if="!access.email_verified && userFormData.email != 'null'">validate</el-button>
         </el-form-item>
-        <el-form-item label="nickName" :label-width=visible.userFormLabelWidth>
+        <el-form-item label="nickName" :label-width=visible.labelWidth>
           <el-input v-model="userFormData.nickName" />
         </el-form-item>
-        <el-form-item label="password" :label-width=visible.userFormLabelWidth>
+        <el-form-item label="password" :label-width=visible.labelWidth>
           <el-input v-model="userFormData.password" />
         </el-form-item>
         <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
@@ -99,12 +99,10 @@
 
   <el-dialog 
     v-model="visible.qrcode"
-    width="50%"
-    align-center>
-
-    <QrcodeVue :value=access.qrcodeUrl :size="200" level="H" />  
-  
+    :width=visible.dialogWidth>
+    <QrcodeVue :value=access.qrcodeUrl :size="200" level="H" /> 
   </el-dialog>
+  <Notice></Notice>
 </template>
 
 <script lang="ts" setup >
@@ -120,6 +118,7 @@ import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
 import { loadUser, noticeListByUser, updateUser, loadUserInfo } from '~/assets/ts/commonApi';
 import { userFormData } from '~/assets/ts/dataInterface'
+import Notice from '~/components/api/Notice.vue';
 
 const username = ref("")
 const userForm = ref(false)
