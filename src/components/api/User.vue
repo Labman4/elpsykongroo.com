@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible.userTable" title="User" width="75%">
+  <el-dialog v-model="visible.userTable" :width=visible.dialogWidth>
     <el-button type="" @click="loadUser()">update</el-button>
     <el-table :data="data.users" @selection-change="handleUserSelectChange" >
       <el-table-column type="selection"/>
@@ -40,15 +40,15 @@
       @update:page-size="userPageSizeChange"/>
   </el-dialog>
 
-  <el-dialog v-model="userForm" title="user" width="75%">
+  <el-dialog v-model="userForm" :width=visible.dialogWidth>
     <el-form :model="userFormData">
-      <el-form-item label="email" :label-width=visible.userFormLabelWidth>
+      <el-form-item label="email" :label-width=visible.labelWidth>
       <el-input v-model="userFormData.email" />
     </el-form-item>
-    <el-form-item label="nickName" :label-width=visible.userFormLabelWidth>
+    <el-form-item label="nickName" :label-width=visible.labelWidth>
       <el-input v-model="userFormData.nickName" />
     </el-form-item>
-    <el-form-item label="password" :label-width=visible.userFormLabelWidth>
+    <el-form-item label="password" :label-width=visible.labelWidth>
       <el-input v-model="userFormData.password" />
     </el-form-item>
     <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
@@ -65,13 +65,13 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="visible.userInfoForm" title="userInfo"  width="80%">
+  <el-dialog v-model="visible.userInfoForm" :width=visible.dialogWidth>
     <el-button type="" @click="claimForm = true">Add</el-button>
     <el-form :model="dynamicClaimForm" >
       <el-form-item v-for="(value, key) in dynamicClaimForm"
         :key="key"
         :label="key"
-        :label-width=visible.userFormLabelWidth> 
+        :label-width=visible.labelWidth> 
             <el-input v-model="dynamicClaimForm[key]" />
             <el-button size="small" type="danger" v-if='!(Object.keys(userInfoTableData).indexOf(key) >= 0)' @click="deleteClaim(key)">  
               delete
@@ -87,12 +87,12 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="claimForm" title="claim" width="75%">
+  <el-dialog v-model="claimForm" :width=visible.dialogWidth>
     <el-form>
-      <el-form-item label="claimName" :label-width="visible.userFormLabelWidth">
+      <el-form-item label="claimName" :label-width="visible.labelWidth">
         <el-input v-model="claimFormData.key" />
       </el-form-item>
-      <el-form-item label="value" :label-width="visible.ipFormLabelWidth">
+      <el-form-item label="value" :label-width="visible.labelWidth">
         <el-input v-model="claimFormData.value"/>
       </el-form-item>
     </el-form>
@@ -107,7 +107,7 @@
   <Group ref="group"></Group>
   <Authority ref="authority"></Authority>
 
-  <el-dialog v-model="authorityTable" title="authority" width="75%">
+  <el-dialog v-model="authorityTable" :width=visible.dialogWidth>
         <el-table :data="datas.authorities">
         <el-table-column property="authority" label="authority" width="auto"/>
         <el-table-column label="Operations">
@@ -124,22 +124,22 @@
         @update:page-size="authorityPageSizeChange"/>
     </el-dialog>
 
-    <el-dialog v-model="groupTable" title="group" width="75%">
-        <el-table :data="datas.groups">
-        <el-table-column property="groupName" label="groupName" width="auto"/>
-        <el-table-column label="Operations">
-        <template #default="scope">
-            <!-- <el-button size="small" type="primary" @click="openGroup(scope.row)">alloacte group</el-button> -->
-            <el-button size="small" type="danger" @click="deleteGroup(scope.index, scope.row)">delete</el-button>
-        </template>
-        </el-table-column>
-        </el-table>
-        <el-pagination layout="prev, pager, next, sizes" :total="50" 
-        :current-page="groupPage.pageNumber"  
-        :page-size="groupPage.pageSize"
-        @update:current-page="groupPageChange"
-        @update:page-size="groupPageSizeChange"/>
-    </el-dialog>
+  <el-dialog v-model="groupTable" :width=visible.dialogWidth>
+      <el-table :data="datas.groups">
+      <el-table-column property="groupName" label="groupName" width="auto"/>
+      <el-table-column label="Operations">
+      <template #default="scope">
+          <!-- <el-button size="small" type="primary" @click="openGroup(scope.row)">alloacte group</el-button> -->
+          <el-button size="small" type="danger" @click="deleteGroup(scope.index, scope.row)">delete</el-button>
+      </template>
+      </el-table-column>
+      </el-table>
+      <el-pagination layout="prev, pager, next, sizes" :total="50" 
+      :current-page="groupPage.pageNumber"  
+      :page-size="groupPage.pageSize"
+      @update:current-page="groupPageChange"
+      @update:page-size="groupPageSizeChange"/>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>

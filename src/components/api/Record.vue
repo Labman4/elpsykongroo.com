@@ -1,5 +1,5 @@
 <template>
-    <el-dialog v-model="recordTable" title="records" width="85%">
+    <el-dialog v-model="recordTable" :width=visible.dialogWidth>
     <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
     <el-button type="" @click="recordForm = true">batch</el-button>
     <el-button type="" @click="recordList(recordPage.order)">refresh</el-button>
@@ -27,7 +27,7 @@
       @update:page-size="recordPageSizeChange"/>
   </el-dialog>
 
-  <el-dialog v-model="recordForm" title="" width="75%">
+  <el-dialog v-model="recordForm" :width=visible.dialogWidth>
     <el-form :model="recordFormData">
       <el-form-item label="address" :label-width="visible.labelWidth">
         <el-input v-model="recordFormData.sourceIP" autocomplete="off" @keyup.enter="DeleteCustom" />
@@ -40,7 +40,7 @@
       </span>
     </template>
   </el-dialog>
-  <el-dialog v-model="recordHeader" title="" width="75%">
+  <el-dialog v-model="recordHeader" :width=visible.dialogWidth>
       <pre>{{ requestHeader }}</pre>
   </el-dialog>
   <IP ref="ip"></IP>

@@ -1,5 +1,5 @@
 <template>
-    <el-dialog v-model="authorityTable" title="authority" width="75%">
+    <el-dialog v-model="authorityTable" :width=visible.dialogWidth>
         <el-button type="" @click="authorityForm = true">add</el-button>
         <el-table :data="datas.authorities">
         <el-table-column property="authority" label="authority" width="auto"/>
@@ -17,9 +17,9 @@
         @update:current-page="authorityPageChange"
         @update:page-size="authorityPageSizeChange"/>
     </el-dialog>
-    <el-dialog v-model="authorityForm" title="authority" width="75%">
+    <el-dialog v-model="authorityForm" :width=visible.dialogWidth>
         <el-form :model="authorityFormData">
-            <el-form-item label="name" :label-width=visible.authorityFormLabelWidth>
+            <el-form-item label="name" :label-width=visible.labelWidth>
                 <el-input v-model="authorityFormData.name" />
             </el-form-item>
         </el-form>
@@ -32,7 +32,7 @@
         </span>
         </template>
     </el-dialog>
-    <el-dialog v-model="authorityTransfer" width="75%">
+    <el-dialog v-model="authorityTransfer" :width=visible.dialogWidth>
         <el-transfer
             style="text-align: left; display: inline-block"
             v-model="datas.array"

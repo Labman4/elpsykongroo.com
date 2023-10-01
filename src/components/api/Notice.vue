@@ -16,7 +16,7 @@
     
   <el-dialog
     v-model="noticeDialog"
-    width="80%"
+    :width=visible.dialogWidth
     align-center>
     <el-image :src="noticeImg"/>
     {{ noticeBody }}
@@ -24,7 +24,7 @@
 
   <el-dialog
     v-model="notificationDialog"
-    width="80%"
+    :width=visible.dialogWidth
     align-center>
     <el-form>
         <el-form-item label="title" :label-width=visible.labelWidth>
@@ -85,7 +85,7 @@
 
   <el-dialog
     v-model="topicDialog"
-    width="80%"
+    :width=visible.dialogWidth
     align-center>
     <el-form>
         <el-form-item label="name" :label-width=visible.labelWidth>
@@ -126,7 +126,7 @@
 
   <el-dialog 
     v-model="visible.topicTable"
-    width="80%"
+    :width=visible.dialogWidth
     align-center>
     <el-button type="" @click="topicDialog = true">Add</el-button>
     <el-table :data="data.topic" @selection-change="">
@@ -148,7 +148,7 @@
 
   <el-dialog 
     v-model="visible.noticeTable"
-    width="80%"
+    :width=visible.dialogWidth
     align-center>
     <el-button type="" @click="notificationDialog = true">Add</el-button>
     <el-table :data="data.notification" @selection-change="">
@@ -179,7 +179,6 @@ import { access } from '~/assets/ts/access';
 import { visible } from '~/assets/ts/visible';
 import { axios } from '~/assets/ts/axio';
 import { listUser, findUser, noticeList, topicList} from '~/assets/ts/commonApi';
-import { CircleCloseFilled } from '@element-plus/icons-vue';
 import { data } from '~/assets/ts/dataInterface'
 
 const userLoad = ref(true)

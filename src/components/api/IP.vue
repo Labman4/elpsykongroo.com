@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="ipTable" title="address" width="75%">
+  <el-dialog v-model="ipTable" :width=visible.dialogWidth>
     <el-button type="" @click="openIpAdd">Update</el-button>
     <el-table :data="data.ips">
       <el-table-column property="address" label="address" width="auto"/>
@@ -21,15 +21,15 @@
       @update:current-page="ipPageChange"
       @update:page-size="ipPageSizeChange"/>
   </el-dialog>
-  <el-dialog v-model="ipForm" title="" width="75%">
+  <el-dialog v-model="ipForm" :width=visible.dialogWidth>
     <el-form :model="ipFormData">
-        <el-form-item label="type" :label-width="visible.ipFormLabelWidth">
+        <el-form-item label="type" :label-width="visible.labelWidth">
         <el-select v-model="ipFormData.black" placeholder="">
           <el-option label="white" value="false" />
           <el-option label="black" value="true" />
         </el-select>
       </el-form-item>
-      <el-form-item label="address" :label-width="visible.ipFormLabelWidth">
+      <el-form-item label="address" :label-width="visible.labelWidth">
         <el-input v-model="ipFormData.address" autocomplete="off" @keyup.enter="addIp" />
       </el-form-item>
     </el-form>

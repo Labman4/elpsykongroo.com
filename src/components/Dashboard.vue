@@ -89,7 +89,6 @@
         
         </el-menu>
       </el-scrollbar>
-      <Notice ref="notice"></Notice>
       <User ref="user"></User>
       <IP ref="ip"></IP>
       <Record ref="record"></Record>
@@ -118,7 +117,6 @@ import User from '~/components/api/User.vue';
 import Group from '~/components/api/Group.vue';
 import Authority from '~/components/api/Authority.vue';
 import Storage from '~/components/api/Storage.vue';
-import Notice from '~/components/api/Notice.vue';
 
 import { listUser, noticeList, topicList } from '~/assets/ts/commonApi';
 import { logout } from '~/assets/ts/login';
@@ -130,7 +128,6 @@ const authClient = ref<InstanceType<typeof AuthClient> | null>(null)
 const group = ref<InstanceType<typeof Group> | null>(null)
 const authority = ref<InstanceType<typeof Authority> | null>(null)
 const user = ref<InstanceType<typeof User> | null>(null)
-const notice = ref<InstanceType<typeof Notice> | null>(null)
 const isCollapse = ref(true)
 
 const openIp = () => {

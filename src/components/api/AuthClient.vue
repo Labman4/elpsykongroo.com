@@ -1,18 +1,18 @@
 <template>
-  <el-dialog v-model="authClientForm" title="" width="75%">
+  <el-dialog v-model="authClientForm" :width=visible.dialogWidth>
     <el-form 
     ref="clientformRef"
     :model="clientForm" 
     :inline-message="true"
     >
-        <el-form-item label="GrantTypes" :label-width=visible.authClientFormWidth>
+        <el-form-item label="GrantTypes" :label-width=visible.labelWidth>
           <el-checkbox-group v-model=authorizationGrantTypes>
             <el-checkbox label="client_credentials" />
             <el-checkbox label="authorization_code" />
             <el-checkbox label="refresh_token" />
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="Methods" :label-width=visible.authClientFormWidth>
+        <el-form-item label="Methods" :label-width=visible.labelWidth>
         <el-select v-model="clientForm.clientAuthenticationMethods" placeholder="">
           <el-option label="client_secret_basic" value="client_secret_basic" />
           <el-option label="client_secret_post" value="client_secret_post" />
@@ -21,20 +21,20 @@
           <el-option label="none" value="none" />
         </el-select>
         </el-form-item>
-      <el-form-item label="redirectUris" :label-width=visible.authClientFormWidth>
+      <el-form-item label="redirectUris" :label-width=visible.labelWidth>
         <el-input v-model="clientForm.redirectUris" />
       </el-form-item>
-      <el-form-item label="logoutRedirectUris" :label-width=visible.authClientFormWidth>
+      <el-form-item label="logoutRedirectUris" :label-width=visible.labelWidth>
         <el-input v-model="clientForm.postLogoutRedirectUris" />
       </el-form-item>
-      <el-form-item label="clientName" :label-width=visible.authClientFormWidth>
+      <el-form-item label="clientName" :label-width=visible.labelWidth>
         <el-input v-model="clientForm.clientName" />
       </el-form-item>
-      <el-form-item label="scopes" :label-width=visible.authClientFormWidth>
+      <el-form-item label="scopes" :label-width=visible.labelWidth>
         <el-input v-model="clientForm.scopes" />
       </el-form-item>
       <el-form-item
-        :label-width=visible.authClientFormWidth
+        :label-width=visible.labelWidth
         label="clientId" 
         prop="clientId"
         :rules="[
@@ -43,13 +43,13 @@
         >
         <el-input v-model="clientForm.clientId" style="width: auto;"/>
       </el-form-item>
-      <el-form-item label="clientSecret" :label-width=visible.authClientFormWidth>
+      <el-form-item label="clientSecret" :label-width=visible.labelWidth>
         <el-input v-model="clientForm.clientSecret" type="password" :show-password="true" autocomplete="off" @keyup.enter="" />
       </el-form-item>
-      <el-form-item label="clientSettings" :label-width=visible.authClientFormWidth>
+      <el-form-item label="clientSettings" :label-width=visible.labelWidth>
         <el-cascader ref="clientSet" v-model="clientSettingList" :options=clientSettings :props="props" @change="handleClientSetting"  clearable />
       </el-form-item>
-      <el-form-item label="tokenSettings" :label-width=visible.authClientFormWidth>
+      <el-form-item label="tokenSettings" :label-width=visible.labelWidth>
         <el-cascader ref="tokenSet" v-model="tokenSettingList" :options=tokenSettings :props="props" @change="handleTokenSetting" clearable />
       </el-form-item>
       <el-form-item label="SecretExpires">
@@ -75,9 +75,8 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="authClientTable" title="client" width="95%">
+  <el-dialog v-model="authClientTable" :width=visible.dialogWidth>
     <el-button type="" @click="openClientAdd(clientformRef)">Add</el-button>
-    <!-- <el-button type="danger" click="DeleteSelect">DeleteSelect</el-button> -->
     <el-table :data="data.authclient" @selection-change="handleClientSelectChange">
       <el-table-column type="selection"/>
       <el-table-column property="clientId" label="Id" width="60px"/>
@@ -92,11 +91,7 @@
       <el-table-column property="clientSecretExpiresAt" label="expire" :formatter="expiredTimestamp" sortable/>
       <el-table-column property="clientSettings" label="clientSettings" width="150px" />
       <el-table-column property="tokenSettings" label="tokenSettings" width="300px" />
-
       <el-table-column>
-      <!-- <template #header>
-        <el-input v-model="search" size="small" placeholder="Type to search"  @keyup.enter="" />
-      </template> -->
       <template #default="scope">
         <el-button
           size="small"
@@ -113,20 +108,19 @@
       @update:page-size="authClientPageSizeChange"/>
   </el-dialog>
 
-  <el-dialog v-model="authClientRegisterForm" title="" width="75%">
+  <el-dialog v-model="authClientRegisterForm" :width=visible.dialogWidth>
     <el-form 
-    ref="registerformRef"
-    :model="registerForm" 
-    :inline-message="true"
-    >
-        <el-form-item label="Types" :label-width=visible.authClientRegisterFormWidth>
+      ref="registerformRef"
+      :model="registerForm" 
+      :inline-message="true">
+        <el-form-item label="Types" :label-width=visible.labelWidth>
           <el-radio-group v-model="registerForm.authorizationGrantType">
             <el-radio label="client_credentials">client_credentials</el-radio>
             <el-radio label="authorization_code">authorization_code</el-radio>
             <el-radio label="refresh_token">refresh_token</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="Methods" :label-width=visible.authClientFormWidth>
+        <el-form-item label="Methods" :label-width=visible.labelWidth>
         <el-select v-model="registerForm.clientAuthenticationMethod" placeholder="">
           <el-option label="client_secret_basic" value="client_secret_basic" />
           <el-option label="client_secret_post" value="client_secret_post" />
@@ -135,17 +129,17 @@
           <el-option label="none" value="none" />
         </el-select>
         </el-form-item>
-      <el-form-item label="redirectUri" :label-width=visible.authClientFormWidth>
+      <el-form-item label="redirectUri" :label-width=visible.labelWidth>
         <el-input v-model="registerForm.redirectUri" />
       </el-form-item>
-      <el-form-item label="clientName" :label-width=visible.authClientFormWidth>
+      <el-form-item label="clientName" :label-width=visible.labelWidth>
         <el-input v-model="registerForm.clientName" />
       </el-form-item>
-      <el-form-item label="scopes" :label-width=visible.authClientFormWidth>
+      <el-form-item label="scopes" :label-width=visible.labelWidth>
         <el-input v-model="registerForm.scopes" placeholder="openid"/>
       </el-form-item>
       <el-form-item
-        :label-width=visible.authClientFormWidth
+        :label-width=visible.labelWidth
         label="registerId" 
         prop="registrationId"
         :rules="[
@@ -155,7 +149,7 @@
         <el-input v-model="registerForm.registrationId" style="width: auto;"/>
       </el-form-item>
       <el-form-item
-        :label-width=visible.authClientFormWidth
+        :label-width=visible.labelWidth
         label="clientId" 
         prop="clientId"
         :rules="[
@@ -164,34 +158,34 @@
         >
         <el-input v-model="registerForm.clientId" style="width: auto;"/>
       </el-form-item>
-      <el-form-item label="clientSecret" :label-width=visible.authClientFormWidth>
+      <el-form-item label="clientSecret" :label-width=visible.labelWidth>
         <el-input v-model="registerForm.clientSecret" type="password" :show-password="true" autocomplete="off" @keyup.enter="" />
       </el-form-item>
-      <el-form-item label="authorizationUri" :label-width=visible.authClientFormWidth :required="true">
+      <el-form-item label="authorizationUri" :label-width=visible.labelWidth :required="true">
         <el-input v-model="registerForm.authorizationUri" />
       </el-form-item>
 
-      <el-form-item label="tokenUri" :label-width=visible.authClientFormWidth :required="true">
+      <el-form-item label="tokenUri" :label-width=visible.labelWidth :required="true">
         <el-input v-model="registerForm.tokenUri" />
       </el-form-item>
       
-      <el-form-item label="jwkSetUri" :label-width=visible.authClientFormWidth>
+      <el-form-item label="jwkSetUri" :label-width=visible.labelWidth>
         <el-input v-model="registerForm.jwkSetUri" />
       </el-form-item>
 
-      <el-form-item label="issuerUri" :label-width=visible.authClientFormWidth>
+      <el-form-item label="issuerUri" :label-width=visible.labelWidth>
         <el-input v-model="registerForm.issuerUri" />
       </el-form-item>
 
-      <el-form-item label="userInfoUri" :label-width=visible.authClientFormWidth>
+      <el-form-item label="userInfoUri" :label-width=visible.labelWidth>
         <el-input v-model="registerForm.userInfoUri" />
       </el-form-item>
 
-      <el-form-item label="authenticationMethod" :label-width=visible.authClientFormWidth :required=true>
+      <el-form-item label="authenticationMethod" :label-width=visible.labelWidth :required=true>
         <el-input v-model="registerForm.authenticationMethod" />
       </el-form-item>
 
-      <el-form-item label="userNameAttributeName" :label-width=visible.authClientFormWidth>
+      <el-form-item label="userNameAttributeName" :label-width=visible.labelWidth>
         <el-input v-model="registerForm.userNameAttributeName" />
       </el-form-item>
 
@@ -210,12 +204,10 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="authClientRegisterTable" title="client" width="95%">
+  <el-dialog v-model="authClientRegisterTable" :width=visible.dialogWidth>
     <el-button type="" @click="openRegisterAdd(registerformRef)">Add</el-button>
-    <!-- <el-button type="danger" click="DeleteSelect">DeleteSelect</el-button> -->
     <el-table :data="data.authclientRegister" @selection-change="handleAuthRegisterSelectChange">
       <el-table-column type="selection"/>
-      
       <el-table-column property="registrationId" label="registrationId" width="auto"/>
       <el-table-column property="clientId" label="clientId" width="auto"/>
       <el-table-column property="clientSecret" label="clientSecret" />
@@ -224,11 +216,7 @@
       <el-table-column property="scopes" label="scopes" width="auto"/>
       <el-table-column property="clientAuthenticationMethod" label="Methods" width="auto"/>
       <el-table-column property="authorizationGrantType" label="type" width="auto"/>
-
       <el-table-column>
-      <!-- <template #header>
-        <el-input v-model="search" size="small" placeholder="Type to search"  @keyup.enter="" />
-      </template> -->
       <template #default="scope">
         <el-button
           size="small"
