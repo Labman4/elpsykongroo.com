@@ -196,10 +196,10 @@ async function webauthnLogin() {
             } else if(response.data == 404) {
                 ElMessageBox.alert("the user is not exist")
                 visible.loading = false;
-            } else if(response.data == 503) {
+            } else if(response.status == 503) {
                 ElMessageBox.alert("network error, please try again later")
                 visible.loading = false;
-            } else if(response.data == 500) {
+            } else if(response.status == 500) {
                 ElMessageBox.alert("service error, please try again later")
                 visible.loading = false;
             } else if (response.status != 403){    

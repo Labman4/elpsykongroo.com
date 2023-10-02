@@ -34,7 +34,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="userForm" title="user" width="80%" >
+    <el-dialog v-model="userForm" :width=visible.dialogWidth>
       <el-button type="primary" @click="addAuthenticator()">add authenticator</el-button>
       <el-form :model="userFormData">
         <el-form-item label="email" :label-width=visible.labelWidth :inline="true">
@@ -67,8 +67,7 @@
 
   <el-dialog
     v-model="visible.tmpLogin"
-    title="Warning"
-    width="80%"
+    :width=visible.dialogWidth
     align-center>
     <span>send email to add authenticator for new Device?</span>
     <template #footer>
@@ -83,8 +82,7 @@
 
   <el-dialog
     v-model="visible.refreshlogin"
-    title="Warning"
-    width="80%"
+    :width=visible.dialogWidth
     align-center>
     <span>redirect to refresh access?</span>
     <template #footer>
