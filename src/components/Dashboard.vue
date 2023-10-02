@@ -110,6 +110,7 @@
     </el-container>
   
     <el-dialog v-model="statusData" :width=visible.dialogWidth>
+      <el-button type="" @click="openStatus()">refresh</el-button>
         <el-table :data="data.statuses">
           <el-table-column property="service" label="service"/>
           <el-table-column property="status" label="status" />
@@ -181,6 +182,12 @@ const openStatus = () => {
       }
       data.statuses.push(status)
     }
+  }).catch(function(error) {
+    const status:status = {
+        service: s,
+        status: "offline"
+      }
+      data.statuses.push(status)
   })
 }
 }
