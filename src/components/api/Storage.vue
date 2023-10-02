@@ -680,7 +680,7 @@ const initS3 = async() => {
 
 const listObject = () => {
   const option = {
-      baseURL: env.apiUrl,
+      baseURL: env.storageUrl,
       url: "/storage/object/list",
       method: "POST",
       data: {
@@ -709,7 +709,7 @@ const listObject = () => {
 
 const abortMultiPart = (name, uploadId) => {
   const option = {
-      baseURL: env.apiUrl,
+      baseURL: env.storageUrl,
       url: "/storage/object/abort",
       method: "POST",
       data: {
@@ -733,7 +733,7 @@ const abortMultiPart = (name, uploadId) => {
 
 const deleteS3 = (index:number, row: ListObject) => {
     const option = {
-        baseURL: env.apiUrl,
+        baseURL: env.storageUrl,
         url: "/storage/object/delete",
         method: "POST",
         data: {
@@ -772,7 +772,7 @@ const selected:string[] = [];
 
 const DeleteSelect = () => {
   const option = {
-    baseURL: env.apiUrl,
+    baseURL: env.storageUrl,
     url: "/storage/object/delete",
     method: "POST",
     data: {

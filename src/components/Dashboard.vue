@@ -66,7 +66,7 @@
           <el-menu-item index="3" >
             <el-icon @click="openStorage()"><UploadFilled /></el-icon>
             <template #title >
-              storage
+              <span>storage</span>
             </template>
           </el-menu-item>
           <el-sub-menu index="4">
@@ -79,11 +79,17 @@
               <el-menu-item index="4-2"  @click="visible.topicTable = true, topicList()">topic</el-menu-item>
             </el-menu-item-group>
           </el-sub-menu>
-          <el-menu-item index="5" v-if="access.expires_in > 0">
+          <el-menu-item index="5">
+            <el-icon @click="statusData = true, openStatus()"><Platform /></el-icon>
+            <template #title >
+              <span>status</span>
+            </template>
+          </el-menu-item>
+          <el-menu-item index="6" v-if="access.expires_in > 0">
             <el-icon><Timer /></el-icon>
             <template #title>{{access.expires_in}}s</template>
           </el-menu-item>
-          <el-menu-item index="5-1">
+          <el-menu-item index="6-1">
             <el-icon @click="logout()"><SwitchButton /></el-icon>
           </el-menu-item>
         
@@ -103,13 +109,19 @@
       </el-container>
     </el-container>
   
+    <el-dialog v-model="statusData" :width=visible.dialogWidth>
+        <el-table :data="data.statuses">
+          <el-table-column property="service" label="service"/>
+          <el-table-column property="status" label="status" />
+        </el-table>
+    </el-dialog>
   </template>
   
 <script lang="ts" setup>
 import { access } from '~/assets/ts/access';
 import { visible } from '~/assets/ts/visible';
 import { ref } from 'vue';
-import { Timer, Operation, SwitchButton, Expand, Fold, Menu, UploadFilled, MessageBox} from '@element-plus/icons-vue';
+import { Timer, Operation, SwitchButton, Expand, Fold, Menu, UploadFilled, MessageBox, Platform} from '@element-plus/icons-vue';
 import IP from '~/components/api/IP.vue';
 import Record from '~/components/api/Record.vue';
 import AuthClient from '~/components/api/AuthClient.vue';
@@ -120,6 +132,8 @@ import Storage from '~/components/api/Storage.vue';
 
 import { listUser, noticeList, topicList } from '~/assets/ts/commonApi';
 import { logout } from '~/assets/ts/login';
+import { axios } from '~/assets/ts/axio';
+import { env } from '~/assets/ts/env';
 
 const storage = ref<InstanceType<typeof Storage> | null>(null)
 const ip = ref<InstanceType<typeof IP> | null>(null)
@@ -129,7 +143,48 @@ const group = ref<InstanceType<typeof Group> | null>(null)
 const authority = ref<InstanceType<typeof Authority> | null>(null)
 const user = ref<InstanceType<typeof User> | null>(null)
 const isCollapse = ref(true)
+const statusData = ref(false)
 
+interface status {
+  service: string
+  status: string
+}
+const statuses:status[] = []
+
+const openStatus = () => {
+  const serverList:any = []
+  serverList.push(env.apiUrl)
+  serverList.push(env.authUrl)
+  serverList.push(env.storageUrl)
+  serverList.push(env.messageUrl)
+  data.statuses = []
+  for (let s of serverList) {
+    const option = {
+        baseURL: s,
+        url: "/actuator/health",
+        method: "GET",
+        headers: {
+         
+        }, 
+    }  
+    axios(option).then(function(response) {
+    if (response.data["status"] == "UP") {
+      const status:status = {
+        service: s,
+        status: "online"
+      }
+      data.statuses.push(status)
+    } else {
+      const status:status = {
+        service: s,
+        status: "offline"
+      }
+      data.statuses.push(status)
+    }
+  })
+}
+}
+const data = reactive({statuses})
 const openIp = () => {
   ip.value?.ipList();
 }
