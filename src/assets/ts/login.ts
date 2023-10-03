@@ -114,6 +114,9 @@ const webauthnRegister = () => {
             withCredentials: true                        
         }
         axios(registerOption).then(async function (response) {
+            if (response.message === 'Network Error' && response.request.status === 0 && response.request.responseURL === '') {
+                visible.loading = false
+            }
             if (response.data == 409) {
                 ElMessageBox.alert("the user already exist")
                 visible.loading = false; 
@@ -176,33 +179,28 @@ async function webauthnLogin() {
             withCredentials: true          
         } 
         axios(loginOption).then(async function (response) {
+            visible.loading = false;
             if(response.data == 200) {
                 if(handleCookie().length == 0) {
                     refreshlogin(access.username);
                 } else {
                     getAccessToken();
-                    visible.loading = false;
                     visible.webauthnFormVisible = false;
                 }
             } else if(response.data == 202) {
                 ElMessageBox.alert("already login with other user")
-                visible.loading = false;
             } else if(response.data == 400) {
                 ElMessageBox.alert("you need a authenticator, please check your email to add")
-                visible.loading = false;
             } else if(response.data == 401) {
                 ElMessageBox.alert("your account may be locked")
-                visible.loading = false;
             } else if(response.data == 404) {
                 ElMessageBox.alert("the user is not exist")
-                visible.loading = false;
             } else if(response.status == 503) {
                 ElMessageBox.alert("network error, please try again later")
-                visible.loading = false;
             } else if(response.status == 500) {
                 ElMessageBox.alert("service error, please try again later")
-                visible.loading = false;
-            } else if (response.status != 403){    
+            } else if (response.status != 403 && response.message != "Network Error"){    
+                visible.loading = true
                 var publicKeyCredential;
                 publicKeyCredential = await webauthnJson.get(response.data).catch((error) => {console.log(error)});
                 if (publicKeyCredential != null) {
