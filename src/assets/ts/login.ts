@@ -177,6 +177,11 @@ async function webauthnLogin() {
         } 
         axios(loginOption).then(async function (response) {
             console.log(response)
+            if (response.message === 'Network Error' && response.request.status === 0 && response.request.responseURL === '') {
+                ElMessageBox.alert("service error, please try again later")
+                visible.loading = false;
+                return
+            }
             if(response.data == 200) {
                 if(handleCookie().length == 0) {
                     refreshlogin(access.username);
