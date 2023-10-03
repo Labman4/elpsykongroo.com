@@ -41,8 +41,7 @@ axios.interceptors.response.use(async function (response) {
       console.log('Request canceled', error.message);
     } 
     if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
-      console.log("cors error");
-      //  window.location.href = error.response.request.responseURL;       
+        ElMessageBox.alert("service error, please try again later")
     }
     if (error.response != undefined && error.response.status === 401) {
       if (error.response.data === 'no access') {
