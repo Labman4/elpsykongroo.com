@@ -176,6 +176,7 @@ async function webauthnLogin() {
             withCredentials: true          
         } 
         axios(loginOption).then(async function (response) {
+            console.log(response)
             if(response.data == 200) {
                 if(handleCookie().length == 0) {
                     refreshlogin(access.username);
