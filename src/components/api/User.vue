@@ -30,6 +30,8 @@
          <span v-if="scope.row.locked == 'false'">lock</span>
          <span v-if="scope.row.locked == 'true'">unlock</span>
         </el-button>
+        <el-button size="small" type="" @click="alloacteAuthority(scope.row)">alloacte authority</el-button>
+        <el-button size="small" type="" @click="alloacteGroup(scope.row)">alloacte group</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -195,6 +197,13 @@ const initclaimFormData = () => ({
 
 let claimFormData = reactive(initclaimFormData());
 
+const alloacteGroup = (row:user) => {
+  group.value?.userGroupList(row)
+}
+
+const alloacteAuthority = (row:user) => {
+  authority.value?.userAuthorityList(row)
+}
 
 const deleteGroup = (index: number, row: group) => {
   group.value?.updateGroup(row.groupName, Ids.value, true);
@@ -399,5 +408,6 @@ const handleUserSelectChange = (val: user[]) => {
     selectUserName.push(i);
   }
 }
+
 
 </script> 

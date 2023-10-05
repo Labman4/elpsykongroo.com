@@ -5,7 +5,7 @@
         <el-table-column property="groupName" label="groupName" width="auto"/>
         <el-table-column label="Operations">
         <template #default="scope">
-            <el-button size="small" type="primary" @click=" openUser(scope.row)">alloacte user</el-button>
+            <!-- <el-button size="small" type="primary" @click=" openUser(scope.row)">alloacte user</el-button> -->
             <el-button size="small" type="primary" @click=" openAuthority(scope.row)">alloacte authority</el-button>
             <el-button size="small" type="danger" @click="deleteGroup(scope.$index, scope.row)">delete</el-button>
         </template>
@@ -70,40 +70,14 @@ import { access } from '~/assets/ts/access';
 import { axios } from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 import { visible } from '~/assets/ts/visible';
-
-
-// const renderFunc = (
-//   h: (type: string, props: VNodeProps | null, children?: string) => VNode,
-//   option: Option
-// ) => {
-//   return h('span', null, option.label)
-// }
-
-interface Group {
-    groupName: string
-    id: string
-} 
-
-interface Authority {
-    authority: string
-    id: string
-}
-
-interface User {
-  id: string
-  email: string
-  nickName: string
-  username: string
-  password: string
-  createTime: string
-  updateTime: string
-  locked: string
-}
+import { user, group, authority } from '~/assets/ts/interface';
 
 const array = ref([""])
 
 let groupsIds = ref("")
 let Ids = ref("")
+let username = ref("")
+
 const initTransfer = () => ([{
     key: "",
     label: "",
@@ -119,7 +93,6 @@ const groupForm = ref(false);
 const groupTable = ref(false);
 const groupTransfer = ref(false);
 const userOrAuth = ref(false)
-const isAllSelected = ref(false)
 
 const groupFormData = reactive({
     name: ""
@@ -130,15 +103,77 @@ const groupPage = {
   "pageSize": 20,
 };
 
+const userGroupList = (row:user) => {
+    username.value = row.username
+    datas.transfer = initTransfer();
+    datas.transfer.splice(0,1);
+    datas.array = []
+    groupTransfer.value = true
+    Ids.value = row.id
+    userOrAuth.value = true
+    const option = {
+        baseURL: env.authUrl,
+        url: "auth/group",
+        method: "GET",
+        headers: {
+        'Authorization': 'Bearer '+ access.access_token
+        },
+    }
+    axios(option).then(function (response) {
+        let groupList
+        if (response.data.length > 0) {
+            groupList = response.data
+        }
+        const checkOption = {
+            baseURL: env.authUrl,
+            url: "auth/group/user/" + row.id,
+            method: "GET",
+            headers: {
+            'Authorization': 'Bearer '+ access.access_token
+            },
+        }
+        axios(checkOption).then(function(response){
+            const groups = response.data
+            if (groups.length > 0) {
+                for (let g of groupList) {
+                    let flag 
+                    for (let group of groups) {
+                        if (group.groupName == g.groupName) {
+                            flag = true
+                        }
+                    }
+                    if (flag) {
+                        datas.transfer.push({
+                                key: g.groupName,
+                                label: g.groupName,
+                                disabled: true,
+                                checked: true
+                            })
 
-const  isIndeterminate = computed(() => {
-      const selectedCount = datas.transfer.filter(item => item.checked).length;
-      return selectedCount > 0 && selectedCount < datas.transfer.length;
-    })
+                    } else {
+                        datas.transfer.push({
+                                key: g.groupName,
+                                label: g.groupName,
+                                disabled: false,
+                                checked: true
+                        })
+                    }
+                }
+            } else {
+                for (let g of groupList) {
+                    datas.transfer.push({
+                        key: g.groupName,
+                        label: g.groupName,
+                        disabled: false,
+                        checked: true
+                    })
+                }          
+            }
+        })
+    }) 
+}
 
-
-
-const openUser = (row: Group) => {
+const openUser = (row: group) => {
     groupTransfer.value = true
     datas.transfer = initTransfer()
     datas.transfer.splice(0,1);
@@ -150,7 +185,7 @@ const openUser = (row: Group) => {
     userList(row)
 }
 
-const openAuthority = (row: Group) => {
+const openAuthority = (row: group) => {
     datas.transfer = initTransfer()
     datas.transfer.splice(0,1);
     datas.left = []
@@ -182,7 +217,7 @@ const addGroup = () => {
     }) 
 }
 
-const deleteGroup = (index: number, row: Group) => {
+const deleteGroup = (index: number, row: group) => {
     const option = {
         baseURL: env.authUrl,
         url: "auth/group/" + row.groupName,
@@ -199,7 +234,7 @@ const deleteGroup = (index: number, row: Group) => {
     }) 
 }
 
-const userList = async (row: Group) => {
+const userList = async (row: group) => {
     const option = {
         baseURL: env.authUrl,
         url: "/auth/user",
@@ -249,7 +284,7 @@ const userList = async (row: Group) => {
     pushUser(users, checked) 
 }
 
-const pushUser = (users: User[], checked: number[]) => {
+const pushUser = (users: user[], checked: number[]) => {
     for (let i = 0; i <users.length; i++) {
         if (checked.indexOf(i) == -1) {
             datas.transfer.push({
@@ -301,7 +336,7 @@ const pushUser = (users: User[], checked: number[]) => {
 //     }) 
 // }
 
-const authorityList = (row: Group) => {
+const authorityList = (row: group) => {
     const checkOption = {
         baseURL: env.authUrl,
         url: "auth/authority/group/" + row.groupName,
@@ -311,7 +346,7 @@ const authorityList = (row: Group) => {
         },
     } 
     let checked: number[] = []
-    let checkedAuthority: Authority[] 
+    let checkedAuthority: authority[] 
     axios(checkOption).then(function (response) {
         checkedAuthority = response.data        
     }).then(function(response) {
@@ -381,7 +416,7 @@ const groupList = () => {
 }
 
 const UpdateGroup = () => {
-    if (groupsIds.value.length == 0 || Ids.value.length == 0 ) {
+    if ((groupsIds.value.length == 0 || Ids.value.length == 0) && username.value == "") {
         ElMessageBox.alert("please select some")
         return
     }
@@ -435,7 +470,7 @@ const updateGroupAuthority = () => {
     }
     axios(Authorityoption).then(function (response) {
         if(response.status == 200) {
-                groupTransfer.value = false
+            groupTransfer.value = false
         }
     }) 
 }
@@ -480,7 +515,7 @@ const resetSelect = () => {
 }
 
 defineExpose({
-  groupList, updateGroup
+  groupList, updateGroup, userGroupList
 })
 
 </script>
