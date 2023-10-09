@@ -184,7 +184,10 @@ async function webauthnLogin() {
                 if(handleCookie().length == 0) {
                     refreshlogin(access.username);
                 } else {
-                    getAccessToken();
+                    const token = await getAccessToken();
+                    if (token == "") {
+                        refreshlogin(access.username);
+                    }
                     visible.webauthnFormVisible = false;
                 }
             } else if(response.data == 202) {

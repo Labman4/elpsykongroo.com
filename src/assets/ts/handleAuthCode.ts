@@ -269,8 +269,13 @@ document.addEventListener('DOMContentLoaded', async function() {
           await register(response.data.u)
           toggleDark();
           countDown();
+          return response.data
+        } else {
+          return ""
         }
       }).catch(function(error) { console.log(error)})
+    } else {
+      return ""
     }
   }
 
