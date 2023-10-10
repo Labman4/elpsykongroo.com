@@ -273,7 +273,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         } else {
           return ""
         }
-      }).catch(function(error) { console.log(error)})
+      }).catch(function(error) { 
+        return ""
+      })
     } else {
       return ""
     }
