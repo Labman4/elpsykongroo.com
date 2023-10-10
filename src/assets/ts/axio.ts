@@ -42,7 +42,9 @@ axios.interceptors.response.use(async function (response) {
     } 
     if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
       console.log(error)
-      ElMessageBox.alert("service error, please try again later")
+      if (error.config.url == "/login" || error.config.url == "/register") {
+        ElMessageBox.alert("service error, please try again later")
+      }   
     }
     if (error.response != undefined && error.response.status === 401) {
       if (error.response.data === 'no access') {
