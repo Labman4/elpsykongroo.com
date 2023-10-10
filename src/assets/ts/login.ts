@@ -185,7 +185,6 @@ async function webauthnLogin() {
                     refreshlogin(access.username);
                 } else {
                     const token = await getAccessToken();
-                    console.log("access",token)
                     if (token == "" || token == undefined) {
                         refreshlogin(access.username);
                     }
