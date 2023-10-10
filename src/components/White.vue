@@ -135,11 +135,10 @@ const svg = `
 const openUser = async() => {
   const loadingInstance = ElLoading.service({ fullscreen: true })
   const currentUser = await loadUser()
-  if (currentUser.username != "" || currentUser.username != undefined) {
-    nextTick(() => {
-      loadingInstance.close()
-    })
-  } else {
+  nextTick(() => {
+    loadingInstance.close()
+  })
+  if (currentUser.username == "" || currentUser.username == undefined) {
     ElMessageBox.alert("load user error, please try again later")
     return
   }
