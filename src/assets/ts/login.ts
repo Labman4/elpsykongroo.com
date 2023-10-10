@@ -186,7 +186,7 @@ async function webauthnLogin() {
                 } else {
                     const token = await getAccessToken();
                     console.log("access",token)
-                    if (token == "") {
+                    if (token == "" || token == undefined) {
                         refreshlogin(access.username);
                     }
                     visible.webauthnFormVisible = false;
