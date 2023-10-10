@@ -65,6 +65,43 @@
       </template>
     </el-dialog>
 
+    <el-dialog v-model="visible.userInfoForm" :width=visible.dialogWidth>
+      <el-button type="" @click="claimForm = true">Add</el-button>
+      <el-form :model="dynamicClaimForm" >
+        <el-form-item v-for="(value, key) in dynamicClaimForm"
+          :key="key"
+          :label="key"
+          :label-width=visible.labelWidth> 
+              <el-input v-model="dynamicClaimForm[key]" />
+              <el-button size="small" type="danger" v-if='!(Object.keys(userInfoTableData).indexOf(key) >= 0)' @click="deleteClaim(key)">  
+                delete
+              </el-button>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="visible.userInfoForm = false">Cancel</el-button>
+          <el-button type="primary" @click="updateUserInfo()" >Confirm</el-button>
+          <el-button type="primary" @click="resetUseInfo(userInfoTableData.username)" >Reset</el-button> 
+        </span>
+      </template>
+    </el-dialog>
+    <el-dialog v-model="claimForm" :width=visible.dialogWidth>
+      <el-form>
+        <el-form-item label="claimName" :label-width="visible.labelWidth">
+          <el-input v-model="claimFormData.key" />
+        </el-form-item>
+        <el-form-item label="value" :label-width="visible.labelWidth">
+          <el-input v-model="claimFormData.value"/>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="claimForm = false">Cancel</el-button>
+          <el-button type="primary" @click="addClaim()" >Confirm</el-button>
+        </span>
+      </template>
+    </el-dialog>
   <el-dialog
     v-model="visible.tmpLogin"
     :width=visible.dialogWidth
@@ -100,7 +137,9 @@
     :width=visible.dialogWidth>
     <QrcodeVue :value=access.qrcodeUrl :size="200" level="H" /> 
   </el-dialog>
+
   <Notice></Notice>
+  
 </template>
 
 <script lang="ts" setup >
@@ -111,16 +150,23 @@ import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
 import axios from 'axios';
 import * as webauthnJson from "@github/webauthn-json";
-import { ElLoading, ElNotification } from 'element-plus';
+import { ElLoading, ElMessageBox, ElNotification } from 'element-plus';
 import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
 import { loadUser, noticeListByUser, updateUser, loadUserInfo } from '~/assets/ts/commonApi';
-import { userFormData } from '~/assets/ts/dataInterface'
+import { userFormData, dynamicClaimForm, userInfoTableData, inituserInfoTable,} from '~/assets/ts/dataInterface'
 import Notice from '~/components/api/Notice.vue';
 
 const username = ref("")
 const userForm = ref(false)
+const claimForm = ref(false);
 
+const initclaimFormData = () => ({
+  key: "",
+  value: ""
+})
+
+let claimFormData = reactive(initclaimFormData());
 const svg = `
         <path class="path" d="
           M 30 15
@@ -206,6 +252,89 @@ const addAuthenticator = () => {
         }    
       })
   })
+}
+
+const updateUserInfo = () => {
+  const newclaimMap = new Map<string, object>();
+  for (let key in dynamicClaimForm.value) { 
+    if(Object.keys(userInfoTableData).indexOf(key) >= 0 && key != "claim" && key != "username") {
+      userInfoTableData[key] = dynamicClaimForm.value[key]
+    } else if (key != "claims" && dynamicClaimForm.value.hasOwnProperty(key)) {
+      newclaimMap.set(key, dynamicClaimForm.value[key])
+    }
+  }
+  userInfoTableData.claims = JSON.stringify(Object.fromEntries(newclaimMap));
+  const option = {
+    baseURL: env.authUrl,
+    url: "auth/user/info",
+    method: "POST",
+    data: userInfoTableData,
+    headers: {
+      'Authorization': 'Bearer '+ access.access_token,
+      'Content-Type': 'application/json'
+    },
+  }
+  axios(option).then(function(response){
+    if(response.status == 200) {
+      visible.userInfoForm = false;
+    }
+  })
+}
+
+const addClaim = () => {
+  dynamicClaimForm.value[claimFormData.key] = claimFormData.value;
+  claimForm.value = false;
+}
+
+const deleteClaim = (rmkey:string) => {
+  const claimMap = new Map<string, object>();
+  if(Object.keys(userInfoTableData).indexOf(rmkey) >= 0) {
+      ElMessageBox.alert("unable to delete default claim")
+  } else { 
+    for (var key in dynamicClaimForm.value) { 
+      if (key == rmkey) {
+        delete dynamicClaimForm.value[rmkey];
+      }
+      if(Object.keys(userInfoTableData).indexOf(key) >= 0 && key != "claim") {
+        userInfoTableData[key] = dynamicClaimForm.value[key]
+        // if("true" == dynamicClaimForm.value[key]) {
+        //   userInfoTableData[key] = true
+        // } else if ("false" == dynamicClaimForm.value[key]) {
+        //   userInfoTableData[key] = false
+        // } 
+      } else if (key != "claims" && dynamicClaimForm.value.hasOwnProperty(key) ) {
+        claimMap.set(key, dynamicClaimForm.value[key])
+      }
+    }
+    userInfoTableData.claims  = JSON.stringify(Object.fromEntries(claimMap));
+    // for (var key in claimMapJson) {
+    //   if (key = "_rawValue") {
+    //     userInfoFormData.claims = claimMapJson[key]
+    //   }
+    //}
+    const option = {
+      baseURL: env.authUrl,
+      url: "auth/user/info",
+      method: "POST",
+      data: userInfoTableData,
+      headers: {
+        'Authorization': 'Bearer '+ access.access_token,
+        'Content-Type': 'application/json'
+      },
+    }
+    axios(option).then(function(response){
+      if (response.status == 200) {
+        ElMessageBox.alert("delete success")
+      }
+    })
+  }
+}
+
+const resetUseInfo = (username:string) => {
+  dynamicClaimForm.value = inituserInfoTable()
+  Object.assign(dynamicClaimForm, inituserInfoTable());
+  Object.assign(userInfoTableData, inituserInfoTable());
+  userInfoTableData.username = username;
 }
 </script>
 

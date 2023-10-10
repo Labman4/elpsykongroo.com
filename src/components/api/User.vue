@@ -67,45 +67,6 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="visible.userInfoForm" :width=visible.dialogWidth>
-    <el-button type="" @click="claimForm = true">Add</el-button>
-    <el-form :model="dynamicClaimForm" >
-      <el-form-item v-for="(value, key) in dynamicClaimForm"
-        :key="key"
-        :label="key"
-        :label-width=visible.labelWidth> 
-            <el-input v-model="dynamicClaimForm[key]" />
-            <el-button size="small" type="danger" v-if='!(Object.keys(userInfoTableData).indexOf(key) >= 0)' @click="deleteClaim(key)">  
-              delete
-            </el-button>
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="visible.userInfoForm = false">Cancel</el-button>
-        <el-button type="primary" @click="updateUserInfo()" >Confirm</el-button>
-        <el-button type="primary" @click="resetUseInfo(userInfoTableData.username)" >Reset</el-button> 
-      </span>
-    </template>
-  </el-dialog>
-
-  <el-dialog v-model="claimForm" :width=visible.dialogWidth>
-    <el-form>
-      <el-form-item label="claimName" :label-width="visible.labelWidth">
-        <el-input v-model="claimFormData.key" />
-      </el-form-item>
-      <el-form-item label="value" :label-width="visible.labelWidth">
-        <el-input v-model="claimFormData.value"/>
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="claimForm = false">Cancel</el-button>
-        <el-button type="primary" @click="addClaim()" >Confirm</el-button>
-      </span>
-    </template>
-  </el-dialog>
-
   <Group ref="group"></Group>
   <Authority ref="authority"></Authority>
 
@@ -151,11 +112,11 @@ import { access } from '~/assets/ts/access';
 import { visible } from '~/assets/ts/visible';
 import { axios } from '~/assets/ts/axio';
 import { listUser, updateUser,loadUserInfo } from '~/assets/ts/commonApi';
-import { ElDialog, ElButton, ElTable, ElTableColumn, ElPagination, ElForm, ElFormItem, ElInput } from 'element-plus';
+import { ElDialog, ElButton, ElTable, ElTableColumn, ElPagination, ElForm, ElFormItem, ElInput, ElMessageBox } from 'element-plus';
 import Group from '~/components/api/Group.vue';
 import Authority from '~/components/api/Authority.vue';
 import { user, group, authority } from '~/assets/ts/interface';
-import { data, userInfoTableData, dynamicClaimForm, userFormData, inituserInfoTable } from '~/assets/ts/dataInterface'
+import { data, userFormData } from '~/assets/ts/dataInterface'
 
 const group = ref<InstanceType<typeof Group> | null>(null)
 const authority = ref<InstanceType<typeof Authority> | null>(null)
@@ -176,7 +137,6 @@ const authorityPage = {
   "pageSize": 20,
 };
 
-const claimForm = ref(false);
 const userForm = ref(false);
 const authorityTable = ref(false);
 const groupTable = ref(false);
@@ -189,13 +149,6 @@ const groups = ref([{}])
 const authorities = ref([{}])
 
 const datas = reactive({groups, authorities, transfer, array});
-
-const initclaimFormData = () => ({
-  key: "",
-  value: ""
-})
-
-let claimFormData = reactive(initclaimFormData());
 
 const alloacteGroup = (row:user) => {
   group.value?.userGroupList(row)
@@ -245,90 +198,6 @@ const loadAuthorities = (row: user) => {
   axios(option).then(function(response){
     datas.authorities = response.data
   })
-}
-
-const updateUserInfo = () => {
-  const newclaimMap = new Map<string, object>();
-  for (let key in dynamicClaimForm.value) { 
-    if(Object.keys(userInfoTableData).indexOf(key) >= 0 && key != "claim" && key != "username") {
-      userInfoTableData[key] = dynamicClaimForm.value[key]
-    } else if (key != "claims" && dynamicClaimForm.value.hasOwnProperty(key)) {
-      newclaimMap.set(key, dynamicClaimForm.value[key])
-    }
-  }
-  userInfoTableData.claims = JSON.stringify(Object.fromEntries(newclaimMap));
-  const option = {
-    baseURL: env.authUrl,
-    url: "auth/user/info",
-    method: "POST",
-    data: userInfoTableData,
-    headers: {
-      'Authorization': 'Bearer '+ access.access_token,
-      'Content-Type': 'application/json'
-    },
-  }
-  axios(option).then(function(response){
-    if(response.status == 200) {
-      visible.userInfoForm = false;
-    }
-  })
-
-}
-
-const addClaim = () => {
-  dynamicClaimForm.value[claimFormData.key] = claimFormData.value;
-  claimForm.value = false;
-}
-
-const deleteClaim = (rmkey:string) => {
-  const claimMap = new Map<string, object>();
-  if(Object.keys(userInfoTableData).indexOf(rmkey) >= 0) {
-      ElMessageBox.alert("unable to delete default claim")
-  } else { 
-    for (var key in dynamicClaimForm.value) { 
-      if (key == rmkey) {
-        delete dynamicClaimForm.value[rmkey];
-      }
-      if(Object.keys(userInfoTableData).indexOf(key) >= 0 && key != "claim") {
-        userInfoTableData[key] = dynamicClaimForm.value[key]
-        // if("true" == dynamicClaimForm.value[key]) {
-        //   userInfoTableData[key] = true
-        // } else if ("false" == dynamicClaimForm.value[key]) {
-        //   userInfoTableData[key] = false
-        // } 
-      } else if (key != "claims" && dynamicClaimForm.value.hasOwnProperty(key) ) {
-        claimMap.set(key, dynamicClaimForm.value[key])
-      }
-    }
-    userInfoTableData.claims  = JSON.stringify(Object.fromEntries(claimMap));
-    // for (var key in claimMapJson) {
-    //   if (key = "_rawValue") {
-    //     userInfoFormData.claims = claimMapJson[key]
-    //   }
-    //}
-    const option = {
-      baseURL: env.authUrl,
-      url: "auth/user/info",
-      method: "POST",
-      data: userInfoTableData,
-      headers: {
-        'Authorization': 'Bearer '+ access.access_token,
-        'Content-Type': 'application/json'
-      },
-    }
-    axios(option).then(function(response){
-      if (response.status == 200) {
-        ElMessageBox.alert("delete success")
-      }
-    })
-  }
-}
-
-const resetUseInfo = (username:string) => {
-  dynamicClaimForm.value = inituserInfoTable()
-  Object.assign(dynamicClaimForm, inituserInfoTable());
-  Object.assign(userInfoTableData, inituserInfoTable());
-  userInfoTableData.username = username;
 }
 
 const lockUser = (row: user) => {
@@ -408,6 +277,4 @@ const handleUserSelectChange = (val: user[]) => {
     selectUserName.push(i);
   }
 }
-
-
 </script> 
