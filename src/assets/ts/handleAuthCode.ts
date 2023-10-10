@@ -254,7 +254,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         withCredentials: true                  
       }
       axios(tokenOption).then(async function (response) {
-        if(response.data != undefined && response.data.at != "" && response.data.at != undefined) {
+        if(response.data != undefined && response.data != "" && response.data.at != "" && response.data.at != undefined) {
           access.update(response.data.at, 1200);
           access.refresh_token = response.data.rt;
           access.id_token = response.data.it;
@@ -269,8 +269,15 @@ document.addEventListener('DOMContentLoaded', async function() {
           await register(response.data.u)
           toggleDark();
           countDown();
+          return response.data
+        } else {
+          return ""
         }
-      }).catch(function(error) { console.log(error)})
+      }).catch(function(error) { 
+        return ""
+      })
+    } else {
+      return ""
     }
   }
 

@@ -111,7 +111,7 @@ import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
 import axios from 'axios';
 import * as webauthnJson from "@github/webauthn-json";
-import { ElNotification } from 'element-plus';
+import { ElLoading, ElNotification } from 'element-plus';
 import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
 import { loadUser, noticeListByUser, updateUser, loadUserInfo } from '~/assets/ts/commonApi';
@@ -133,7 +133,15 @@ const svg = `
       `
 
 const openUser = async() => {
+  const loadingInstance = ElLoading.service({ fullscreen: true })
   const currentUser = await loadUser()
+  nextTick(() => {
+    loadingInstance.close()
+  })
+  if (currentUser.username == "" || currentUser.username == undefined) {
+    ElMessageBox.alert("load user error, please try again later")
+    return
+  }
   userFormData.email = currentUser.email
   userFormData.nickName = currentUser.nickName
   userFormData.password = currentUser.password
