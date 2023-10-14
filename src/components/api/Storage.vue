@@ -499,13 +499,7 @@ const upload = async (options: UploadRequestOptions) => {
    }
 }
 
-const connect = () => {
-    if (s3FormData.accessSecret != "") {
-        saveS3Warning.value = true;
-        // return;
-    } else {
-      s3Form.value = false
-    }
+const connect = async() => {
     if (s3FormData.platform == "default") {
       access.platform = ""
     } else {
@@ -515,7 +509,17 @@ const connect = () => {
     access.accessSecret = s3FormData.accessSecret
     access.endpoint = s3FormData.endpoint
     access.region = s3FormData.region   
-    listObject()
+    if (s3FormData.accessSecret != "") {
+        const result = await listObject()
+        if (result != "" && result != undefined ) {
+          saveS3Warning.value = true;
+        } else {
+          ElMessageBox.alert("check failed, please ensure and try again")
+        }
+        // return;
+    } else {
+      s3Form.value = false
+    }
     storageTable.value = true
 }
 
@@ -678,7 +682,7 @@ const initS3 = async() => {
   }
 }
 
-const listObject = () => {
+const listObject = async() => {
   const option = {
       baseURL: env.storageUrl,
       url: "/storage/object/list",
@@ -697,14 +701,16 @@ const listObject = () => {
           "Content-Type": "application/json"
       }
   }
-  axios(option).then(function (response) {
-      const listObject:ListObject[] = response.data
-      const filterObject = listObject.filter( obj => {
-            return !obj.key.startsWith(access.bucket)
-        })
-      data.files = filterObject;
-      // data.files = response.data
-  })   
+  const listObject:ListObject[] = await axios(option)
+  if (listObject != undefined && listObject.length > 0 ) {
+    const filterObject = listObject.filter( obj => {
+        return !obj.key.startsWith(access.bucket)
+    })
+    data.files = filterObject;
+    return listObject
+  } else {
+    return ""
+  }
 }
 
 const abortMultiPart = (name, uploadId) => {
