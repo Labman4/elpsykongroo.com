@@ -511,7 +511,7 @@ const connect = async() => {
     access.region = s3FormData.region   
     if (s3FormData.accessSecret != "") {
         const result = await listObject()
-        if (result != "" && result != undefined ) {
+        if (result != "" && result != undefined && result.length >= 0 ) {
           saveS3Warning.value = true;
         } else {
           ElMessageBox.alert("check failed, please ensure and try again")
@@ -520,7 +520,6 @@ const connect = async() => {
     } else {
       s3Form.value = false
     }
-    storageTable.value = true
 }
 
 const saveS3Info = async() => {
@@ -701,16 +700,16 @@ const listObject = async() => {
           "Content-Type": "application/json"
       }
   }
-  const listObject:ListObject[] = await axios(option)
-  if (listObject != undefined && listObject.length > 0 ) {
+  let result
+  await axios(option).then(function(response) {
+    const listObject:listObject[] = response.data
     const filterObject = listObject.filter( obj => {
         return !obj.key.startsWith(access.bucket)
     })
     data.files = filterObject;
-    return listObject
-  } else {
-    return ""
-  }
+    result = response.data
+  })
+  return result
 }
 
 const abortMultiPart = (name, uploadId) => {
