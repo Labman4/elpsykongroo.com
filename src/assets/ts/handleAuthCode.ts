@@ -266,6 +266,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           access.email_verified = jwt["email_verified"]
           access.client_id = jwt["azp"]
           access.expires_in = jwt["exp"] - jwt["iat"]
+          access.avatarUrl = env.storageUrl + "/storage/object?bucket=" + access.sub + "&key=" + "avatar.jpg" + "&idToken=" + access.id_token
           await register(response.data.u)
           toggleDark();
           countDown();

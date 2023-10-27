@@ -2,7 +2,7 @@
     <el-icon class="storage" @click="openStorage()"><UploadFilled /></el-icon>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
     <el-avatar class="whiteMode" :icon="UserFilled" size="small" @click="visible.webauthnFormVisible = true" v-if="access.sub == ''|| access.sub == undefined "/>
-    <el-avatar class="whiteMode" size="small" v-if="access.sub != '' && access.sub != undefined " @click="openUser()"> {{ access.sub }} </el-avatar>
+    <el-avatar class="whiteMode" size="small" v-if="access.sub != '' && access.sub != undefined " src=access.avatarUrl @click="openUser()"></el-avatar>
     <el-badge class="message" :is-dot=visible.isDot v-if="access.sub == '' ">
       <el-icon @click="visible.noticeDrawer = true, noticeListByUser('', false)"><Message/></el-icon>
     </el-badge>
@@ -37,6 +37,7 @@
 
     <el-dialog v-model="userForm" :width=visible.dialogWidth>
       <el-button type="primary" @click="addAuthenticator()">add authenticator</el-button>
+      <el-button type="primary" @click="loadUserInfo(username)">userInfo</el-button>
       <el-form :model="userFormData">
         <el-form-item label="email" :label-width=visible.labelWidth :inline="true">
           <el-input v-model="userFormData.email"/>       
@@ -48,10 +49,17 @@
         <el-form-item label="password" :label-width=visible.labelWidth>
           <el-input v-model="userFormData.password" />
         </el-form-item>
-        <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
-          <el-input v-model="userFormData.username" />
-        </el-form-item>  -->
-        <el-button type="primary" @click="loadUserInfo(username)">userInfo</el-button>
+        <el-form-item label="avatar" :label-width=visible.labelWidth>
+          <el-upload
+            class="avatar-uploader"
+            action="https://storage.elpsykongroo.com/storage/object"
+            :show-file-list="false"
+            :http-request="uploadAvatar"
+          >
+            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
+        </el-form-item> 
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -145,7 +153,7 @@
 </template>
 
 <script lang="ts" setup >
-import { Iphone, Message, UploadFilled, UserFilled } from '@element-plus/icons-vue';
+import { Iphone, Message, UploadFilled, UserFilled, Plus } from '@element-plus/icons-vue';
 import { webauthnRegister, webauthnLogin, tmpLogin, logout, qrcodeLogin } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
 import { visible } from "~/assets/ts/visible";
@@ -185,6 +193,25 @@ const svg = `
 
 const openStorage = () => {
   storage.value?.initS3();
+}
+
+const uploadAvatar = async (options: UploadRequestOptions) => {
+  const option = {
+      baseURL: env.storageUrl,
+      url: "/storage/object",
+      method: "POST",
+      data: {
+          data: options.file,
+          bucket: access.sub,
+          mode: "stream",
+          idToken: access.id_token,
+      },
+      headers: {
+          'Authorization': 'Bearer '+ access.access_token,
+          "Content-Type": "multipart/form-data"
+      }
+  }
+  axios(option);   
 }
 
 const openUser = async() => {
@@ -363,5 +390,30 @@ const resetUseInfo = (username:string) => {
   .storage {
     position:absolute;right: 110px; top:15px;
     color: #409EFF;
+  }
+  .avatar-uploader .el-upload {
+    border: 1px dashed var(--el-border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: var(--el-transition-duration-fast);
+  }
+
+  .avatar-uploader .el-upload:hover {
+    border-color: var(--el-color-primary);
+  }
+
+  .el-icon.avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 78px;
+    height: 78px;
+    text-align: center;
+  }
+  .avatar-uploader .avatar {
+    width: 78px;
+    height: 78px;
+    display: block;
   }
 </style>
