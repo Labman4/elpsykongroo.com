@@ -1,8 +1,8 @@
 <template>
     <el-icon class="storage" @click="openStorage()"><UploadFilled /></el-icon>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
-    <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.sub == ''|| access.sub == undefined ">  <User /></el-icon>
-    <el-icon class="whiteMode" v-if="access.sub != '' && access.sub != undefined " @click="openUser()"> {{ access.sub }} </el-icon>
+    <el-avatar class="whiteMode" :icon="UserFilled" size="small" @click="visible.webauthnFormVisible = true" v-if="access.sub == ''|| access.sub == undefined "/>
+    <el-avatar class="whiteMode" v-if="access.sub != '' && access.sub != undefined " @click="openUser()"> {{ access.sub }} </el-avatar>
     <el-badge class="message" :is-dot=visible.isDot v-if="access.sub == '' ">
       <el-icon @click="visible.noticeDrawer = true, noticeListByUser('', false)"><Message/></el-icon>
     </el-badge>
@@ -145,7 +145,7 @@
 </template>
 
 <script lang="ts" setup >
-import { User, Iphone, Message, UploadFilled } from '@element-plus/icons-vue';
+import { Iphone, Message, UploadFilled, UserFilled } from '@element-plus/icons-vue';
 import { webauthnRegister, webauthnLogin, tmpLogin, logout, qrcodeLogin } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
 import { visible } from "~/assets/ts/visible";
@@ -350,19 +350,18 @@ const resetUseInfo = (username:string) => {
 
 <style scoped>
  .phoneMode {
-    position:absolute;right: 20px; top:15px;
-    color: #409EFF;
-  }
-  .whiteMode {
-    position:absolute;right: 120px; top:15px;
-    color: #409EFF;
-  }
-  .message {
     position:absolute;right: 50px; top:15px;
     color: #409EFF;
   }
-  .storage {
+  .whiteMode {
+    position:absolute;right: 10px; top:10px;
+  }
+  .message {
     position:absolute;right: 80px; top:15px;
+    color: #409EFF;
+  }
+  .storage {
+    position:absolute;right: 110px; top:15px;
     color: #409EFF;
   }
 </style>
