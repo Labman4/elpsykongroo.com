@@ -2,7 +2,7 @@
     <el-icon class="storage" @click="openStorage()"><UploadFilled /></el-icon>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
     <el-avatar class="whiteMode" :icon="UserFilled" size="small" @click="visible.webauthnFormVisible = true" v-if="access.sub == ''|| access.sub == undefined "/>
-    <el-avatar class="whiteMode" size="small" v-if="access.sub != '' && access.sub != undefined " src=access.avatarUrl @click="openUser()"></el-avatar>
+    <el-avatar class="whiteMode" size="small" v-if="access.sub != '' && access.sub != undefined " :src="access.avatarUrl" @click="openUser()"></el-avatar>
     <el-badge class="message" :is-dot=visible.isDot v-if="access.sub == '' ">
       <el-icon @click="visible.noticeDrawer = true, noticeListByUser('', false)"><Message/></el-icon>
     </el-badge>
