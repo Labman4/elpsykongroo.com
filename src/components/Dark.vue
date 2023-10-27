@@ -45,7 +45,7 @@ import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
 import { ElButton, ElDialog, ElForm, ElFormItem, ElSelect, ElOption, ElInput } from 'element-plus';
 import { toggleDark } from '~/composables';
-import { code, pkceCode } from '~/assets/ts/handleAuthCode';
+import { code } from '~/assets/ts/handleAuthCode';
 import { visible } from '~/assets/ts/visible';
 import { pkce } from '~/assets/ts/pkce';
 
@@ -148,9 +148,7 @@ const userInfo = () => {
       // } , 
       withCredentials: true                 
     }
-    axios(authOption).then(function (response) {
-        console.log(response.data)
-    }) 
+    axios(authOption)
 }
 
 const passowrd = () => {

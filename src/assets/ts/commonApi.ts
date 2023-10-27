@@ -17,9 +17,11 @@ const loadUser = async() => {
       'Authorization': 'Bearer '+ access.access_token
     },
   }
-  await axios(option).then(function (response) {
-    user = response.data
-  })
+  await axios(option).then(function(response) {
+    if (response != undefined) {
+      user = response.data
+    }
+   })
   return user
 }
 

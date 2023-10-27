@@ -63,33 +63,27 @@
               <el-menu-item index="2-4-3" @click="openAuthority()">authority</el-menu-item>
             </el-sub-menu>
           </el-sub-menu>
-          <el-menu-item index="3" >
-            <el-icon @click="openStorage()"><UploadFilled /></el-icon>
-            <template #title >
-              <span>storage</span>
-            </template>
-          </el-menu-item>
-          <el-sub-menu index="4">
+          <el-sub-menu index="3">
             <template #title>
               <el-icon><MessageBox/></el-icon>
               <span>Message</span> 
             </template>
             <el-menu-item-group>
-              <el-menu-item index="4-1"  @click="visible.noticeTable = true, noticeList([],'')">notification</el-menu-item>
-              <el-menu-item index="4-2"  @click="visible.topicTable = true, topicList()">topic</el-menu-item>
+              <el-menu-item index="3-1"  @click="visible.noticeTable = true, noticeList([],'')">notification</el-menu-item>
+              <el-menu-item index="3-2"  @click="visible.topicTable = true, topicList()">topic</el-menu-item>
             </el-menu-item-group>
           </el-sub-menu>
-          <el-menu-item index="5">
+          <el-menu-item index="4">
             <el-icon @click="statusData = true, openStatus()"><Platform /></el-icon>
             <template #title >
               <span>status</span>
             </template>
           </el-menu-item>
-          <el-menu-item index="6" v-if="access.expires_in > 0">
+          <el-menu-item index="5" v-if="access.expires_in > 0">
             <el-icon><Timer /></el-icon>
             <template #title>{{access.expires_in}}s</template>
           </el-menu-item>
-          <el-menu-item index="6-1">
+          <el-menu-item index="5-1">
             <el-icon @click="logout()"><SwitchButton /></el-icon>
           </el-menu-item>
         
@@ -101,7 +95,6 @@
       <AuthClient ref="authClient"></AuthClient>
       <Group ref="group"></Group>
       <Authority ref="authority"></Authority>
-      <Storage ref="storage"></Storage>
       <el-container>
         <el-main>
           <router-view ref="iframeView"/>
@@ -129,14 +122,11 @@ import AuthClient from '~/components/api/AuthClient.vue';
 import User from '~/components/api/User.vue';
 import Group from '~/components/api/Group.vue';
 import Authority from '~/components/api/Authority.vue';
-import Storage from '~/components/api/Storage.vue';
-
 import { listUser, noticeList, topicList } from '~/assets/ts/commonApi';
 import { logout } from '~/assets/ts/login';
 import { axios } from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 
-const storage = ref<InstanceType<typeof Storage> | null>(null)
 const ip = ref<InstanceType<typeof IP> | null>(null)
 const record = ref<InstanceType<typeof Record> | null>(null)
 const authClient = ref<InstanceType<typeof AuthClient> | null>(null)
@@ -218,10 +208,6 @@ const openGroup = () => {
 
 const openAuthority = () => {
   authority.value?.authorityList();
-}
-
-const openStorage = () => {
-  storage.value?.initS3();
 }
 
 const href = (dash: string) => {

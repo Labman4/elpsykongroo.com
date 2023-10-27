@@ -828,7 +828,7 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
         bcrypt.hash(registerForm.clientSecret, 10).then(function(hash) {
           authRegister.clientSecret = '{bcrypt}' + hash ;
           axios(option).then(function (response) {
-            if(response.data.length > 0) {
+            if(response.status == 200) {
               authClientRegisterForm.value = false ;
               authClientRegisterList();
             } 
@@ -836,7 +836,7 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
         });
       } else {
           axios(option).then(function (response) {
-            if(response.data > 0) {
+            if(response.status == 200) {
               authClientRegisterForm.value = false ;
               authClientRegisterList();
             } 

@@ -1,4 +1,5 @@
 <template>
+    <el-icon class="storage" @click="openStorage()"><UploadFilled /></el-icon>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
     <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.sub == ''|| access.sub == undefined ">  <User /></el-icon>
     <el-icon class="whiteMode" v-if="access.sub != '' && access.sub != undefined " @click="openUser()"> {{ access.sub }} </el-icon>
@@ -139,11 +140,12 @@
   </el-dialog>
 
   <Notice></Notice>
-  
+  <Storage ref="storage"></Storage>
+
 </template>
 
 <script lang="ts" setup >
-import { User, Iphone, Message } from '@element-plus/icons-vue';
+import { User, Iphone, Message, UploadFilled } from '@element-plus/icons-vue';
 import { webauthnRegister, webauthnLogin, tmpLogin, logout, qrcodeLogin } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
 import { visible } from "~/assets/ts/visible";
@@ -153,9 +155,12 @@ import * as webauthnJson from "@github/webauthn-json";
 import { ElLoading, ElMessageBox, ElNotification } from 'element-plus';
 import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
-import { loadUser, noticeListByUser, updateUser, loadUserInfo } from '~/assets/ts/commonApi';
+import { loadUser, noticeListByUser, updateUser, loadUserInfo, openStorage} from '~/assets/ts/commonApi';
 import { userFormData, dynamicClaimForm, userInfoTableData, inituserInfoTable,} from '~/assets/ts/dataInterface'
 import Notice from '~/components/api/Notice.vue';
+import Storage from '~/components/api/Storage.vue';
+
+const storage = ref<InstanceType<typeof Storage> | null>(null)
 
 const username = ref("")
 const userForm = ref(false)
@@ -178,13 +183,18 @@ const svg = `
         " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
       `
 
+const openStorage = () => {
+  storage.value?.initS3();
+}
+
 const openUser = async() => {
   const loadingInstance = ElLoading.service({ fullscreen: true })
   const currentUser = await loadUser()
+  console.log(currentUser)
   nextTick(() => {
     loadingInstance.close()
   })
-  if (currentUser.username == "" || currentUser.username == undefined) {
+  if (currentUser == "" || currentUser == undefined) {
     ElMessageBox.alert("load user error, please try again later")
     return
   }
@@ -344,11 +354,15 @@ const resetUseInfo = (username:string) => {
     color: #409EFF;
   }
   .whiteMode {
-    position:absolute;right: 80px; top:15px;
+    position:absolute;right: 120px; top:15px;
     color: #409EFF;
   }
   .message {
     position:absolute;right: 50px; top:15px;
+    color: #409EFF;
+  }
+  .storage {
+    position:absolute;right: 80px; top:15px;
     color: #409EFF;
   }
 </style>
