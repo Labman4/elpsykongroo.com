@@ -37,7 +37,7 @@
 
     <el-dialog v-model="userForm" :width=visible.dialogWidth>
       <el-button type="primary" @click="addAuthenticator()">add authenticator</el-button>
-      <el-button type="primary" @click="loadUserInfo(username)">userInfo</el-button>
+      <el-button type="primary" @click="loadUserInfo(username), visible.userInfoForm = true">userInfo</el-button>
       <el-form :model="userFormData">
         <el-form-item label="email" :label-width=visible.labelWidth :inline="true">
           <el-input v-model="userFormData.email"/>       
@@ -52,8 +52,9 @@
         <el-form-item label="avatar" :label-width=visible.labelWidth>
           <el-upload
             class="avatar-uploader"
-            action="https://storage.elpsykongroo.com/storage/object"
             :show-file-list="false"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
             :http-request="uploadAvatar"
           >
             <img v-if="imageUrl" :src="imageUrl" class="avatar" />
@@ -90,7 +91,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="visible.userInfoForm = false">Cancel</el-button>
-          <el-button type="primary" @click="updateUserInfo()" >Confirm</el-button>
+          <el-button type="primary" @click="updateUserInfo('')" >Confirm</el-button>
           <el-button type="primary" @click="resetUseInfo(userInfoTableData.username)" >Reset</el-button> 
         </span>
       </template>
@@ -170,6 +171,7 @@ import Storage from '~/components/api/Storage.vue';
 
 const storage = ref<InstanceType<typeof Storage> | null>(null)
 
+const imageUrl = ref('')
 const username = ref("")
 const userForm = ref(false)
 const claimForm = ref(false);
@@ -211,13 +213,33 @@ const uploadAvatar = async (options: UploadRequestOptions) => {
           "Content-Type": "multipart/form-data"
       }
   }
-  axios(option);   
+  axios(option);
+}
+
+const handleAvatarSuccess: UploadProps['onSuccess'] = async(
+  response,
+  uploadFile
+) => {
+  const userInfo = await loadUserInfo(access.sub);
+  userInfo["picture"] = uploadFile.name
+  updateUserInfo(userInfo)  
+  imageUrl.value = URL.createObjectURL(uploadFile.raw!)
+}
+
+const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
+  if (rawFile.type !== 'image/jpeg') {
+    ElMessage.error('Avatar picture must be JPG format!')
+    return false
+  } else if (rawFile.size / 1024 / 1024 > 10) {
+    ElMessage.error('Avatar picture size can not exceed 10MB!')
+    return false
+  }
+  return true
 }
 
 const openUser = async() => {
   const loadingInstance = ElLoading.service({ fullscreen: true })
   const currentUser = await loadUser()
-  console.log(currentUser)
   nextTick(() => {
     loadingInstance.close()
   })
@@ -291,7 +313,7 @@ const addAuthenticator = () => {
   })
 }
 
-const updateUserInfo = () => {
+const updateUserInfo = (userInfo) => {
   const newclaimMap = new Map<string, object>();
   for (let key in dynamicClaimForm.value) { 
     if(Object.keys(userInfoTableData).indexOf(key) >= 0 && key != "claim" && key != "username") {
@@ -302,15 +324,18 @@ const updateUserInfo = () => {
   }
   userInfoTableData.claims = JSON.stringify(Object.fromEntries(newclaimMap));
   const option = {
-    baseURL: env.authUrl,
-    url: "auth/user/info",
-    method: "POST",
-    data: userInfoTableData,
-    headers: {
-      'Authorization': 'Bearer '+ access.access_token,
-      'Content-Type': 'application/json'
-    },
+      baseURL: env.authUrl,
+      url: "auth/user/info",
+      method: "POST",
+      data: userInfoTableData,
+      headers: {
+        'Authorization': 'Bearer '+ access.access_token,
+        'Content-Type': 'application/json'
+      },
   }
+  if (userInfo != "") {
+     option["data"] = userInfo
+  }  
   axios(option).then(function(response){
     if(response.status == 200) {
       visible.userInfoForm = false;

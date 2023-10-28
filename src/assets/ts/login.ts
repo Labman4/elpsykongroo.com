@@ -12,8 +12,8 @@ import jwt_decode from "jwt-decode";
 const qrcodeLogin = () => {
     visible.qrcode = true
     const option = {
-        baseURL: env.messageUrl,
-        url: "message/publicKey",
+        baseURL: env.apiUrl,
+        url: "/public/key",
         method: "GET",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"

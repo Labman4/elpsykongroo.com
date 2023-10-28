@@ -11,7 +11,7 @@
       <el-table-column property="updateTime" label="updateTime"/>
       <el-table-column label="userInfo">
         <template #default="scope">
-          <el-button size="small" type="info" @click="loadUserInfo(scope.row.username)">detail</el-button>
+          <el-button size="small" type="info" @click="loadUserInfo(scope.row.username), visible.userInfoForm = true">detail</el-button>
         </template>
       </el-table-column>
       <el-table-column label="permissions">

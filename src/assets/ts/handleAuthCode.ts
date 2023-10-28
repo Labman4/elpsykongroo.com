@@ -123,9 +123,9 @@ if (code != null && state != null) {
  function pkceCode() {
     var codeVerifier;
     codeVerifier = "841aa35355d86c55c1a948831ab90f23f80f71c65a08feb0dc4830a066fd55d36422c464bc58128edecf2f0bf5e0baadfda1168f8cb5883bd8ff6745454afe8b";
-    if (window.sessionStorage.getItem("code_verifier") != null) {
-        codeVerifier =  window.sessionStorage.getItem("code_verifier");
-    }
+    // if (window.sessionStorage.getItem("code_verifier") != null) {
+    //     codeVerifier =  window.sessionStorage.getItem("code_verifier");
+    // }
     const code_verifier = btoa(codeVerifier);
     const authOption = {
         baseURL: env.authUrl,
@@ -143,24 +143,7 @@ if (code != null && state != null) {
         },   
         withCredentials: true                  
     }
-      axios(authOption).then(function (response) {
-        if(response.data.access_token != "") {
-          access.refresh_token = response.data.refresh_token;
-          access.grant_type = "authorization_code";
-          access.id_token = response.data.id_token;
-          access.update(response.data.access_token, response.data.expires_in);
-          const decoded = jwt_decode(access.id_token);
-          const jwtString = (JSON.stringify(decoded));
-          const jwt = JSON.parse(jwtString);
-          access.permission = jwt["permission"]
-          access.sub = jwt["sub"]
-          access.email_verified = jwt["email_verified"]
-          access.client_id = jwt["azp"]
-          access.expires_in = jwt["exp"] - jwt["iat"]
-          toggleDark();
-          countDown();
-        }
-      }) 
+    handleAccess(authOption)
   }
 
   function openaiPkceCode(code) {
@@ -253,33 +236,37 @@ document.addEventListener('DOMContentLoaded', async function() {
         },   
         withCredentials: true                  
       }
-      axios(tokenOption).then(async function (response) {
-        if(response.data != undefined && response.data != "" && response.data.at != "" && response.data.at != undefined) {
-          access.update(response.data.at, 1200);
-          access.refresh_token = response.data.rt;
-          access.id_token = response.data.it;
-          access.sub = response.data.u;
-          const decoded = jwt_decode(access.id_token);
-          const jwtString = (JSON.stringify(decoded));
-          const jwt = JSON.parse(jwtString);
-          access.permission = jwt["permission"]
-          access.email_verified = jwt["email_verified"]
-          access.client_id = jwt["azp"]
-          access.expires_in = jwt["exp"] - jwt["iat"]
-          access.avatarUrl = env.storageUrl + "/storage/object?bucket=" + access.sub + "&key=" + "avatar.jpg" + "&idToken=" + access.id_token
-          await register(response.data.u)
-          toggleDark();
-          countDown();
-          return response.data
-        } else {
-          return ""
-        }
-      }).catch(function(error) { 
-        return ""
-      })
+      handleAccess(tokenOption)
     } else {
       return ""
     }
+  }
+
+  const handleAccess = (option) => {
+    axios(option).then(async function (response) {
+      if(response.data != undefined && response.data != "" && response.data.at != "" && response.data.at != undefined) {
+        access.update(response.data.at, 1200);
+        access.refresh_token = response.data.rt;
+        access.id_token = response.data.it;
+        access.sub = response.data.u;
+        const decoded = jwt_decode(access.id_token);
+        const jwtString = (JSON.stringify(decoded));
+        const jwt = JSON.parse(jwtString);
+        access.permission = jwt["permission"]
+        access.email_verified = jwt["email_verified"]
+        access.client_id = jwt["azp"]
+        access.expires_in = jwt["exp"] - jwt["iat"]
+        access.avatarUrl = env.storageUrl + "/storage/object?bucket=" + access.sub + "&key=" + jwt['picture'] + "&idToken=" + access.id_token;
+        await register(response.data.u)
+        toggleDark();
+        countDown();
+        return response.data
+      } else {
+        return ""
+      }
+    }).catch(function(error) { 
+      return ""
+    })
   }
 
   if (code != null && state == null) {

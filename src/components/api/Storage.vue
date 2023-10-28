@@ -17,22 +17,13 @@
       </template>
       </el-table-column>
     </el-table>
-    <!-- <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="visible.userInfoForm = false">Cancel</el-button>
-        <el-button type="primary" @click="updateUserInfo()" >Confirm</el-button>
-        <el-button type="primary" @click="resetUseInfo(userInfoTableData.username)" >Reset</el-button> 
-        
-      </span>
-    </template> -->
+
   </el-dialog>
 
   <el-dialog v-model="uploadForm" :width=visible.dialogWidth>
     <el-upload
         v-model:file-list="fileList"
         class="upload-demo"
-        action=https://storage.elpsykongroo.com/storage/object
-        method="POST"
         :headers=uploadHeader
         name="data"
         :data=uploadInfo
@@ -68,14 +59,6 @@
       </template>
       </el-table-column>
     </el-table>
-    <!-- <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="visible.userInfoForm = false">Cancel</el-button>
-        <el-button type="primary" @click="updateUserInfo()" >Confirm</el-button>
-        <el-button type="primary" @click="resetUseInfo(userInfoTableData.username)" >Reset</el-button> 
-        
-      </span>
-    </template> -->
   </el-dialog>
 
 <el-dialog
