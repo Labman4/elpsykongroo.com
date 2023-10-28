@@ -225,6 +225,8 @@ const handleAvatarSuccess: UploadProps['onSuccess'] = async(
   userInfo["username"] = access.sub
   updateUserInfo(userInfo)  
   imageUrl.value = URL.createObjectURL(uploadFile.raw!)
+  ElMessage.info('Avatar will update after next login')
+
 }
 
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
@@ -324,7 +326,6 @@ const updateUserInfo = (userInfo) => {
     }
   }
   userInfoTableData.claims = JSON.stringify(Object.fromEntries(newclaimMap));
-  console.log(userInfoTableData)
   const option = {
       baseURL: env.authUrl,
       url: "auth/user/info",

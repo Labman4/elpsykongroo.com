@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       } else if (response.data != undefined && response.data != "" && response.data.at != "" && response.data.at != undefined) {
         access.refresh_token = response.data.rt;
         access.id_token = response.data.it;
-        access.update(response.data.at, access.expires_in);
+        access.update(response.data.at, 1200);
         decoded = jwt_decode(access.id_token);
         jwtString = (JSON.stringify(decoded));
       } else {
@@ -265,6 +265,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       access.email_verified = jwt["email_verified"]
       access.client_id = jwt["azp"]
       access.expires_in = jwt["exp"] - jwt["iat"]
+      access.update(access.access_token, access.expires_in);
       access.avatarUrl = env.storageUrl + "/storage/object?bucket=" + access.sub + "&key=" + jwt['picture'] + "&idToken=" + access.id_token;
       await register(response.data.u)
       toggleDark();
