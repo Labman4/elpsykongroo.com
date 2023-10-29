@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         },   
         withCredentials: true                  
       }
-      handleAccess(tokenOption)
+      await handleAccess(tokenOption)
     } else {
       return ""
     }
