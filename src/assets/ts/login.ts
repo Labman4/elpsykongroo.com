@@ -179,7 +179,6 @@ async function webauthnLogin() {
             withCredentials: true          
         } 
         axios(loginOption).then(async function (response) {
-            console.log(response)
             visible.loading = false;
             if(response.data == 200) {
                 if(handleCookie().length == 0) {
