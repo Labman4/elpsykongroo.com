@@ -17,22 +17,13 @@
       </template>
       </el-table-column>
     </el-table>
-    <!-- <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="visible.userInfoForm = false">Cancel</el-button>
-        <el-button type="primary" @click="updateUserInfo()" >Confirm</el-button>
-        <el-button type="primary" @click="resetUseInfo(userInfoTableData.username)" >Reset</el-button> 
-        
-      </span>
-    </template> -->
+
   </el-dialog>
 
   <el-dialog v-model="uploadForm" :width=visible.dialogWidth>
     <el-upload
         v-model:file-list="fileList"
         class="upload-demo"
-        action=https://storage.elpsykongroo.com/storage/object
-        method="POST"
         :headers=uploadHeader
         name="data"
         :data=uploadInfo
@@ -68,14 +59,6 @@
       </template>
       </el-table-column>
     </el-table>
-    <!-- <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="visible.userInfoForm = false">Cancel</el-button>
-        <el-button type="primary" @click="updateUserInfo()" >Confirm</el-button>
-        <el-button type="primary" @click="resetUseInfo(userInfoTableData.username)" >Reset</el-button> 
-        
-      </span>
-    </template> -->
   </el-dialog>
 
 <el-dialog
@@ -499,13 +482,7 @@ const upload = async (options: UploadRequestOptions) => {
    }
 }
 
-const connect = () => {
-    if (s3FormData.accessSecret != "") {
-        saveS3Warning.value = true;
-        // return;
-    } else {
-      s3Form.value = false
-    }
+const connect = async() => {
     if (s3FormData.platform == "default") {
       access.platform = ""
     } else {
@@ -515,8 +492,17 @@ const connect = () => {
     access.accessSecret = s3FormData.accessSecret
     access.endpoint = s3FormData.endpoint
     access.region = s3FormData.region   
-    listObject()
-    storageTable.value = true
+    if (s3FormData.accessSecret != "") {
+        const result = await listObject()
+        if (result != "" && result != undefined && result.length >= 0 ) {
+          saveS3Warning.value = true;
+        } else {
+          ElMessageBox.alert("check failed, please ensure and try again")
+        }
+        // return;
+    } else {
+      s3Form.value = false
+    }
 }
 
 const saveS3Info = async() => {
@@ -678,7 +664,7 @@ const initS3 = async() => {
   }
 }
 
-const listObject = () => {
+const listObject = async() => {
   const option = {
       baseURL: env.storageUrl,
       url: "/storage/object/list",
@@ -697,14 +683,16 @@ const listObject = () => {
           "Content-Type": "application/json"
       }
   }
-  axios(option).then(function (response) {
-      const listObject:ListObject[] = response.data
-      const filterObject = listObject.filter( obj => {
-            return !obj.key.startsWith(access.bucket)
-        })
-      data.files = filterObject;
-      // data.files = response.data
-  })   
+  let result
+  await axios(option).then(function(response) {
+    const listObject:listObject[] = response.data
+    const filterObject = listObject.filter( obj => {
+        return !obj.key.startsWith(access.bucket)
+    })
+    data.files = filterObject;
+    result = response.data
+  })
+  return result
 }
 
 const abortMultiPart = (name, uploadId) => {

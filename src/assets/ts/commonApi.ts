@@ -17,9 +17,11 @@ const loadUser = async() => {
       'Authorization': 'Bearer '+ access.access_token
     },
   }
-  await axios(option).then(function (response) {
-    user = response.data
-  })
+  await axios(option).then(function(response) {
+    if (response != undefined) {
+      user = response.data
+    }
+   })
   return user
 }
 
@@ -197,7 +199,8 @@ async function loadUserInfo (username:string) {
       'Authorization': 'Bearer '+ access.access_token
     },
   }
-  axios(option).then(function(response){
+  let userInfo;
+  await axios(option).then(function(response){
     nextTick(() => {
       // Loading should be closed asynchronously
       loadingInstance.close()
@@ -224,10 +227,11 @@ async function loadUserInfo (username:string) {
         } 
       }
       dynamicClaimForm.value = userinfo;
+      userInfo = userinfo
     }
-    visible.userInfoForm = true
+    // visible.userInfoForm = true
   })
-  return dynamicClaimForm.value
+  return userInfo
 }
 
 export { listUser, findUser, loadUser, updateUser, loadUserInfo, noticeListByUser, noticeList, topicList};

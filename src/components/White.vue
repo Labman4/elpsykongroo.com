@@ -1,7 +1,8 @@
 <template>
+    <el-icon class="storage" @click="openStorage()"><UploadFilled /></el-icon>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
-    <el-icon class="whiteMode" @click="visible.webauthnFormVisible = true" v-if="access.sub == ''|| access.sub == undefined ">  <User /></el-icon>
-    <el-icon class="whiteMode" v-if="access.sub != '' && access.sub != undefined " @click="openUser()"> {{ access.sub }} </el-icon>
+    <el-avatar class="whiteMode" :icon="UserFilled" size="small" @click="visible.webauthnFormVisible = true" v-if="access.sub == ''|| access.sub == undefined "/>
+    <el-avatar class="whiteMode" size="small" v-if="access.sub != '' && access.sub != undefined " :src="access.avatarUrl" fit="fill" @click="openUser()"></el-avatar>
     <el-badge class="message" :is-dot=visible.isDot v-if="access.sub == '' ">
       <el-icon @click="visible.noticeDrawer = true, noticeListByUser('', false)"><Message/></el-icon>
     </el-badge>
@@ -36,6 +37,7 @@
 
     <el-dialog v-model="userForm" :width=visible.dialogWidth>
       <el-button type="primary" @click="addAuthenticator()">add authenticator</el-button>
+      <el-button type="primary" @click="loadUserInfo(username), visible.userInfoForm = true">userInfo</el-button>
       <el-form :model="userFormData">
         <el-form-item label="email" :label-width=visible.labelWidth :inline="true">
           <el-input v-model="userFormData.email"/>       
@@ -47,10 +49,18 @@
         <el-form-item label="password" :label-width=visible.labelWidth>
           <el-input v-model="userFormData.password" />
         </el-form-item>
-        <!-- <el-form-item label="username" :label-width=visible.userFormLabelWidth>
-          <el-input v-model="userFormData.username" />
-        </el-form-item>  -->
-        <el-button type="primary" @click="loadUserInfo(username)">userInfo</el-button>
+        <el-form-item label="avatar" :label-width=visible.labelWidth>
+          <el-upload
+            class="avatar-uploader"
+            :show-file-list="false"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+            :http-request="uploadAvatar"
+          >
+            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
+        </el-form-item> 
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -65,6 +75,43 @@
       </template>
     </el-dialog>
 
+    <el-dialog v-model="visible.userInfoForm" :width=visible.dialogWidth>
+      <el-button type="" @click="claimForm = true">Add</el-button>
+      <el-form :model="dynamicClaimForm" >
+        <el-form-item v-for="(value, key) in dynamicClaimForm"
+          :key="key"
+          :label="key"
+          :label-width=visible.labelWidth> 
+              <el-input v-model="dynamicClaimForm[key]" />
+              <el-button size="small" type="danger" v-if='!(Object.keys(userInfoTableData).indexOf(key) >= 0)' @click="deleteClaim(key)">  
+                delete
+              </el-button>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="visible.userInfoForm = false">Cancel</el-button>
+          <el-button type="primary" @click="updateUserInfo('')" >Confirm</el-button>
+          <el-button type="primary" @click="resetUseInfo(userInfoTableData.username)" >Reset</el-button> 
+        </span>
+      </template>
+    </el-dialog>
+    <el-dialog v-model="claimForm" :width=visible.dialogWidth>
+      <el-form>
+        <el-form-item label="claimName" :label-width="visible.labelWidth">
+          <el-input v-model="claimFormData.key" />
+        </el-form-item>
+        <el-form-item label="value" :label-width="visible.labelWidth">
+          <el-input v-model="claimFormData.value"/>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="claimForm = false">Cancel</el-button>
+          <el-button type="primary" @click="addClaim()" >Confirm</el-button>
+        </span>
+      </template>
+    </el-dialog>
   <el-dialog
     v-model="visible.tmpLogin"
     :width=visible.dialogWidth
@@ -100,27 +147,41 @@
     :width=visible.dialogWidth>
     <QrcodeVue :value=access.qrcodeUrl :size="200" level="H" /> 
   </el-dialog>
+
   <Notice></Notice>
+  <Storage ref="storage"></Storage>
+
 </template>
 
 <script lang="ts" setup >
-import { User, Iphone, Message } from '@element-plus/icons-vue';
+import { Iphone, Message, UploadFilled, UserFilled, Plus } from '@element-plus/icons-vue';
 import { webauthnRegister, webauthnLogin, tmpLogin, logout, qrcodeLogin } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
 import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
 import axios from 'axios';
 import * as webauthnJson from "@github/webauthn-json";
-import { ElLoading, ElNotification } from 'element-plus';
+import { ElLoading, ElMessageBox, ElNotification } from 'element-plus';
 import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
-import { loadUser, noticeListByUser, updateUser, loadUserInfo } from '~/assets/ts/commonApi';
-import { userFormData } from '~/assets/ts/dataInterface'
+import { loadUser, noticeListByUser, updateUser, loadUserInfo, openStorage} from '~/assets/ts/commonApi';
+import { userFormData, dynamicClaimForm, userInfoTableData, inituserInfoTable,} from '~/assets/ts/dataInterface'
 import Notice from '~/components/api/Notice.vue';
+import Storage from '~/components/api/Storage.vue';
 
+const storage = ref<InstanceType<typeof Storage> | null>(null)
+
+const imageUrl = ref('')
 const username = ref("")
 const userForm = ref(false)
+const claimForm = ref(false);
 
+const initclaimFormData = () => ({
+  key: "",
+  value: ""
+})
+
+let claimFormData = reactive(initclaimFormData());
 const svg = `
         <path class="path" d="
           M 30 15
@@ -132,13 +193,62 @@ const svg = `
         " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
       `
 
+const openStorage = () => {
+  storage.value?.initS3();
+}
+
+const uploadAvatar = async (options: UploadRequestOptions) => {
+  const option = {
+      baseURL: env.storageUrl,
+      url: "/storage/object",
+      method: "POST",
+      data: {
+          data: options.file,
+          bucket: access.sub,
+          mode: "stream",
+          idToken: access.id_token,
+      },
+      headers: {
+          'Authorization': 'Bearer '+ access.access_token,
+          "Content-Type": "multipart/form-data"
+      }
+  }
+  axios(option);
+}
+
+const handleAvatarSuccess: UploadProps['onSuccess'] = async(
+  response,
+  uploadFile
+) => {
+  const userInfo = await loadUserInfo(access.sub);
+  userInfo["picture"] = uploadFile.name
+  userInfo["username"] = access.sub
+  updateUserInfo(userInfo)  
+  imageUrl.value = URL.createObjectURL(uploadFile.raw!)
+  ElMessage.info('Avatar will update after next login')
+
+}
+
+const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
+  if (rawFile.type == "image/jpeg" || rawFile.type == "image/gif" || rawFile.type == "image/png") {
+    if (rawFile.size / 1024 / 1024 > 10) {
+      ElMessage.error('Avatar picture size can not exceed 10MB!')
+      return false
+    }
+  } else {
+    ElMessage.error('not support ' + rawFile.type)
+    return false
+  }
+  return true
+}
+
 const openUser = async() => {
   const loadingInstance = ElLoading.service({ fullscreen: true })
   const currentUser = await loadUser()
   nextTick(() => {
     loadingInstance.close()
   })
-  if (currentUser.username == "" || currentUser.username == undefined) {
+  if (currentUser == "" || currentUser == undefined) {
     ElMessageBox.alert("load user error, please try again later")
     return
   }
@@ -207,19 +317,133 @@ const addAuthenticator = () => {
       })
   })
 }
+
+const updateUserInfo = (userInfo) => {
+  const newclaimMap = new Map<string, object>();
+  for (let key in dynamicClaimForm.value) { 
+    if(Object.keys(userInfoTableData).indexOf(key) >= 0 && key != "claim" && key != "username") {
+      userInfoTableData[key] = dynamicClaimForm.value[key]
+    } else if (key != "claims" && dynamicClaimForm.value.hasOwnProperty(key)) {
+      newclaimMap.set(key, dynamicClaimForm.value[key])
+    }
+  }
+  userInfoTableData.claims = JSON.stringify(Object.fromEntries(newclaimMap));
+  const option = {
+      baseURL: env.authUrl,
+      url: "auth/user/info",
+      method: "POST",
+      data: userInfoTableData,
+      headers: {
+        'Authorization': 'Bearer '+ access.access_token,
+        'Content-Type': 'application/json'
+      },
+  }
+  if (userInfo != "") {
+     option["data"] = userInfo
+  }  
+  axios(option).then(function(response){
+    if(response.status == 200) {
+      visible.userInfoForm = false;
+    }
+  })
+}
+
+const addClaim = () => {
+  dynamicClaimForm.value[claimFormData.key] = claimFormData.value;
+  claimForm.value = false;
+}
+
+const deleteClaim = (rmkey:string) => {
+  const claimMap = new Map<string, object>();
+  if(Object.keys(userInfoTableData).indexOf(rmkey) >= 0) {
+      ElMessageBox.alert("unable to delete default claim")
+  } else { 
+    for (var key in dynamicClaimForm.value) { 
+      if (key == rmkey) {
+        delete dynamicClaimForm.value[rmkey];
+      }
+      if(Object.keys(userInfoTableData).indexOf(key) >= 0 && key != "claim") {
+        userInfoTableData[key] = dynamicClaimForm.value[key]
+        // if("true" == dynamicClaimForm.value[key]) {
+        //   userInfoTableData[key] = true
+        // } else if ("false" == dynamicClaimForm.value[key]) {
+        //   userInfoTableData[key] = false
+        // } 
+      } else if (key != "claims" && dynamicClaimForm.value.hasOwnProperty(key) ) {
+        claimMap.set(key, dynamicClaimForm.value[key])
+      }
+    }
+    userInfoTableData.claims  = JSON.stringify(Object.fromEntries(claimMap));
+    // for (var key in claimMapJson) {
+    //   if (key = "_rawValue") {
+    //     userInfoFormData.claims = claimMapJson[key]
+    //   }
+    //}
+    const option = {
+      baseURL: env.authUrl,
+      url: "auth/user/info",
+      method: "POST",
+      data: userInfoTableData,
+      headers: {
+        'Authorization': 'Bearer '+ access.access_token,
+        'Content-Type': 'application/json'
+      },
+    }
+    axios(option).then(function(response){
+      if (response.status == 200) {
+        ElMessageBox.alert("delete success")
+      }
+    })
+  }
+}
+
+const resetUseInfo = (username:string) => {
+  dynamicClaimForm.value = inituserInfoTable()
+  Object.assign(dynamicClaimForm, inituserInfoTable());
+  Object.assign(userInfoTableData, inituserInfoTable());
+  userInfoTableData.username = username;
+}
 </script>
 
 <style scoped>
  .phoneMode {
-    position:absolute;right: 20px; top:15px;
+    position:absolute;right: 50px; top:15px;
     color: #409EFF;
   }
   .whiteMode {
+    position:absolute;right: 10px; top:10px;
+  }
+  .message {
     position:absolute;right: 80px; top:15px;
     color: #409EFF;
   }
-  .message {
-    position:absolute;right: 50px; top:15px;
+  .storage {
+    position:absolute;right: 110px; top:15px;
     color: #409EFF;
+  }
+  .avatar-uploader .el-upload {
+    border: 1px dashed var(--el-border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: var(--el-transition-duration-fast);
+  }
+
+  .avatar-uploader .el-upload:hover {
+    border-color: var(--el-color-primary);
+  }
+
+  .el-icon.avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 78px;
+    height: 78px;
+    text-align: center;
+  }
+  .avatar-uploader .avatar {
+    width: 78px;
+    height: 78px;
+    display: block;
   }
 </style>
