@@ -243,37 +243,38 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   const handleAccess = async(option) => {
-    await axios(option).then(async function (response) {
+    const jwtString = await axios(option).then(function (response) {
       let decoded
-      let jwtString
-      if (response.data.id_token != "") {
-        decoded = jwt_decode(response.data.id_token);
-        jwtString = (JSON.stringify(decoded));
+      if (response.data == undefined && response.data == "") {
+          return ""
+      } else if (response.data.id_token != "" && response.data.id_token != undefined ) {
         access.update(response.data.access_token, response.data.expires_in);
-      } else if (response.data != undefined && response.data != "" && response.data.at != "" && response.data.at != undefined) {
+        decoded = jwt_decode(response.data.id_token);
+        return JSON.stringify(decoded);
+      } else if (response.data.at != "" && response.data.at != undefined) {
         access.refresh_token = response.data.rt;
         access.id_token = response.data.it;
         access.update(response.data.at, 1200);
         decoded = jwt_decode(access.id_token);
-        jwtString = (JSON.stringify(decoded));
+        return JSON.stringify(decoded)
       } else {
         return ""
       } 
-      const jwt = JSON.parse(jwtString);
-      access.sub = jwt["sub"]
-      access.permission = jwt["permission"]
-      access.email_verified = jwt["email_verified"]
-      access.client_id = jwt["azp"]
-      access.expires_in = jwt["exp"] - jwt["iat"]
-      access.update(access.access_token, access.expires_in);
-      access.avatarUrl = env.storageUrl + "/storage/object?bucket=" + access.sub + "&key=" + jwt['picture'] + "&idToken=" + access.id_token;
-      await register(response.data.u)
-      toggleDark();
-      countDown();
-      return response.data
     }).catch(function(error) { 
       return ""
     })
+    const jwt = JSON.parse(jwtString);
+    access.sub = jwt["sub"]
+    access.permission = jwt["permission"]
+    access.email_verified = jwt["email_verified"]
+    access.client_id = jwt["azp"]
+    access.expires_in = jwt["exp"] - jwt["iat"]
+    access.update(access.access_token, access.expires_in);
+    access.avatarUrl = env.storageUrl + "/storage/object?bucket=" + access.sub + "&key=" + jwt['picture'] + "&idToken=" + access.id_token;
+    await register(access.sub)
+    toggleDark();
+    countDown();
+    return jwtString
   }
 
   if (code != null && state == null) {
