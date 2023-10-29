@@ -236,7 +236,7 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
       return false
     }
   } else {
-    ElMessage.error('not support' + rawFile.type)
+    ElMessage.error('not support ' + rawFile.type)
     return false
   }
   return true
