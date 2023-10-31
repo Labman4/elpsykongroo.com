@@ -26,7 +26,16 @@ axios.interceptors.response.use(async function (response) {
     //   return axios.get(response.headers.location)
     // }
     csrfToken = response.headers['x-csrf-token'];
- 
+    if (response.status == 401) {
+      console.log(response)
+      if (response.data === 'no access') {
+        ElMessageBox.alert("no access, please ensure and retry")
+      } else if (handleCookie().length != 0 && access.sub != "" && access.sub != undefined) {
+          visible.refreshlogin = true
+      } else {
+        refreshToken(); 
+      }
+    }
     if (response.status == 403 && retry == 0) {
       retry ++
     } else {
