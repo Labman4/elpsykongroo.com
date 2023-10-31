@@ -36,14 +36,12 @@ axios.interceptors.response.use(async function (response) {
     }
     return response;
   }, function (error) {
-    console.log(error)
     if (axios.isCancel(error)) {
       console.log('Request canceled', error.message);
     } 
     if (error.request.status === 401) {
       if (handleCookie().length != 0 && access.sub != "" && access.sub != undefined) {
         visible.refreshlogin = true
-        return
       } else {
         refreshToken()
         return
