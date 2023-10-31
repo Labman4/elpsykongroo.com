@@ -26,16 +26,6 @@ axios.interceptors.response.use(async function (response) {
     //   return axios.get(response.headers.location)
     // }
     csrfToken = response.headers['x-csrf-token'];
-    if (response.status == 401) {
-      console.log(response)
-      if (response.data === 'no access') {
-        ElMessageBox.alert("no access, please ensure and retry")
-      } else if (handleCookie().length != 0 && access.sub != "" && access.sub != undefined) {
-          visible.refreshlogin = true
-      } else {
-        refreshToken(); 
-      }
-    }
     if (response.status == 403 && retry == 0) {
       retry ++
     } else {
@@ -46,11 +36,20 @@ axios.interceptors.response.use(async function (response) {
     }
     return response;
   }, function (error) {
+    console.log(error)
     if (axios.isCancel(error)) {
       console.log('Request canceled', error.message);
     } 
+    if (error.request.status === 401) {
+      if (handleCookie().length != 0 && access.sub != "" && access.sub != undefined) {
+        visible.refreshlogin = true
+      } else {
+        refreshToken()
+        return
+      }
+    }
     if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
-      console.log(error)
+      console.log("cors error")
       if (error.response != undefined && error.response.status === 401) {
         if (error.response.data === 'no access') {
           ElMessageBox.alert("no access, please ensure and retry")

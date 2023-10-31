@@ -685,12 +685,14 @@ const listObject = async() => {
   }
   let result
   await axios(option).then(function(response) {
-    const listObject:listObject[] = response.data
-    const filterObject = listObject.filter( obj => {
-        return !obj.key.startsWith(access.bucket)
-    })
-    data.files = filterObject;
-    result = response.data
+    if (response.data != undefined) {
+      const listObject:listObject[] = response.data
+      const filterObject = listObject.filter( obj => {
+          return !obj.key.startsWith(access.bucket)
+      })
+      data.files = filterObject;
+      result = response.data
+    }
   })
   return result
 }
