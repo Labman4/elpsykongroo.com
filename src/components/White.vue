@@ -159,7 +159,7 @@ import { webauthnRegister, webauthnLogin, tmpLogin, logout, qrcodeLogin } from '
 import { access } from '~/assets/ts/access';
 import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
-import axios from 'axios';
+import { axios } from '~/assets/ts/axio';
 import * as webauthnJson from "@github/webauthn-json";
 import { ElLoading, ElMessageBox, ElNotification } from 'element-plus';
 import QrcodeVue from 'qrcode.vue';
