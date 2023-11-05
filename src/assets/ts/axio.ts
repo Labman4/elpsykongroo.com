@@ -46,7 +46,6 @@ axios.interceptors.response.use(async function (response) {
         visible.refreshlogin = true
       } else {
         refreshToken()
-        return
       }
     }
     if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {

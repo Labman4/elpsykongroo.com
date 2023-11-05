@@ -502,6 +502,8 @@ const connect = async() => {
         // return;
     } else {
       s3Form.value = false
+      storageTable.value = true
+      listObject()
     }
 }
 
@@ -685,7 +687,7 @@ const listObject = async() => {
   }
   let result
   await axios(option).then(function(response) {
-    if (response.data != undefined) {
+    if (response.data != "" && response.data != undefined) {
       const listObject:listObject[] = response.data
       const filterObject = listObject.filter( obj => {
           return !obj.key.startsWith(access.bucket)
