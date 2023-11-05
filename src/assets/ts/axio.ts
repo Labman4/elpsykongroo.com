@@ -3,7 +3,7 @@ import { ElMessageBox } from 'element-plus';
 import { toggleDark } from '~/composables';
 import { access } from './access';
 import { env } from './env';
-import { handleCookie, handleCsrf } from './handleAuthCode';
+import { handleCookie } from './handleAuthCode';
 import { visible } from './visible';
 const timeCount= ref(0);
 let csrfToken
@@ -40,7 +40,9 @@ axios.interceptors.response.use(async function (response) {
       console.log('Request canceled', error.message);
     } 
     if (error.request.status === 401) {
-      if (handleCookie().length != 0 && access.sub != "" && access.sub != undefined) {
+      if (error.request.response == "no access") {
+        ElMessageBox.alert("no access, please ensure and retry")
+      } else if (handleCookie().length != 0 && access.sub != "" && access.sub != undefined) {
         visible.refreshlogin = true
       } else {
         refreshToken()
