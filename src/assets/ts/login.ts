@@ -45,7 +45,6 @@ async function checkToken () {
         visible.qrcode = false;
         if (access.sub != "") {
            const resp = await loginWithToken();
-           console.log(resp)
            if (resp.data == 200) {
                 redirectOauthProxy("")
            }

@@ -167,7 +167,7 @@ const DeleteCustom = () => {
 const openRecord = (row) => {
     recordHeader.value = true
     requestHeader.value = JSON.stringify(row.requestHeader, null, 2)  
-    console.log(requestHeader.value)
+    // console.log(requestHeader.value)
 }
 const DeleteRecord = (index: number, row: Record) => {
   const option = {
