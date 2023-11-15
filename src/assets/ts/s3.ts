@@ -16,7 +16,7 @@ const initS3Client = () => {
         return s3Client
     }
     if (access.region == "") {
-        if (access.platform != "cloudflare") {
+        if (access.platform == "cloudflare") {
             access.region = "auto"
         } else {
             access.region = "us-east-1"
