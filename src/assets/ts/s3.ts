@@ -11,8 +11,8 @@ import { access } from '~/assets/ts/access';
 let uploadPromises:any= [];
 
 let s3Client
-const initS3Client = () => {
-    if (s3Client != null) {
+const initS3Client = (init:boolean) => {
+    if (s3Client != null && !init) {
         return s3Client
     }
     if (access.region == "") {
@@ -35,8 +35,12 @@ const initS3Client = () => {
     return s3Client
 }
 
+watch(access, () => {
+  initS3Client(true)
+})
+
 const uploadPartDirect = async (data, bucket, key, uploadId, partNum, partSize) => {
-    const client = initS3Client()
+    const client = initS3Client(false)
     const corsCommand = new PutBucketCorsCommand({
         Bucket: bucket,
         CORSConfiguration: {
