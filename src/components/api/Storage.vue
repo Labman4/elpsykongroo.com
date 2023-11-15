@@ -381,16 +381,18 @@ const uploadPart = (chunk, filename, partCount, partNum, uploadId, offset) => {
 
 const uploadMode = async() => {
   isStream.value = false;
-  await ElMessageBox.confirm("please select upload mode",{
+  if (!isDirect.value) {
+    await ElMessageBox.confirm("please select upload mode",{
     confirmButtonText: 'stream',
     cancelButtonText: 'direct',
-  })
-  .then(() => {
-    isStream.value = true;
-  })
-  .catch(() => {
-    isStream.value = false;
-  })
+    })
+    .then(() => {
+      isStream.value = true;
+    })
+    .catch(() => {
+      isStream.value = false;
+    })
+  }
 }
 
 const uploadPartProxy = (chunk, filename, partCount, partNum, uploadId, offset) => {
