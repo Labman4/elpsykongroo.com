@@ -157,7 +157,7 @@ import { dayjs } from 'element-plus';
 import { visible } from '~/assets/ts/visible'
 import { setObject, deleteObject, getObject, openDB } from '~/assets/ts/indexDB'
 import { encryptData, decryptData, computeFileSHA256, arrayBufferToBase64, base64ToArrayBuffer } from '~/assets/ts/encrypt'
-import { uploadPartDirect } from '~/assets/ts/s3'
+import { uploadPartDirect, initS3Client } from '~/assets/ts/s3'
 import VideoPlayer from '~/components/VideoPlayer.vue';
 const player = ref<InstanceType<typeof VideoPlayer> | null>(null)
 
@@ -599,6 +599,7 @@ const loadS3Info = async(row: s3Info) => {
     s3Secret.value = ""
     saveS3InfoForm.value = true;
   }
+  initS3Client(true)
 }
 
 const cancelLoad = () => {
