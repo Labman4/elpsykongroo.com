@@ -709,7 +709,8 @@ const initS3Info = async() => {
         storageTable.value = true
         listObject()
         return;
-    } 
+      }
+    }
     s3Init.value = true;
     storageTable.value = true
     listObject()
@@ -723,7 +724,7 @@ const initS3Info = async() => {
     s3Form.value = false
   }
 }
-  
+ 
 const initS3 = async() => {
   if (!s3Init.value) {
     await initS3Info()
