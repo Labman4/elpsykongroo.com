@@ -57,7 +57,8 @@
       <el-table-column label="Operations">
       <template #default="scope">
         <el-button size="small" type="danger" @click="deleteS3Info(scope.$index, scope.row)">Delete</el-button>
-        <el-button size="small" type="primary" @click="loadS3Info(scope.row)">select</el-button>
+        <el-button size="small" type="primary" @click="loadS3Info(scope.row)" v-if = " access.platform != scope.row.platform">select</el-button>
+        <el-button size="small" type="info" v-if = "access.platform == scope.row.platform" disabled>selectd</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -599,7 +600,6 @@ const loadS3Info = async(row: s3Info) => {
     s3Secret.value = ""
     saveS3InfoForm.value = true;
   }
-  initS3Client(true)
 }
 
 const cancelLoad = () => {
@@ -669,7 +669,7 @@ const initS3Info = async() => {
           saveS3InfoForm.value = false
           access.accessSecret = secretData
         }     
-        if (access.accessSecret != "") {   
+        if (access.accessSecret != "") { 
             if (data.s3InfoList.length > 1) {
               if (!s3Init.value) {
                 s3InfoTable.value = true;
@@ -686,7 +686,12 @@ const initS3Info = async() => {
               access.accessKey = data.s3InfoList[0].accessKey
               s3InfoTable.value = false;
             }
-        } 
+        } else {
+          access.platform = ""
+          access.accessKey = ""
+          access.endpoint = ""
+          access.region = ""
+        }
       } catch (error) {
         if (s3Secret.value != "") {
           ElMessageBox.alert("incorrect secret, will open default s3, please try again later by load button")
@@ -704,11 +709,11 @@ const initS3Info = async() => {
         storageTable.value = true
         listObject()
         return;
-      }
     } 
     s3Init.value = true;
     storageTable.value = true
     listObject()
+    initS3Client(true)
   } else if (access.platform == "default") {
     s3Form.value = true
     access.platform = "";

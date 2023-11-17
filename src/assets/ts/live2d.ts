@@ -160,7 +160,7 @@ function resize(models) {
         // app.renderer.resize(window.innerWidth, window.innerHeight - (((((window.innerHeight * 100) / window.innerWidth) / 100) - 0.65) * window.innerWidth));
         scaleInit = 0.8;
     }
-    if (models[0].scale && models[1].scale) {
+    if (models[0].scale != undefined && models[1].scale != undefined) {
         models[0].scale.set(scaleInit);
         models[1].scale.set(scaleInit);
     }
