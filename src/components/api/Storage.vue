@@ -58,7 +58,7 @@
       <template #default="scope">
         <el-button size="small" type="danger" @click="deleteS3Info(scope.$index, scope.row)">Delete</el-button>
         <el-button size="small" type="primary" @click="loadS3Info(scope.row)" v-if = "access.platform != scope.row.platform">select</el-button>
-        <el-button size="small" type="info" v-if = "access.platform == scope.row.platform" @click="listObject(), storageTable = true">open</el-button>
+        <el-button size="small" type="info" v-if = "access.platform == scope.row.platform" @click="listObject(), storageTable = true, s3InfoTable = false">open</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -577,9 +577,9 @@ const saveS3Info = async() => {
   const ciphertext = arrayBufferToBase64(resp.ciphertext)
   const iv = arrayBufferToBase64(resp.iv)
   s3FormData.accessSecret = ciphertext
-  await setObject(db, "aes", "ciphertext-" + s3FormData.platform, ciphertext, "readwrite", "");
-  await setObject(db, "aes", "iv-" + s3FormData.platform, iv, "readwrite", "");
-  await setObject(db, "s3", s3FormData.platform, JSON.stringify(s3FormData), "readwrite", "put");
+  await setObject(db, "aes", "ciphertext-" + s3FormData.accessKey, ciphertext, "readwrite", "");
+  await setObject(db, "aes", "iv-" + s3FormData.accessKey, iv, "readwrite", "");
+  await setObject(db, "s3", s3FormData.accessKey, JSON.stringify(s3FormData), "readwrite", "put");
   await getS3Info();
   saveS3InfoForm.value = false
   s3Form.value = false
@@ -623,9 +623,9 @@ const clearS3Info = async() => {
 
 const deleteS3Info = async(index:number, row: s3Info) => {
   const db = await openDB('s3', 1, ['s3',"aes"]);
-  await deleteObject(db, "aes", "ciphertext-" + row.platform, "readwrite");
-  await deleteObject(db, "aes", "iv-" + row.platform, "readwrite");
-  await deleteObject(db, "s3", row.platform, "readwrite");
+  await deleteObject(db, "aes", "ciphertext-" + row.accessKey, "readwrite");
+  await deleteObject(db, "aes", "iv-" + row.accessKey, "readwrite");
+  await deleteObject(db, "s3", row.accessKey, "readwrite");
   data.s3InfoList.splice(index, 1)
 }
 
@@ -654,8 +654,8 @@ const initS3Info = async() => {
         access.platform = data.s3InfoList[0].platform
         access.bucket = access.sub
     }
-    const ciphertext = await getObject(db, "aes", "ciphertext-" + access.platform, "readwrite", "");
-    const ivbase64 = await getObject(db, "aes", "iv-" + access.platform, "readwrite", "");
+    const ciphertext = await getObject(db, "aes", "ciphertext-" + data.s3InfoList[0].accessKey, "readwrite", "");
+    const ivbase64 = await getObject(db, "aes", "iv-" + data.s3InfoList[0].accessKey, "readwrite", "");
     if (ciphertext != undefined && ciphertext != "") {
       try {
         if (s3Secret.value == "") {
