@@ -57,8 +57,8 @@
       <el-table-column label="Operations">
       <template #default="scope">
         <el-button size="small" type="danger" @click="deleteS3Info(scope.$index, scope.row)">Delete</el-button>
-        <el-button size="small" type="primary" @click="loadS3Info(scope.row)" v-if = "access.platform != scope.row.platform">select</el-button>
-        <el-button size="small" type="info" v-if = "access.platform == scope.row.platform" @click="listObject(), storageTable = true, s3InfoTable = false">open</el-button>
+        <el-button size="small" type="primary" @click="loadS3Info(scope.row)" v-if = "access.accessKey != scope.row.accessKey">select</el-button>
+        <el-button size="small" type="info" v-if = "access.accessKey == scope.row.accessKey" @click="listObject(), storageTable = true, s3InfoTable = false">open</el-button>
       </template>
       </el-table-column>
     </el-table>
