@@ -57,8 +57,8 @@
       <el-table-column label="Operations">
       <template #default="scope">
         <el-button size="small" type="danger" @click="deleteS3Info(scope.$index, scope.row)">Delete</el-button>
-        <el-button size="small" type="primary" @click="loadS3Info(scope.row)" v-if = " access.platform != scope.row.platform">select</el-button>
-        <el-button size="small" type="info" v-if = "access.platform == scope.row.platform" disabled>selectd</el-button>
+        <el-button size="small" type="primary" @click="loadS3Info(scope.row)" v-if = "access.platform != scope.row.platform">select</el-button>
+        <el-button size="small" type="info" v-if = "access.platform == scope.row.platform">default</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -670,20 +670,20 @@ const initS3Info = async() => {
           access.accessSecret = secretData
         }     
         if (access.accessSecret != "") { 
+            access.endpoint = data.s3InfoList[0].endpoint 
+            access.region = data.s3InfoList[0].region 
+            access.accessKey = data.s3InfoList[0].accessKey
             if (data.s3InfoList.length > 1) {
               if (!s3Init.value) {
                 s3InfoTable.value = true;
                 s3Init.value = true;
                 return;
-              } else {          
+              } else {         
                 saveS3InfoForm.value = false;
                 s3InfoTable.value = false;
               }
             }
             if (data.s3InfoList.length == 1) {
-              access.endpoint = data.s3InfoList[0].endpoint 
-              access.region = data.s3InfoList[0].region 
-              access.accessKey = data.s3InfoList[0].accessKey
               s3InfoTable.value = false;
             }
         } else {
