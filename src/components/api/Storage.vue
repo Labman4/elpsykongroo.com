@@ -58,7 +58,7 @@
       <template #default="scope">
         <el-button size="small" type="danger" @click="deleteS3Info(scope.$index, scope.row)">Delete</el-button>
         <el-button size="small" type="primary" @click="loadS3Info(scope.row)" v-if = "access.platform != scope.row.platform">select</el-button>
-        <el-button size="small" type="info" v-if = "access.platform == scope.row.platform">default</el-button>
+        <el-button size="small" type="info" v-if = "access.platform == scope.row.platform" @click="listObject(), storageTable = true">open</el-button>
       </template>
       </el-table-column>
     </el-table>
