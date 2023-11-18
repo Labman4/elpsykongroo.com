@@ -646,7 +646,7 @@ const initS3Info = async(accessKey) => {
         access.bucket = access.sub
     }
     let cipher
-    if (accessKey == "") {
+    if (accessKey == "" || accessKey == undefined) {
       cipher =  await getObject(db, "aes", "cipher-" + data.s3InfoList[0].accessKey, "readwrite", "")
     } else {
       cipher = await getObject(db, "aes", "cipher-" + accessKey, "readwrite", "");
