@@ -135,7 +135,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="cancelLoad()">Cancel</el-button>
-        <el-button type="primary" @click="initS3Info()">load</el-button>
+        <el-button type="primary" @click="initS3Info(access.accessKey)">load</el-button>
         <el-button type="primary" @click="saveS3Info()">save</el-button>
       </span>
     </template>
@@ -574,11 +574,9 @@ const saveS3Info = async() => {
   saveS3Warning.value = false
   const db = await openDB('s3', 1, ['s3',"aes"]);
   const resp = await encryptData(s3FormData.accessSecret, s3Secret.value, "", "AES-GCM");
-  const ciphertext = arrayBufferToBase64(resp.ciphertext)
-  const iv = arrayBufferToBase64(resp.iv)
-  s3FormData.accessSecret = ciphertext
-  await setObject(db, "aes", "ciphertext-" + s3FormData.accessKey, ciphertext, "readwrite", "");
-  await setObject(db, "aes", "iv-" + s3FormData.accessKey, iv, "readwrite", "");
+  const cipher = arrayBufferToBase64(resp.cipher)
+  s3FormData.accessSecret = cipher
+  await setObject(db, "aes", "cipher-"s3FormData.accessKey, cipher, "readwrite", "");
   await setObject(db, "s3", s3FormData.accessKey, JSON.stringify(s3FormData), "readwrite", "put");
   await getS3Info();
   saveS3InfoForm.value = false
@@ -611,14 +609,13 @@ const clearS3Info = async() => {
   access.endpoint = s3FormData.endpoint
   access.region = s3FormData.region       
   access.platform = s3FormData.platform 
-  await initS3Info();
+  await initS3Info("");
   Object.assign(s3FormData, initS3FormData());
 }
 
 const deleteS3Info = async(index:number, row: s3Info) => {
   const db = await openDB('s3', 1, ['s3',"aes"]);
-  await deleteObject(db, "aes", "ciphertext-" + row.accessKey, "readwrite");
-  await deleteObject(db, "aes", "iv-" + row.accessKey, "readwrite");
+  await deleteObject(db, "aes", "cipher-" + row.accessKey, "readwrite");
   await deleteObject(db, "s3", row.accessKey, "readwrite");
   data.s3InfoList.splice(index, 1)
 }
@@ -632,7 +629,7 @@ const getS3Info = async() => {
   return db
 }
 
-const initS3Info = async() => {
+const initS3Info = async(accessKey) => {
   //for local s3 dev
   const domain = window.location.hostname;
   if (domain.split(":")[0] == "127.0.0.1" || domain.split(":")[0] == "localhost") {
@@ -648,22 +645,26 @@ const initS3Info = async() => {
         access.platform = data.s3InfoList[0].platform
         access.bucket = access.sub
     }
-    const ciphertext = await getObject(db, "aes", "ciphertext-" + data.s3InfoList[0].accessKey, "readwrite", "");
-    const ivbase64 = await getObject(db, "aes", "iv-" + data.s3InfoList[0].accessKey, "readwrite", "");
-    if (ciphertext != undefined && ciphertext != "") {
+    let cipher
+    if (accessKey == "") {
+      ciphertext =  await getObject(db, "aes", "cipher-" + data.s3InfoList[0].accessKey, "readwrite", "")
+    } else {
+      cipher = await getObject(db, "aes", "cipher-" + accessKey, "readwrite", "");
+    }
+    if (cipher != undefined && cipher != "") {
       try {
         if (s3Secret.value == "") {
           saveS3InfoForm.value = true
           access.accessSecret = ""
           return;
         }
-        const resp = await decryptData(base64ToArrayBuffer(ciphertext), base64ToArrayBuffer(ivbase64), s3Secret.value, "AES-GCM");
+        const resp = await decryptData(base64ToArrayBuffer(cipher), "", s3Secret.value, "AES-GCM");
         const secretData = new TextDecoder().decode(resp)
         if (secretData != "") {
           saveS3InfoForm.value = false
           access.accessSecret = secretData
         }     
-        if (access.accessSecret != "") { 
+        if (access.accessSecret != "") {
             if (data.s3InfoList.length > 1) {
               if (!s3Init.value) {
                 s3InfoTable.value = true;
@@ -718,7 +719,7 @@ const initS3Info = async() => {
  
 const initS3 = async() => {
   if (!s3Init.value) {
-    await initS3Info()
+    await initS3Info("")
   } else {
     storageTable.value = true
     listObject()
