@@ -576,7 +576,7 @@ const saveS3Info = async() => {
   const resp = await encryptData(s3FormData.accessSecret, s3Secret.value, "", "AES-GCM");
   const cipher = arrayBufferToBase64(resp.cipher)
   s3FormData.accessSecret = cipher
-  await setObject(db, "aes", "cipher-"s3FormData.accessKey, cipher, "readwrite", "");
+  await setObject(db, "aes", "cipher-" + s3FormData.accessKey, cipher, "readwrite", "");
   await setObject(db, "s3", s3FormData.accessKey, JSON.stringify(s3FormData), "readwrite", "put");
   await getS3Info();
   saveS3InfoForm.value = false
