@@ -588,18 +588,12 @@ const saveS3Info = async() => {
 }
 
 const loadS3Info = async(row: s3Info) => {
-  access.accessKey = row.accessKey
   access.endpoint = row.endpoint
   access.region = row.region
- if (access.platform == row.platform && s3Init.value) {
-    listObject()
-    saveS3Warning.value = false
-    storageTable.value = true
-  } else {
-    access.platform = row.platform      
-    s3Secret.value = ""
-    saveS3InfoForm.value = true;
-  }
+  access.platform = row.platform 
+  access.accessKey = row.accessKey     
+  s3Secret.value = ""
+  saveS3InfoForm.value = true;
 }
 
 const cancelLoad = () => {
