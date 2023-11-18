@@ -664,9 +664,6 @@ const initS3Info = async() => {
           access.accessSecret = secretData
         }     
         if (access.accessSecret != "") { 
-            access.endpoint = data.s3InfoList[0].endpoint 
-            access.region = data.s3InfoList[0].region 
-            access.accessKey = data.s3InfoList[0].accessKey
             if (data.s3InfoList.length > 1) {
               if (!s3Init.value) {
                 s3InfoTable.value = true;
