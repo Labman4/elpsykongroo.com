@@ -109,4 +109,4 @@ async function decryptData(ciphertext, iv, text, algorithm) {
 }
 
 
-export { encryptData, decryptData, computeFileSHA256, arrayBufferToBase64, base64ToArrayBuffer }
+export { encryptData, decryptData, computeFileSHA256, arrayBufferToBase64, base64ToArrayBuffer, generateFixedKey }

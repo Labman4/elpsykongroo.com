@@ -51,7 +51,7 @@ export default defineConfig({
     VitePWA({
       srcDir: 'public',
       strategies: 'injectManifest',
-      filename: 'firebase-messaging-sw.js',
+      filename: 'sw.js',
       injectRegister: null,
       registerType: 'autoUpdate',
       devOptions: {
