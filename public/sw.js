@@ -23,173 +23,254 @@ const messaging = getMessaging(firebaseApp);
 self.skipWaiting();
 clientsClaim();
 
+// self.addEventListener('fetch', (event) => {
+//   if (event.request.url.includes("&X-Amz-Expires")) {
+//     event.respondWith(
+//       fetch(event.request, { mode: 'cors', credentials: "same-origin" })
+//         .then(async (response) => {
+//           const url = new URL(event.request.url);
+//           const fileKey = url.pathname.slice(1).split("/")[1];
+//           const db = await openDB('s3', 1, ['s3', 'aes']);
+//           const iv = await getObject(db, "aes", "iv-" + fileKey, "readwrite", "");
+//           const key = await getObject(db, "aes", "key-" + fileKey, "readwrite", "");
+//           if (!key || !response.body || typeof response.body.getReader !== 'function') {
+//             return response;
+//           } else {
+//             const reader = response.body.getReader();
 
-// const rangeHeader = request.headers.get('Range');
-// const [start, end] = parseRangeHeader(rangeHeader);
-// console.log(start)
-// console.log(end)
+//             const { readable, writable } = new TransformStream();
+//             const writer = writable.getWriter();
+  
+//             (async () => {
+//               try {
+//                 while (true) {
+//                   const { done, value } = await reader.read();
+//                   if (done) {
+//                     break;
+//                   }
+//                 let dataToWrite = value;
+//                 if (key) {
+//                   try {
+//                     const decryptedData = await crypto.subtle.decrypt(
+//                       {
+//                         name: "AES-CTR",
+//                         counter: iv,
+//                         length: 128,
+//                       }, 
+//                       key,
+//                       value
+//                     );
+//                     console.log(decryptedData)
+  
+//                     dataToWrite = decryptedData;
+//                   } catch (error) {
+//                     console.error(error);
+//                     const db = await openDB('s3', 1, ['s3', 'aes']);
+//                     await deleteObject(db, "aes", "key-" + key, "readwrite");
+//                     return
+//                   }
+//                 }
+//                 if (writer.state === "writable") {
+//                   await writer.write(dataToWrite);
+//                 }
+//                 while (reader.desiredSize === 0) {
+//                   await new Promise(resolve => setTimeout(resolve, 10));
+//                 }
+//                   }
+//               } finally {
+//                 reader.releaseLock();
+//                 writer.close();
+//               }
+//             })();
+  
+//             return new Response(readable, {
+//               status: response.status,
+//               statusText: response.statusText,
+//               headers: response.headers,
+//             });
+//           }
+     
+//         })
+//         .catch((error) => {
+//           console.error('Fetch error:', error);
+//           return new Response(null, { status: 500, statusText: 'Internal Server Error' });
+//         })
+//     );
+//   }
+// });
 
-self.addEventListener('fetch', async (event) => {
-  if (event.request.url.includes("&X-Amz-Expires")) {
-    event.respondWith(handleRequest(event.request));
-  }
-});
+// async function handleRequest(request) {
+//   const rangeHeader = request.headers.get('Range');
+//   const [start, end] = parseRangeHeader(rangeHeader);
+//   console.log(request)
+//   const url = new URL(request.url);
+//   const fileKey = url.pathname.slice(1).split("/")[1];
+//   const db = await openDB('s3', 1, ['s3', 'aes']);
+//   const iv = await getObject(db, "aes", "iv-" + fileKey, "readwrite", "");
+//   const key = await getObject(db, "aes", "key-" + fileKey, "readwrite", "");
+//   return new Promise(async (resolve) => {
+//       fetch(request, { mode: 'cors', credentials: "same-origin" }).then(async function(response) {
+//         if (!key || !response.body || typeof response.body.getReader !== 'function') {
+//           resolve(response);
+//         } else {
+//           console.log(2)
+//           const { readable, writable } = new TransformStream({ close: false });
+//           const writer = writable.getWriter();
+//           // try {
+//             await transform(response.body, key, iv, writer, () => {
+//               const transformedResponse = new Response(readable, {
+//                 status: response.status,
+//                 statusText: response.statusText,
+//                 headers: response.headers,
+//               });
+//               console.log(transformedResponse);
+//               if (transformedResponse.body.getReader !== 'function') {
+//                 console.log("unread")
+//               }
+//               resolve(transformedResponse);
+//             });
+//           // } finally {
+//           //   writer.close();
+//           // }
+//         }
+//       })        
+//   })
+// }
 
-const handleRequest = async (request) => {
-  const url = new URL(request.url);
-  const fileKey = url.pathname.slice(1).split("/")[1];
-  const db = await openDB('s3', 1, ['s3', 'aes']);
-  const iv = await getObject(db, "aes", "iv-" + fileKey, "readwrite", "");
-  const key = await getObject(db, "aes", "key-" + fileKey, "readwrite", "");
-  const response = await fetch(request, { mode: 'cors', credentials: "same-origin" });
-  if (key) {
-    if (response.body && typeof response.body.getReader === 'function') {
-      const transformedStream = decryptStream(response.body, key, iv);
-      return new Response(transformedStream, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers,
-      });
-    } else {
-      return response;
-    }
-  } else {
-    // console.log("fetch 2");
-    return fetch(request, { mode: 'cors', credentials: "same-origin" });
-  }
-};
+// async function transform(inputStream, key, iv, writer, callback) {
+//   const reader = inputStream.getReader();
 
-function decryptStream(cipherStream, key, iv) {
-  const transformer = new TransformStream({
-    async transform(chunk, controller) {
-      try {
-        if (key && iv) {
-          console.log("start decrypt");
-          const decryptedData = await crypto.subtle.decrypt(
-            { name: "AES-CTR", counter: iv, length: 128 },
-            key,
-            chunk
-          );
-          controller.enqueue(decryptedData);
-        } else {
-          console.log("start transform");
-          controller.enqueue(chunk);
-        } 
-      } catch (error) {
-        console.log(error);
-        const db = await openDB('s3', 1, ['s3', 'aes']);
-        await deleteObject(db, "aes", "key-" + key, "readwrite");
-      }
-    }
-  });
+//   async function writeData() {
+//     while (true) {
+//       const { done, value } = await reader.read();
+//       if (done) break;
+//       console.log(value)
+//       let dataToWrite = value;
+//       if (key) {
+//         try {
+//           const decryptedData = await crypto.subtle.decrypt(
+//             {
+//               name: "AES-CTR",
+//               counter: iv,
+//               length: 128,
+//             }, 
+//             key,
+//             value
+//           );
+//           console.log(decryptedData)
 
-  const { readable, writable } = new TransformStream();
-  const writer = writable.getWriter();
+//           dataToWrite = decryptedData;
+//         } catch (error) {
+//           console.error(error);
+//           const db = await openDB('s3', 1, ['s3', 'aes']);
+//           await deleteObject(db, "aes", "key-" + key, "readwrite");
+//           return
+//         }
+//       }
+//       if (writer.state === "writable") {
+//         await writer.write(dataToWrite);
+//       }
+//       while (reader.desiredSize === 0) {
+//         await new Promise(resolve => setTimeout(resolve, 10));
+//       }
+//     }
 
-  // Pipe the original cipherStream through the transformer
-  cipherStream.pipeTo(transformer.writable);
+//     callback();
+//   }
 
-  // Create a new Response object with the transformed stream and original headers
-  const response = new Response(readable, {
-    headers: cipherStream.headers,
-  });
+//   await writeData();
+// }
 
-  // Close the writer to signal that no more data will be written
-  writer.close();
+// function parseRangeHeader(rangeHeader) {
+//   if (!rangeHeader) {
+//     return [0, null]; // Default to start from the beginning if no range is specified
+//   }
 
-  return response;
-}
+//   const matches = rangeHeader.match(/bytes=(\d+)-(\d+)?/);
 
-function parseRangeHeader(rangeHeader) {
-  if (!rangeHeader) {
-    return [0, null]; // Default to start from the beginning if no range is specified
-  }
+//   if (!matches) {
+//     return [0, null]; // Invalid or unsupported range format
+//   }
 
-  const matches = rangeHeader.match(/bytes=(\d+)-(\d+)?/);
+//   const start = parseInt(matches[1], 10);
+//   const end = matches[2] ? parseInt(matches[2], 10) : null;
 
-  if (!matches) {
-    return [0, null]; // Invalid or unsupported range format
-  }
+//   return [start, end];
+// }
 
-  const start = parseInt(matches[1], 10);
-  const end = matches[2] ? parseInt(matches[2], 10) : null;
+// function openDB(databaseName, version, storageName) {
+//   return new Promise((resolve, reject) => {
+//     var request;
+//     if (version != "") {
+//       request = indexedDB.open(databaseName, version);
+//     } else {
+//       request = indexedDB.open(databaseName);
+//     }
 
-  return [start, end];
-}
+//     request.onsuccess = function(event) {
+//       const db = request.result;
+//       resolve(db);
+//     };
 
-function openDB(databaseName, version, storageName) {
-  return new Promise((resolve, reject) => {
-    var request;
-    if (version != "") {
-      request = indexedDB.open(databaseName, version);
-    } else {
-      request = indexedDB.open(databaseName);
-    }
+//     request.onupgradeneeded = function(event) {
+//       const db = request.result;
+//       for (let i of storageName) {
+//           if (!db.objectStoreNames.contains(i)) {
+//               db.createObjectStore(i);
+//           }
+//       }    
+//   } 
+//     request.onerror = function(event) {
+//       const error = request.error;
+//       reject(error);
+//     };
+//   });
+// }
 
-    request.onsuccess = function(event) {
-      const db = request.result;
-      resolve(db);
-    };
+// function getObject(db, storeName, key, permission, scope) {
+//   if (permission == "" || permission == undefined) {
+//       permission = "readwrite"
+//   }
+//   return new Promise((resolve, reject) => {
+//       const transaction = db.transaction(storeName, permission);
+//       const objectStore = transaction.objectStore(storeName);
+//       var request;
+//       if (scope == "all") {
+//           request = objectStore.getAll();
+//       } else {
+//           request = objectStore.get(key);
+//       }
+//       request.onsuccess = function(event) {
+//           const result = request.result;
+//           resolve(result);
+//       };
 
-    request.onupgradeneeded = function(event) {
-      const db = request.result;
-      for (let i of storageName) {
-          if (!db.objectStoreNames.contains(i)) {
-              db.createObjectStore(i);
-          }
-      }    
-  } 
-    request.onerror = function(event) {
-      const error = request.error;
-      reject(error);
-    };
-  });
-}
+//       request.onerror = function(event) {
+//           const error = request.error;
+//           reject(error);
+//       };
+//   });
+// }
 
-function getObject(db, storeName, key, permission, scope) {
-  if (permission == "" || permission == undefined) {
-      permission = "readwrite"
-  }
-  return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, permission);
-      const objectStore = transaction.objectStore(storeName);
-      var request;
-      if (scope == "all") {
-          request = objectStore.getAll();
-      } else {
-          request = objectStore.get(key);
-      }
-      request.onsuccess = function(event) {
-          const result = request.result;
-          resolve(result);
-      };
+// function deleteObject(db, storeName, key, permission) {
+//   if (permission == "" || permission == undefined) {
+//       permission = "readwrite"
+//   }
+//   return new Promise((resolve, reject) => {
+//       const transaction = db.transaction(storeName, permission);
+//       const objectStore = transaction.objectStore(storeName);
+//       const request = objectStore.delete(key)
+//       request.onsuccess = function(event) {
+//           const result = request.result;
+//           resolve(result);
+//       };
 
-      request.onerror = function(event) {
-          const error = request.error;
-          reject(error);
-      };
-  });
-}
-
-function deleteObject(db, storeName, key, permission) {
-  if (permission == "" || permission == undefined) {
-      permission = "readwrite"
-  }
-  return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, permission);
-      const objectStore = transaction.objectStore(storeName);
-      const request = objectStore.delete(key)
-      request.onsuccess = function(event) {
-          const result = request.result;
-          resolve(result);
-      };
-
-      request.onerror = function(event) {
-          const error = request.error;
-          reject(error);
-      };
-  });
-}
+//       request.onerror = function(event) {
+//           const error = request.error;
+//           reject(error);
+//       };
+//   });
+// }
 
 
 onBackgroundMessage(messaging, (payload)  => {

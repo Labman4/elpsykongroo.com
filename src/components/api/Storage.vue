@@ -465,6 +465,7 @@ function* chunks(file, chunkSize) {
 }
 
 const upload = async (options: UploadRequestOptions) => {
+    iv == null
     if (options.file.size > 1024*1024*5) {
       await uploadMethod()
       if (isDirect.value) {
@@ -473,7 +474,6 @@ const upload = async (options: UploadRequestOptions) => {
           return
         }
       }
-      iv == null
       // be careful minio must big than 5mb 
       if (access.platform == "" || access.platform == "default" || access.platform == "cloudflare" || access.platform == "c2" ) {
         await chunkedUpload(options, 1024*1024*5);
@@ -1026,24 +1026,27 @@ const download = async(row: ListObject, preview) => {
       }
       await axios(messageOption)
     })
-  } 
+  }
+  // downloadObject(row)
   await getObjectUrl(row, secret, preview);
 }
+
 const getObjectUrl = async (row: ListObject, secret, preview) => {
   let url
   if (isDownloadDirect.value) {
     if (password.value) {
-      const ivv = await getObjectBytes(access.bucket, "iv-" + row.key)
-      const db = await openDB('s3', 1, ['s3',"aes"]);
-      const ivBytes = await getObject(db, "aes", "iv-" + row.key, "readwrite", "");
-      if (!ivBytes) {
-        await setObject(db, "aes", "iv-" + row.key, ivv, "readwrite", "");
-      } 
-      const keyBytes = await getObject(db, "aes", "key-" + row.key, "readwrite", "");
-      if (!keyBytes) {
-        const key = await generateFixedKey(password.value, "AES-CTR")
-        await setObject(db, "aes", "key-" + row.key, key, "readwrite", "");
-      }
+      ElMessageBox.alert("direct download not support auto decrypt, please select proxy")
+      // const db = await openDB('s3', 1, ['s3',"aes"]);
+      // const ivBytes = await getObject(db, "aes", "iv-" + row.key, "readwrite", "");
+      // if (!ivBytes) {
+      //   const ivv = await getObjectBytes(access.bucket, "iv-" + row.key)
+      //   await setObject(db, "aes", "iv-" + row.key, ivv, "readwrite", "");
+      // } 
+      // const keyBytes = await getObject(db, "aes", "key-" + row.key, "readwrite", "");
+      // if (!keyBytes) {
+      //   const key = await generateFixedKey(password.value, "AES-CTR")
+      //   await setObject(db, "aes", "key-" + row.key, key, "readwrite", "");
+      // }
     }
     url = await getObjectSignedUrl(access.bucket, row.key)
   } else {
@@ -1099,11 +1102,61 @@ const getObjectUrl = async (row: ListObject, secret, preview) => {
 const reload = () => {
   player.value?.open()
 }
+
 watch(videoDialog, (open) => {
   if(!open) {
     player.value?.pause()
   }
 })
+
+// function downloadObject (row: ListObject)  {
+//     axios({
+//         method: 'POST',
+//         url: env.storageUrl + "/storage/object/download" ,
+//         responseType: 'arraybuffer',
+//         //responseType: 'blob',
+//         data: {    
+//             bucket: access.bucket,
+//             key: row.key,
+//             idToken: access.id_token,
+//             accessKey: access.accessKey,
+//             accessSecret: access.accessSecret,
+//             endpoint: access.endpoint, 
+//             region: access.region,
+//             platform: access.platform
+//         },   
+//         headers: {
+//             'Authorization': 'Bearer '+ access.access_token,
+//             "Content-Type": "application/json"
+//         },
+//     }).then(async function(response){
+//       let url
+//       if (password.value) {
+//         const key = await generateFixedKey(password.value, "AES-CTR")
+//         const iv = await getObjectBytes(access.bucket, "iv-" + row.key)
+//         console.log(response.data)
+//         console.log(iv.buffer)
+//         console.log(key)
+//         const decryptedData = await crypto.subtle.decrypt(
+//               { name: "AES-CTR", counter: iv, length: 128 },
+//               key,
+//               new Uint8Array(response.data)
+//         );
+//         const file = uint8ArrayToFile(decryptedData, row.key)
+//         url = URL.createObjectURL(file);
+//       } else {
+//         url = URL.createObjectURL(response.data);
+//       }
+//       const a = document.createElement('a');
+//         a.style.display = 'none';
+//         a.href = url;
+//         a.download = row.key;
+//         document.body.appendChild(a);
+//         a.click();
+//         document.body.removeChild(a);
+//         URL.revokeObjectURL(url);
+//     })
+// }
 
 function formatTimestamp(row:ListObject) {
     return dayjs(row.timestamp*1000).format("YYYY-MM-DD HH:mm:ss");
