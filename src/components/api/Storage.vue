@@ -1036,6 +1036,7 @@ const getObjectUrl = async (row: ListObject, secret, preview) => {
   if (isDownloadDirect.value) {
     if (password.value) {
       ElMessageBox.alert("direct download not support auto decrypt, please select proxy")
+      return
       // const db = await openDB('s3', 1, ['s3',"aes"]);
       // const ivBytes = await getObject(db, "aes", "iv-" + row.key, "readwrite", "");
       // if (!ivBytes) {
