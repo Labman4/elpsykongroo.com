@@ -13,7 +13,9 @@
       <el-table-column label="Operations">
       <template #default="scope">
         <el-button size="small" type="danger" @click="deleteS3(scope.$index, scope.row)">Delete</el-button>
-        <el-button size="small" type="primary" @click="download(scope.row)">Download</el-button>
+        <el-button size="small" type="primary" @click="download(scope.row, false)">Download</el-button>
+        <el-button size="small" type="primary" v-if='scope.row.key.endsWith("mp4")' @click="download(scope.row, true), videoDialog = true">Preview</el-button>
+
       </template>
       </el-table-column>
     </el-table>
@@ -55,7 +57,8 @@
       <el-table-column label="Operations">
       <template #default="scope">
         <el-button size="small" type="danger" @click="deleteS3Info(scope.$index, scope.row)">Delete</el-button>
-        <el-button size="small" type="primary" @click="loadS3Info(scope.row)">select</el-button>
+        <el-button size="small" type="primary" @click="loadS3Info(scope.row)" v-if = "access.accessKey != scope.row.accessKey">select</el-button>
+        <el-button size="small" type="info" v-if = "access.accessKey == scope.row.accessKey" @click="listObject(), storageTable = true, s3InfoTable = false">open</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -132,10 +135,18 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="cancelLoad()">Cancel</el-button>
-        <el-button type="primary" @click="initS3Info()">load</el-button>
+        <el-button type="primary" @click="initS3Info(access.accessKey)">load</el-button>
         <el-button type="primary" @click="saveS3Info()">save</el-button>
       </span>
     </template>
+  </el-dialog>
+
+  <el-dialog
+    v-model="videoDialog"
+    :width=visible.dialogWidth
+    align-center>
+    <el-button type="info" @click="reload()">reload</el-button>
+    <video-player ref="player" ></video-player>
   </el-dialog>
 </template>
 
@@ -147,7 +158,10 @@ import { ElMessageBox, ElNotification, UploadFile, UploadProps, UploadRawFile, U
 import { dayjs } from 'element-plus';
 import { visible } from '~/assets/ts/visible'
 import { setObject, deleteObject, getObject, openDB } from '~/assets/ts/indexDB'
-import { encryptData, decryptData, computeFileSHA256, encryptDataCombineIv, decryptDataWithoutIv } from '~/assets/ts/encrypt'
+import { encryptData, decryptData, computeFileSHA256, arrayBufferToBase64, base64ToArrayBuffer, generateFixedKey } from '~/assets/ts/encrypt'
+import { uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes, getObjectSignedUrlWithParams } from '~/assets/ts/s3'
+import VideoPlayer from '~/components/VideoPlayer.vue';
+const player = ref<InstanceType<typeof VideoPlayer> | null>(null)
 
 interface ListObject {
     "key": string
@@ -163,6 +177,7 @@ interface s3Info {
   platform: string
 }
 
+const videoDialog = ref(false)
 const s3InfoTable = ref(false)
 const saveS3Warning = ref(false)
 const storageTable = ref(false)
@@ -171,9 +186,13 @@ const s3Form = ref(false)
 const s3Init = ref(false)
 const saveS3InfoForm = ref(false)
 const s3Secret = ref("")
-const isZip = ref(false)
+const isDirect = ref(false)
+const isDownloadDirect = ref(false)
 const isEncrypt = ref(false)
+const isStream = ref(false)
+const isSafe = ref(false)
 const password = ref("")
+let iv
 
 let initS3FormData  = () => ({
   accessKey: "",
@@ -222,18 +241,18 @@ const refreshList = (response: any, uploadFile: UploadFile) => {
     listObject();
 }
 
-const encryptOrNot: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
-  return new Promise((resolve, reject) => {
-    ElMessageBox.prompt("keep the below empty if not", 'need encrypt by yourself?',{
+const encryptOrNot: UploadProps['beforeUpload'] = async(rawFile: UploadRawFile) => {
+  await ElMessageBox.prompt("keep the below empty if not", 'need encrypt by yourself?',{
       inputValue: "",
       confirmButtonText: "continue",
       showCancelButton: false
     }).then(({ value, action }) => {
         isEncrypt.value = true;
         password.value = value;
-        resolve();
     })
-  });
+  if (isEncrypt.value && password.value != "") {
+    await safeEncrypt()
+  }
 };
 
 const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
@@ -274,11 +293,9 @@ const getUploadId = async (fileName, sha256, partCount, partNum) => {
 }
 
 async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
+    await uploadMode()
     let fileName = options.file.name;
     let tagList, tag, result;
-    if (isZip.value) {
-      fileName = options.file.name + ".zip"
-    }
     var uploadId;
     if (access.platform != "" && access.platform != "default") {
       const upload = await getUploadId(fileName, "", "", "");
@@ -286,54 +303,21 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
     }
     var partCount = Math.ceil(options.file.size / chunkSize);
     if (isEncrypt.value && password.value != "" ) {
-      tagList = new Map()
-      tag = new Uint8Array(16) 
-      abortMultiPart(options.file.name, uploadId)
-      const upload = await getUploadId(fileName, "", "", "");
-      uploadId = upload;
+      fileName = "encrypt-" + options.file.name
+      uploadId = await abortMultiPart(fileName, uploadId)
     }
-    // const sortedChunksArray = await sortChunks(options.file, chunkSize);
     var completeSize = 0;
     for (const { index, chunk } of chunks(options.file, chunkSize)) {
           chunk.arrayBuffer().then(async function(arrayBuffer) {  
           const sha256 = await computeFileSHA256(arrayBuffer)
-          var checkUpload = await getUploadId(fileName, sha256, partCount, index)
+          const checkUpload = await getUploadId(fileName, sha256, partCount, index)
           if (checkUpload == "" || checkUpload == undefined) {
               completeSize ++;
           } else if (access.platform != "" && access.platform != "default" && access.platform != "cloudflare" && uploadId != checkUpload) {
-              listObject()
-          } else if (isZip.value) {
-              // const zip = new JSZip()
-              // zip.file(options.file.name + (index + 1) + ".zip", chunk); 
-              // zip.generateAsync({type:"blob"}).then(function(content) {
-                // uploadPart(content, options.file.name + ".zip", partCount, index, uploadId, "")
-              // });
+              // listObject()
           } else if (isEncrypt.value && password.value != "") {
-              const byteData = await readFileAsArrayBuffer(chunk);
-              const cipherResp = await encryptDataCombineIv(byteData, password.value)
-              // if (index == 0) {
-              //   tagList.set(index, cipherResp.tag)
-              // } else {
-              //   tagList.set(index, new Uint8Array(cipherResp.tag))
-              // }
-              // if (index === partCount - 1) {
-                // console.log("last", tagList)
-                // const sortedArray = Array.from(tagList.entries());
-                // sortedArray.sort((a, b) => a[0] - b[0]);
-                // const sortedMap = new Map(sortedArray);                
-                // for (let i = 0; i < sortedMap.size - 1; i++) {
-                //   const tag = await bitwiseXOR(sortedMap.get(i), sortedMap.get(i+1))
-                //   sortedMap.set(i+1, new Uint8Array(tag))
-                // }
-                // console.log("after", sortedMap)
-                // result = new Uint8Array(cipherResp.ciphertext.byteLength + 16);
-                // result.set(new Uint8Array(cipherResp.ciphertext))
-                // result.set(sortedMap.get(index), cipherResp.ciphertext.byteLength)
-                // uploadPart(result, options.file.name, partCount, index, uploadId, "")
-              // } else {
-                // console.log("first", tagList)
-                uploadPart(cipherResp.cipher, options.file.name, partCount, index, uploadId, "")
-              // }
+            const cipher = await encryptBydecryptMethod(arrayBuffer, options.file.name)
+            uploadPart(cipher, "encrypt-"+ options.file.name, partCount, index, uploadId, "")
           }
            else {   
             uploadPart(chunk, options.file.name, partCount, index, uploadId, "")
@@ -345,51 +329,90 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
     }  
 }    
 
-// async function sortTagList(tagList) {
-//   return new Promise((resolve, reject) => {
-//     const sortedArray = Array.from(tagList.entries());
-//     sortedArray.sort((a, b) => a[0] - b[0]);
-//     const sortedMap = new Map(sortedArray);
-//     resolve(sortedMap);
-//   });
-// }
-
-// async function sortChunks(file, chunkSize) {
-//   return new Promise((resolve, reject) => {
-//     const chunksArray = Array.from(chunks(file, chunkSize));
-//     const sortedChunksArray = chunksArray.sort((a, b) => a.index - b.index);
-//     resolve(sortedChunksArray);
-//   });
-// }
-
-// async function bitwiseXOR(arr1, arr2) {
-//   return new Promise((resolve, reject) => {
-//     const result = new Uint8Array(arr1.length);
-//     for (let i = 0; i < arr1.length; i++) {
-//       result[i] = arr1[i] ^ arr2[i];
-//     }
-//     resolve(result);
-//   });
-// }
-  
-function readFileAsArrayBuffer(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      resolve(event.target?.result);
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
+const uploadMethod = async() => {
+  isDirect.value = false;
+  await ElMessageBox.confirm('please choose upload method?',{
+    confirmButtonText: 'proxy',
+    cancelButtonText: 'direct',
+  })
+  .then(() => {
+    isDirect.value = false;
+  })
+  .catch(() => {
+    isDirect.value = true;
+  })
 }
 
-function uint8ArrayToFile(uint8Array, fileName, mimeType = 'application/octet-stream') {
+const downloadMethod = async() => {
+  isDownloadDirect.value = false;
+  await ElMessageBox.confirm('please choose download method?',{
+    confirmButtonText: 'proxy',
+    cancelButtonText: 'direct',
+  })
+  .then(() => {
+    isDownloadDirect.value = false;
+  })
+  .catch(() => {
+    isDownloadDirect.value = true;
+  })
+}
+
+const safeEncrypt = async() => {
+  await ElMessageBox.confirm('if the data is important and needs to be kept intact, choose manual and need decrypt by manual after',
+    "please select decrypt method",{
+      confirmButtonText: 'manual',
+      cancelButtonText: 'auto',
+    })
+    .then(() => {
+      isSafe.value = true;
+    })
+    .catch(() => {
+      isSafe.value = false;
+    })
+}
+
+const downloadWithDecrypt = async() => {
+    password.value = ""
+    await ElMessageBox.prompt("enter the secret you used when uploading before ", 'the file upload with secret?',{
+      inputValue: "",
+      confirmButtonText: "continue",
+      showCancelButton: false
+    }).then(({ value, action }) => {
+        password.value = value;
+    })
+}
+
+const uint8ArrayToFile = (uint8Array, fileName, mimeType = 'application/octet-stream') => {
   const blob = new Blob([uint8Array], { type: mimeType });
   const file = new File([blob], fileName, { type: mimeType });
   return file;
 }
 
-const uploadPart = (chunk, filename, partCount, partNum, uploadId, offset) => {
+const uploadPart = async(chunk, filename, partCount, partNum, uploadId, offset) => {
+    if (isDirect.value) {
+      uploadPartDirect(chunk, access.bucket, filename, uploadId, partNum, partCount)
+    } else {
+      uploadPartProxy(chunk, filename, partCount, partNum, uploadId, offset)
+    }
+}
+
+const uploadMode = async() => {
+  isStream.value = false;
+  if (!isDirect.value) {
+    await ElMessageBox.confirm("please select upload mode",{
+    confirmButtonText: 'stream',
+    cancelButtonText: 'direct',
+    })
+    .then(() => {
+      isStream.value = true;
+    })
+    .catch(() => {
+      isStream.value = false;
+    })
+  }
+}
+
+const uploadPartProxy = (chunk, filename, partCount, partNum, uploadId, offset) => {
       const option = {
         baseURL: env.storageUrl,
         url: "/storage/object",
@@ -408,16 +431,16 @@ const uploadPart = (chunk, filename, partCount, partNum, uploadId, offset) => {
             region: access.region,
             platform: access.platform,
             offset: offset,
-            mode: "stream"
-
         },
         headers: {
             'Authorization': 'Bearer '+ access.access_token,
             "Content-Type": "multipart/form-data"
         }
       }
+      if (isStream.value) {
+        option.data["mode"] = "stream"
+      }
       axios(option).catch(function(error) {
-        console.log(error)
         axios(option).catch(function(error){
           axios(option).catch(function(error){
             ElNotification({
@@ -442,44 +465,187 @@ function* chunks(file, chunkSize) {
 }
 
 const upload = async (options: UploadRequestOptions) => {
+    iv == null
     if (options.file.size > 1024*1024*5) {
+      await uploadMethod()
+      if (isDirect.value) {
+        if (!await checkCors()) {
+          ElMessageBox.alert("the bucket is not support cors, please try to choose proxy")
+          return
+        }
+      }
       // be careful minio must big than 5mb 
       if (access.platform == "" || access.platform == "default" || access.platform == "cloudflare" || access.platform == "c2" ) {
-        chunkedUpload(options, 1024*1024*5);
+        await chunkedUpload(options, 1024*1024*5);
       } else {
-        chunkedUpload(options, 1024*1024*2);
+        await chunkedUpload(options, 1024*1024*2);
       }
     } else {
       let fileData;
       if (isEncrypt.value && password.value != "") {
-        const byteData = await readFileAsArrayBuffer(options.file);
-        const cipherResp = await encryptDataCombineIv(byteData, password.value)
-        fileData = uint8ArrayToFile(cipherResp.cipher, options.file.name)
+        // const sha256origin = await computeFileSHA256(options.file)
+        // console.log("origin", sha256origin)
+        await options.file.arrayBuffer().then(async function(arrayBuffer) {
+          const sha256array = await computeFileSHA256(arrayBuffer)
+          // console.log("sha256array", sha256array)
+          const cipher = await encryptBydecryptMethod(arrayBuffer, options.file.name)
+          fileData = uint8ArrayToFile(cipher, "encrypt-" + options.file.name)
+        })
       } else {
         fileData = options.file
       }
-      const option = {
-          baseURL: env.storageUrl,
-          url: "/storage/object",
-          method: "POST",
-          data: {
-              data: fileData,
-              bucket: access.bucket,
-              mode: "stream",
-              idToken: access.id_token,
-              accessKey: access.accessKey,
-              accessSecret: access.accessSecret,
-              endpoint: access.endpoint, 
-              region: access.region,
-              platform: access.platform
-          },
-          headers: {
-              'Authorization': 'Bearer '+ access.access_token,
-              "Content-Type": "multipart/form-data"
-          }
-      }
-      axios(option);   
+      uploadFileDirect(fileData, "")
    }
+}
+let corsFlag
+let corsCount
+
+const checkEndpointCors = async() => {
+  let flag 
+  await axios.get(access.endpoint).then(function(response) {
+    if(response.headers["access-control-allow-origin"] == "*" || response.headers["access-control-allow-origin"] == env.redirectUrl) {
+      flag = true
+    }
+  }).catch (() => {})
+  return flag
+}
+
+const checkCors = async() => {
+  if (corsCount > 1) {
+    return false
+  }
+  if (!corsFlag) {
+    if (await checkEndpointCors()) {
+      return true
+    }
+    corsCount ++
+    const CORSRules = await getCorsRule(access.bucket);
+    for(let rule of CORSRules.data) {
+        if (rule["allowedOrigins"] && rule["allowedOrigins"].includes(env.redirectUrl)) {
+          corsFlag = true
+        }    
+    }
+  }
+  if (!corsFlag) {
+    corsCount ++
+    const corsOption = {
+        baseURL: env.storageUrl,
+        url: "/storage/object/cors",
+        method: "PUT",
+        data: {
+            bucket: access.bucket,
+            idToken: access.id_token,
+            accessKey: access.accessKey,
+            accessSecret: access.accessSecret,
+            endpoint: access.endpoint, 
+            region: access.region,
+            platform: access.platform,
+            corsRules: [{
+                allowedHeaders: ["*"],
+                allowedMethods: ["GET", "PUT", "POST"],
+                allowedOrigins: [env.redirectUrl],
+                exposeHeaders: ["ETag"],
+                maxAgeSeconds: 3600,
+            }]  
+        },
+        headers: {
+            'Authorization': 'Bearer '+ access.access_token,
+        }
+    }
+    await axios(corsOption).then(function (response) {
+      if (response.status == 200) {
+        corsFlag = true
+      }
+    })
+  }
+  return corsFlag
+}
+
+const getCorsRule = async(bucket) => {
+    const corsOption = {
+        baseURL: env.storageUrl,
+        url: "/storage/object/cors",
+        method: "POST",
+        data: {
+            bucket: bucket,
+            idToken: access.id_token,
+            accessKey: access.accessKey,
+            accessSecret: access.accessSecret,
+            endpoint: access.endpoint, 
+            region: access.region,
+            platform: access.platform,
+        },
+        headers: {
+            'Authorization': 'Bearer '+ access.access_token,
+        }
+    }
+    return await axios(corsOption)
+}
+
+const encryptBydecryptMethod = async(arrayBuffer, fileName) => {
+  let cipher
+  if (isSafe.value) {
+    const cipherResp = await encryptData(arrayBuffer, password.value, "", "AES-GCM")
+    cipher = cipherResp.cipher
+  } else {
+    const cipherResp = await encryptData(arrayBuffer, password.value, iv, "AES-CTR")
+    cipher = cipherResp.ciphertext
+    if (iv == null) {
+      iv = cipherResp.iv
+      // console.log("upload iv")
+      const ivfile = uint8ArrayToFile(cipherResp.iv,  "iv-encrypt-" + fileName )
+      uploadFileDirect(ivfile, "")
+    }
+  }
+  return cipher
+}
+
+const uploadByteDirect = (byteData, key) => {
+  const option = {
+      baseURL: env.storageUrl,
+      url: "/storage/object",
+      method: "POST",
+      data: {
+          byteData: byteData,
+          key: key,
+          bucket: access.bucket,
+          idToken: access.id_token,
+          accessKey: access.accessKey,
+          accessSecret: access.accessSecret,
+          endpoint: access.endpoint, 
+          region: access.region,
+          platform: access.platform
+      },
+      headers: {
+          'Authorization': 'Bearer '+ access.access_token,
+          "Content-Type": "application/octet-stream"
+      }
+  }
+  axios(option);  
+}
+
+const uploadFileDirect = (data, key) => {
+  const option = {
+      baseURL: env.storageUrl,
+      url: "/storage/object",
+      method: "POST",
+      data: {
+          data: data,
+          key: key,
+          bucket: access.bucket,
+          idToken: access.id_token,
+          accessKey: access.accessKey,
+          accessSecret: access.accessSecret,
+          endpoint: access.endpoint, 
+          region: access.region,
+          platform: access.platform
+      },
+      headers: {
+          'Authorization': 'Bearer '+ access.access_token,
+          "Content-Type": "multipart/form-data"
+      }
+  }
+  axios(option);  
 }
 
 const connect = async() => {
@@ -514,11 +680,11 @@ const saveS3Info = async() => {
   } 
   saveS3Warning.value = false
   const db = await openDB('s3', 1, ['s3',"aes"]);
-  const resp = await encryptData(s3FormData.accessSecret, s3Secret.value);
-  s3FormData.accessSecret = resp.ciphertext
-  await setObject(db, "aes", "ciphertext-" + s3FormData.platform, resp.ciphertext, "readwrite", "");
-  await setObject(db, "aes", "iv-" + s3FormData.platform, resp.iv, "readwrite", "");
-  await setObject(db, "s3", s3FormData.platform, JSON.stringify(s3FormData), "readwrite", "put");
+  const resp = await encryptData(s3FormData.accessSecret, s3Secret.value, "", "AES-GCM");
+  const cipher = arrayBufferToBase64(resp.cipher)
+  s3FormData.accessSecret = cipher
+  await setObject(db, "aes", "cipher-" + s3FormData.accessKey, cipher, "readwrite", "");
+  await setObject(db, "s3", s3FormData.accessKey, JSON.stringify(s3FormData), "readwrite", "put");
   await getS3Info();
   saveS3InfoForm.value = false
   s3Form.value = false
@@ -527,15 +693,14 @@ const saveS3Info = async() => {
 }
 
 const loadS3Info = async(row: s3Info) => {
-  access.accessKey = row.accessKey
+  if (s3Secret.value != "") {
+    initS3Info(row.accessKey)
+  }
   access.endpoint = row.endpoint
   access.region = row.region
- if (access.platform == row.platform && s3Init.value) {
-    listObject()
-    saveS3Warning.value = false
-    storageTable.value = true
-  } else {
-    access.platform = row.platform      
+  access.platform = row.platform 
+  access.accessKey = row.accessKey
+  if (access.accessSecret == ""){
     s3Secret.value = ""
     saveS3InfoForm.value = true;
   }
@@ -556,15 +721,14 @@ const clearS3Info = async() => {
   access.endpoint = s3FormData.endpoint
   access.region = s3FormData.region       
   access.platform = s3FormData.platform 
-  await initS3Info();
+  await initS3Info("");
   Object.assign(s3FormData, initS3FormData());
 }
 
 const deleteS3Info = async(index:number, row: s3Info) => {
   const db = await openDB('s3', 1, ['s3',"aes"]);
-  await deleteObject(db, "aes", "ciphertext-" + row.platform, "readwrite");
-  await deleteObject(db, "aes", "iv-" + row.platform, "readwrite");
-  await deleteObject(db, "s3", row.platform, "readwrite");
+  await deleteObject(db, "aes", "cipher-" + row.accessKey, "readwrite");
+  await deleteObject(db, "s3", row.accessKey, "readwrite");
   data.s3InfoList.splice(index, 1)
 }
 
@@ -577,7 +741,7 @@ const getS3Info = async() => {
   return db
 }
 
-const initS3Info = async() => {
+const initS3Info = async(accessKey) => {
   //for local s3 dev
   const domain = window.location.hostname;
   if (domain.split(":")[0] == "127.0.0.1" || domain.split(":")[0] == "localhost") {
@@ -593,38 +757,54 @@ const initS3Info = async() => {
         access.platform = data.s3InfoList[0].platform
         access.bucket = access.sub
     }
-    const ciphertext = await getObject(db, "aes", "ciphertext-" + access.platform, "readwrite", "");
-    const iv = await getObject(db, "aes", "iv-" + access.platform, "readwrite", "");
-    if (ciphertext != undefined && ciphertext != "") {
+    let cipher
+    if (accessKey == "" || accessKey == undefined) {
+      cipher =  await getObject(db, "aes", "cipher-" + data.s3InfoList[0].accessKey, "readwrite", "")
+    } else {
+      cipher = await getObject(db, "aes", "cipher-" + accessKey, "readwrite", "");
+    }
+    if (cipher != undefined && cipher != "") {
       try {
         if (s3Secret.value == "") {
           saveS3InfoForm.value = true
           access.accessSecret = ""
           return;
         }
-        const resp = await decryptData(ciphertext, iv, s3Secret.value);
-        if (resp != "") {
+        const resp = await decryptData(base64ToArrayBuffer(cipher), "", s3Secret.value, "AES-GCM");
+        const secretData = new TextDecoder().decode(resp)
+        if (secretData != "") {
           saveS3InfoForm.value = false
-          access.accessSecret = resp
+          access.accessSecret = secretData
         }     
-        if (access.accessSecret != "") {   
+        if (access.accessSecret != "") {
             if (data.s3InfoList.length > 1) {
               if (!s3Init.value) {
+                access.accessKey = data.s3InfoList[0].accessKey
+                access.platform = data.s3InfoList[0].platform
+                access.endpoint = data.s3InfoList[0].endpoint
+                access.region = data.s3InfoList[0].region
                 s3InfoTable.value = true;
                 s3Init.value = true;
+                initS3Client(true)
                 return;
-              } else {          
+              } else {         
                 saveS3InfoForm.value = false;
                 s3InfoTable.value = false;
               }
             }
             if (data.s3InfoList.length == 1) {
-              access.endpoint = data.s3InfoList[0].endpoint 
-              access.region = data.s3InfoList[0].region 
               access.accessKey = data.s3InfoList[0].accessKey
+              access.platform = data.s3InfoList[0].platform
+              access.endpoint = data.s3InfoList[0].endpoint
+              access.region = data.s3InfoList[0].region
               s3InfoTable.value = false;
             }
-        } 
+        } else {
+          access.platform = ""
+          access.accessKey = ""
+          access.endpoint = ""
+          access.region = ""
+        }
       } catch (error) {
         if (s3Secret.value != "") {
           ElMessageBox.alert("incorrect secret, will open default s3, please try again later by load button")
@@ -643,10 +823,11 @@ const initS3Info = async() => {
         listObject()
         return;
       }
-    } 
+    }
     s3Init.value = true;
     storageTable.value = true
     listObject()
+    initS3Client(true)
   } else if (access.platform == "default") {
     s3Form.value = true
     access.platform = "";
@@ -656,10 +837,10 @@ const initS3Info = async() => {
     s3Form.value = false
   }
 }
-  
+ 
 const initS3 = async() => {
   if (!s3Init.value) {
-    await initS3Info()
+    await initS3Info("")
   } else {
     storageTable.value = true
     listObject()
@@ -690,7 +871,7 @@ const listObject = async() => {
     if (response.data != "" && response.data != undefined) {
       const listObject:listObject[] = response.data
       const filterObject = listObject.filter( obj => {
-          return !obj.key.startsWith(access.bucket)
+          return !obj.key.startsWith(access.bucket) && !obj.key.startsWith("iv-")
       })
       data.files = filterObject;
       result = response.data
@@ -699,7 +880,8 @@ const listObject = async() => {
   return result
 }
 
-const abortMultiPart = (name, uploadId) => {
+const abortMultiPart = async (name, uploadId) => {
+  let upload
   const option = {
       baseURL: env.storageUrl,
       url: "/storage/object/abort",
@@ -720,7 +902,11 @@ const abortMultiPart = (name, uploadId) => {
           "Content-Type": "application/json"
       }
   }
-  axios(option)
+  await axios(option).then(async function () {
+    upload = await getUploadId(name, "", "", "");
+    // console.log("new uploadId",upload)
+  })
+  return upload
 }
 
 const deleteS3 = (index:number, row: ListObject) => {
@@ -797,19 +983,75 @@ const DeleteSelect = () => {
       } 
     }
   })
-    
 }
 
-const download = (row: ListObject) => {
-  if (access.platform == "" || access.platform == "default") {
-    downloadUrl(row);
-  } else {
-    getObjectUrl(row);
-    // downloadObject(row);
+const download = async(row: ListObject, preview) => {  
+  password.value = ""
+  if (row.key.startsWith("encrypt-")) {
+    await downloadWithDecrypt();
   }
+  await downloadMethod()
+  let secret 
+  if (password.value && !isDownloadDirect.value) {
+    const option = {
+        baseURL: env.apiUrl,
+        url: "/public/key",
+        method: "GET",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },   
+    }
+    await axios(option).then(async function(response) {
+      secret = response.data
+      const key = crypto.getRandomValues(new Uint8Array(16))
+      // console.log(key)
+      // console.log(base64ToArrayBuffer(arrayBufferToBase64(key)))
+      // console.log(arrayBufferToBase64(key))
+      const cipherResp = await encryptData(password.value, key, "", "AES-GCM")
+      // console.log(cipherResp.cipher)
+      // console.log(arrayBufferToBase64(cipherResp.cipher))
+
+      password.value = encodeURIComponent(arrayBufferToBase64(cipherResp.cipher))
+      // const text = await decryptData(cipherResp.cipher, "", key, "AES-GCM")
+      // console.log(text)
+
+      const messageOption = {
+        baseURL: env.messageUrl,
+        url: "/message",
+        method: "PUT",
+        data: {
+          key: secret,
+          value: arrayBufferToBase64(key)
+        },  
+      }
+      await axios(messageOption)
+    })
+  }
+  // downloadObject(row)
+  await getObjectUrl(row, secret, preview);
 }
-const getObjectUrl = (row: ListObject) =>{
-  axios({
+
+const getObjectUrl = async (row: ListObject, secret, preview) => {
+  let url
+  if (isDownloadDirect.value) {
+    if (password.value) {
+      ElMessageBox.alert("direct download not support auto decrypt, please select proxy")
+      // const db = await openDB('s3', 1, ['s3',"aes"]);
+      // const ivBytes = await getObject(db, "aes", "iv-" + row.key, "readwrite", "");
+      // if (!ivBytes) {
+      //   const ivv = await getObjectBytes(access.bucket, "iv-" + row.key)
+      //   await setObject(db, "aes", "iv-" + row.key, ivv, "readwrite", "");
+      // } 
+      // const keyBytes = await getObject(db, "aes", "key-" + row.key, "readwrite", "");
+      // if (!keyBytes) {
+      //   const key = await generateFixedKey(password.value, "AES-CTR")
+      //   await setObject(db, "aes", "key-" + row.key, key, "readwrite", "");
+      // }
+    }
+    url = await getObjectSignedUrl(access.bucket, row.key)
+  } else {
+    // const loadingInstance = ElLoading.service({ fullscreen: true })
+    await axios({
         method: 'POST',
         url: env.storageUrl + "/storage/object/url" ,
         data: {    
@@ -820,73 +1062,101 @@ const getObjectUrl = (row: ListObject) =>{
             accessSecret: access.accessSecret,
             endpoint: access.endpoint, 
             region: access.region,
-            platform: access.platform
+            platform: access.platform,
+            secret: secret
         },   
         headers: {
             'Authorization': 'Bearer '+ access.access_token,
             "Content-Type": "application/json"
         },
     }).then(async function(response){
-      const url = response.data;
-      const aLink = document.createElement('a');
-      aLink.style.display = 'none';
-      aLink.href = url;
-      aLink.download = row.key;
-    //   aLink.target = '_parent';
-      document.body.appendChild(aLink);
-      aLink.click();
-      document.body.removeChild(aLink); 
-    }) 
-}
-
-function downloadUrl (row: ListObject) {
-    const url = env.storageUrl + "/storage/object?bucket=" + access.bucket + "&key=" + row.key + "&idToken=" + access.id_token;
-    const aLink = document.createElement('a');
-      aLink.style.display = 'none';
-      aLink.href = url;
-      aLink.download = row.key;
-    //   aLink.target = '_parent';
-      document.body.appendChild(aLink);
-      aLink.click();
-      document.body.removeChild(aLink); 
-}
-
-function downloadObject (row: ListObject)  {
-    axios({
-        method: 'POST',
-        url: env.storageUrl + "/storage/object/download" ,
-        responseType: 'blob',
-        data: {    
-            bucket: access.bucket,
-            key: row.key,
-            idToken: access.id_token,
-            accessKey: access.accessKey,
-            accessSecret: access.accessSecret,
-            endpoint: access.endpoint, 
-            region: access.region,
-            platform: access.platform
-        },   
-        headers: {
-            'Authorization': 'Bearer '+ access.access_token,
-            "Content-Type": "application/json"
-        },
-    }).then(async function(response){
-        // const bytedata = await readFileAsArrayBuffer(response.data)
-        // const byteArray = await decryptDataWithoutIv(bytedata, "1")
-        // const file = uint8ArrayToFile(bytedata, row.key)
-        // const url = URL.createObjectURL(file);
-        const url = URL.createObjectURL(response.data);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = row.key;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+      url = response.data
     })
-    // await axios.post(env.apiUrl+ "/storage/object/download", data, {});  
+    if(password.value) {
+      url = url + "&secret=" + password.value
+    }
+  }
+    // nextTick(() => {
+    //     loadingInstance.close()
+    // })
+  if (preview) {
+    console.log(url)
+    player.value?.src( {
+            type: "video/mp4",
+            src: url
+          })
+    player.value?.open()
+    videoDialog.value = true
+    return
+  }
+  const aLink = document.createElement('a');
+  aLink.style.display = 'none';
+  aLink.href = url;
+  aLink.download = row.key;
+  //   aLink.target = '_parent';
+  document.body.appendChild(aLink);
+  aLink.click();
+  document.body.removeChild(aLink); 
 }
+
+const reload = () => {
+  player.value?.open()
+}
+
+watch(videoDialog, (open) => {
+  if(!open) {
+    player.value?.pause()
+  }
+})
+
+// function downloadObject (row: ListObject)  {
+//     axios({
+//         method: 'POST',
+//         url: env.storageUrl + "/storage/object/download" ,
+//         responseType: 'arraybuffer',
+//         //responseType: 'blob',
+//         data: {    
+//             bucket: access.bucket,
+//             key: row.key,
+//             idToken: access.id_token,
+//             accessKey: access.accessKey,
+//             accessSecret: access.accessSecret,
+//             endpoint: access.endpoint, 
+//             region: access.region,
+//             platform: access.platform
+//         },   
+//         headers: {
+//             'Authorization': 'Bearer '+ access.access_token,
+//             "Content-Type": "application/json"
+//         },
+//     }).then(async function(response){
+//       let url
+//       if (password.value) {
+//         const key = await generateFixedKey(password.value, "AES-CTR")
+//         const iv = await getObjectBytes(access.bucket, "iv-" + row.key)
+//         console.log(response.data)
+//         console.log(iv.buffer)
+//         console.log(key)
+//         const decryptedData = await crypto.subtle.decrypt(
+//               { name: "AES-CTR", counter: iv, length: 128 },
+//               key,
+//               new Uint8Array(response.data)
+//         );
+//         const file = uint8ArrayToFile(decryptedData, row.key)
+//         url = URL.createObjectURL(file);
+//       } else {
+//         url = URL.createObjectURL(response.data);
+//       }
+//       const a = document.createElement('a');
+//         a.style.display = 'none';
+//         a.href = url;
+//         a.download = row.key;
+//         document.body.appendChild(a);
+//         a.click();
+//         document.body.removeChild(a);
+//         URL.revokeObjectURL(url);
+//     })
+// }
 
 function formatTimestamp(row:ListObject) {
     return dayjs(row.timestamp*1000).format("YYYY-MM-DD HH:mm:ss");

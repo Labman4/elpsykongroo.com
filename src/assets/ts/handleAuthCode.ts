@@ -33,7 +33,7 @@ const registerSw = async(username) => {
   console.log("start register")
   navigator.serviceWorker
     .register(    
-      import.meta.env.VITE_PWA_MODE === 'production' ? '/firebase-messaging-sw.js' : '/dev-sw.js?dev-sw',
+      import.meta.env.VITE_PWA_MODE === 'production' ? '/sw.js' : '/dev-sw.js?dev-sw',
       { type: import.meta.env.VITE_PWA_MODE  === 'production' ? 'classic' : 'module', updateViaCache: 'none'  })
     .then((registration) => {
         if ("Notification" in window ) {

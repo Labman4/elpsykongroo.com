@@ -164,7 +164,7 @@ import * as webauthnJson from "@github/webauthn-json";
 import { ElLoading, ElMessageBox, ElNotification } from 'element-plus';
 import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
-import { loadUser, noticeListByUser, updateUser, loadUserInfo, openStorage} from '~/assets/ts/commonApi';
+import { loadUser, noticeListByUser, updateUser, loadUserInfo} from '~/assets/ts/commonApi';
 import { userFormData, dynamicClaimForm, userInfoTableData, inituserInfoTable,} from '~/assets/ts/dataInterface'
 import Notice from '~/components/api/Notice.vue';
 import Storage from '~/components/api/Storage.vue';

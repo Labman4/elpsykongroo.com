@@ -86,69 +86,62 @@
   }
 </style>
 <script lang="ts" setup>
-    import $ from "jquery";
-    function update() {
-        var date = new Date();
-        var hour = date.getHours();
-        var minute = date.getMinutes();
-        var second = date.getSeconds();
-        var num0 = Math.floor(hour / 10);
-        var num1 = hour - 10 * num0;
-        var num2 = Math.floor(minute / 10);
-        var num3 = minute - 10 * num2;
-        var num4 = Math.floor(second / 10);
-        var num5 = second - 10 * num4;
-        var num:number[] = [];
-        num.push(num0);
-        num.push(num1);
-        num.push(num2);
-        num.push(num3);
-        num.push(num4);
-        num.push(num5);
+   function update() {
+    var date = new Date();
+    var hour = date.getHours();
+    var minute = date.getMinutes();
+    var second = date.getSeconds();
+    var num0 = Math.floor(hour / 10);
+    var num1 = hour - 10 * num0;
+    var num2 = Math.floor(minute / 10);
+    var num3 = minute - 10 * num2;
+    var num4 = Math.floor(second / 10);
+    var num5 = second - 10 * num4;
+    var num = [num0, num1, num2, num3, num4, num5];
 
-        for (var i = 0; i < 6; i++) {
-            var temp = num[i];
-            var grandSelector = "#nixie-tube-" + i;
-            var allNumbers = grandSelector + " .nixie-number";
-            var childSelector = grandSelector + " .nixie-number-" + temp;
-            var background = grandSelector + " .nixie-background";
+    for (var i = 0; i < 6; i++) {
+        var temp = num[i];
+        var grandSelector = "#nixie-tube-" + i;
+        var allNumbers = document.querySelectorAll(grandSelector + " .nixie-number");
+        var childSelector = grandSelector + " .nixie-number-" + temp;
+        var background = document.querySelector(grandSelector + " .nixie-background");
 
-            $(allNumbers).each(function () {
-                if ($(this).hasClass('active')) {
-                    $(this).removeClass('active');
-                }
-            });
-
-            if ($(background).hasClass('active')) {
-                $(background).removeClass('active');
+        allNumbers.forEach(function (number) {
+            if (number.classList.contains('active')) {
+                number.classList.remove('active');
             }
+        });
 
-            $(childSelector).addClass('active');
-            $(background).addClass('active');
+        if (background.classList.contains('active')) {
+            background.classList.remove('active');
         }
-    } 
 
-    $(function () {
-        initializeNixieTube(6, 2);
-        update();
-        setInterval(() => {update()}, 1000);
-    });
+        document.querySelector(childSelector).classList.add('active');
+        background.classList.add('active');
+    }
+}
 
-    function initializeNixieTube(number:number, whiteSpaceSpan:number) {
-        var template = $('#nixietube-template').html();
-        var targetHTML = "";
-        var whiteSpace = "<div class='white-space'></div>";
-        var CurrentTubeNumber = 0;
-        while (CurrentTubeNumber < number) {
-            if (whiteSpaceSpan > 0) {
-                if (CurrentTubeNumber % whiteSpaceSpan == 0 && CurrentTubeNumber > 0)
-                    $('#clock-surface').append(whiteSpace);
-            }
-            targetHTML = template.replace("[order]", CurrentTubeNumber?.toLocaleString());
-            $('#clock-surface').append(targetHTML);
-            CurrentTubeNumber++;
+document.addEventListener("DOMContentLoaded", function () {
+    initializeNixieTube(6, 2);
+    update();
+    setInterval(update, 1000);
+});
+
+function initializeNixieTube(number, whiteSpaceSpan) {
+    var template = document.getElementById('nixietube-template').innerHTML;
+    var targetHTML = "";
+    var whiteSpace = "<div class='white-space'></div>";
+    var CurrentTubeNumber = 0;
+    
+    while (CurrentTubeNumber < number) {
+        if (whiteSpaceSpan > 0) {
+            if (CurrentTubeNumber % whiteSpaceSpan == 0 && CurrentTubeNumber > 0)
+                document.getElementById('clock-surface').insertAdjacentHTML('beforeend', whiteSpace);
         }
-    };
-
+        targetHTML = template.replace("[order]", CurrentTubeNumber);
+        document.getElementById('clock-surface').insertAdjacentHTML('beforeend', targetHTML);
+        CurrentTubeNumber++;
+    }
+}
 </script>
 

@@ -1,6 +1,6 @@
 import { access } from '~/assets/ts/access';
 import { pkce } from '~/assets/ts/pkce';
-import axios from "axios";
+import { axios } from '~/assets/ts/axio';
 import { env } from "~/assets/ts/env";
 import * as webauthnJson from "@github/webauthn-json";
 import { visible } from "~/assets/ts/visible";
@@ -45,7 +45,6 @@ async function checkToken () {
         visible.qrcode = false;
         if (access.sub != "") {
            const resp = await loginWithToken();
-           console.log(resp)
            if (resp.data == 200) {
                 redirectOauthProxy("")
            }
