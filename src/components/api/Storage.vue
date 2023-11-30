@@ -1059,7 +1059,6 @@ const getObjectUrl = async (row: ListObject, secret, preview) => {
     }
     url = await getObjectSignedUrl(access.bucket, row.key)
   } else {
-    // const loadingInstance = ElLoading.service({ fullscreen: true })
     await axios({
         method: 'POST',
         url: env.storageUrl + "/storage/object/url" ,
@@ -1079,9 +1078,11 @@ const getObjectUrl = async (row: ListObject, secret, preview) => {
             "Content-Type": "application/json"
         },
     }).then(async function(response){
-      url = response.data
+      if (response.status == 200) {
+        url = response.data
+      }
     })
-    if(url && password.value) {
+    if (url && password.value) {
       let algorithm = "AES-GCM"
       let offset = 1024*1024*5
       // if (isSafe.value) {
@@ -1097,27 +1098,26 @@ const getObjectUrl = async (row: ListObject, secret, preview) => {
       }
     }
   }
-    // nextTick(() => {
-    //     loadingInstance.close()
-    // })
-  if (preview) {
-    console.log(url)
-    player.value?.src( {
+  if (url) {
+    if (preview) {
+      player.value?.src( {
             type: "video/mp4",
             src: url
           })
-    player.value?.open()
-    videoDialog.value = true
-    return
+      player.value?.open()
+      videoDialog.value = true
+      return 
+    } else {
+      const aLink = document.createElement('a');
+      aLink.style.display = 'none';
+      aLink.href = url;
+      aLink.download = row.key;
+      //   aLink.target = '_parent';
+      document.body.appendChild(aLink);
+      aLink.click();
+      document.body.removeChild(aLink); 
+    }
   }
-  const aLink = document.createElement('a');
-  aLink.style.display = 'none';
-  aLink.href = url;
-  aLink.download = row.key;
-  //   aLink.target = '_parent';
-  document.body.appendChild(aLink);
-  aLink.click();
-  document.body.removeChild(aLink); 
 }
 
 const reload = () => {
