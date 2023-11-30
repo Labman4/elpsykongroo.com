@@ -1028,7 +1028,9 @@ const download = async(row: ListObject, preview) => {
         },  
       }
       await axios(messageOption).then(async function (response) {
-        await getObjectUrl(row, secret, preview);
+        if (response.status == 200) {
+          await getObjectUrl(row, secret, preview);
+        } 
       })
     })
   } else {
