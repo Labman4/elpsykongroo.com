@@ -29,52 +29,101 @@ const register = async(username) => {
   }
 } 
 
-const registerSw = async(username) => {
-  console.log("start register")
-  navigator.serviceWorker
-    .register(    
-      import.meta.env.VITE_PWA_MODE === 'production' ? '/sw.js' : '/dev-sw.js?dev-sw',
-      { type: import.meta.env.VITE_PWA_MODE  === 'production' ? 'classic' : 'module', updateViaCache: 'none'  })
-    .then((registration) => {
-        if ("Notification" in window ) {
-            window.Notification.requestPermission().then((permission) => {
-          if (permission === 'granted') {
-            console.log("notice enable")
-            // navigator.serviceWorker.ready.then((registration) => {
-            //   registration.showNotification("register ready");
-            // });
-              if ('PushManager' in window) {
-                console.log("push enable")
-                  getToken(messaging, {
-                      vapidKey: env.publicKey,
-                      serviceWorkerRegistration : registration 
-                  })
-                  .then((currentToken) => {
-                      access.registerToken = currentToken
-                      const option = {
-                        baseURL: env.messageUrl,
-                        url: "notice/register",
-                        method: "PUT",
-                        params: {
-                            token: currentToken,
-                            timestamp: Date.now(),
-                            user: username
-                        },
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        withCredentials: true,             
-                      }                
-                      axios(option)
-                  })
-              }
-          }
+const registerSw = async (username) => {
+  console.log("start register");
+
+  const callbacks = {
+    success: [] as ((registration: ServiceWorkerRegistration) => void)[],
+    failure: []  as ((error: any) => void)[],
+  };
+
+  // Function to handle successful registration
+  const handleSuccess = (registration) => {
+    console.log("Service Worker registration succeeded. Scope is " + registration.scope);
+
+    // Execute success callbacks
+    callbacks.success.forEach((callback) => callback(registration));
+  };
+
+  // Function to handle registration failure
+  const handleFailure = (error) => {
+    console.log("Service Worker registration failed with " + error);
+
+    // Execute failure callbacks
+    callbacks.failure.forEach((callback) => callback(error));
+  };
+
+  try {
+    const registration = await navigator.serviceWorker.register(
+      import.meta.env.VITE_PWA_MODE === "production" ? "/sw.js" : "/dev-sw.js?dev-sw",
+      { type: import.meta.env.VITE_PWA_MODE === "production" ? "classic" : "module", updateViaCache: "none" }
+    );
+
+    if ("Notification" in window) {
+      window.Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          console.log("Notification permission granted");
+
+          // Add success and failure callbacks
+          callbacks.success.push((registration: any) => {
+            // Code to execute on success
+            if ("PushManager" in window) {
+              console.log("PushManager available");
+              getToken(messaging, {
+                vapidKey: env.publicKey,
+                serviceWorkerRegistration: registration,
+              }).then((currentToken) => {
+                access.registerToken = currentToken;
+
+                const option = {
+                  baseURL: env.messageUrl,
+                  url: "notice/register",
+                  method: "PUT",
+                  params: {
+                    token: currentToken,
+                    timestamp: Date.now(),
+                    user: username,
+                  },
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  withCredentials: true,
+                };
+
+                axios(option);
+              });
+            }
+          });
+
+          callbacks.failure.push((error) => {
+            // Code to execute on failure
+            console.log("PushManager is not available");
+          });
+
+          // Execute success callback
+          handleSuccess(registration);
+        }
       });
-    }})
-    .catch(function(error){
-        console.log("register failed");
-    }) 
-}
+    }
+  } catch (error) {
+    // Execute failure callback
+    handleFailure(error);
+  }
+
+  // Function to unregister the Service Worker on page unload
+  const unregisterOnUnload = () => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => {
+          registration.unregister();
+        });
+      });
+    }
+  };
+
+  // Add unload event listener
+  window.addEventListener("unload", unregisterOnUnload);
+};
 
 onMessage(messaging, (payload) => {
   console.log(payload)
