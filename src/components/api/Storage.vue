@@ -988,7 +988,7 @@ const DeleteSelect = () => {
   })
 }
 
-const download = async(row: ListObject, preview) => {  
+const download = async(row: ListObject, preview) => {
   password.value = ""
   if (row.key.startsWith("encrypt-")) {
     await downloadWithDecrypt();
@@ -1027,11 +1027,14 @@ const download = async(row: ListObject, preview) => {
           value: arrayBufferToBase64(key)
         },  
       }
-      await axios(messageOption)
+      await axios(messageOption).then(async function (response) {
+        await getObjectUrl(row, secret, preview);
+      })
     })
+  } else {
+    await getObjectUrl(row, secret, preview);
   }
   // downloadObject(row)
-  await getObjectUrl(row, secret, preview);
 }
 
 const getObjectUrl = async (row: ListObject, secret, preview) => {
