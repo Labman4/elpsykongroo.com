@@ -762,7 +762,7 @@ const initS3Info = async(accessKey) => {
     }
     let cipher
     if (accessKey == "" || accessKey == undefined) {
-      cipher =  await getObject(db, "aes", "cipher-" + data.s3InfoList[0].accessKey, "readwrite", "")
+      cipher = await getObject(db, "aes", "cipher-" + data.s3InfoList[0].accessKey, "readwrite", "")
     } else {
       cipher = await getObject(db, "aes", "cipher-" + accessKey, "readwrite", "");
     }
@@ -1043,19 +1043,18 @@ const getObjectUrl = async (row: ListObject, secret, preview) => {
   let url
   if (isDownloadDirect.value) {
     if (password.value) {
-      ElMessageBox.alert("direct download not support auto decrypt, please select proxy")
-      return
-      // const db = await openDB('s3', 1, ['s3',"aes"]);
-      // const ivBytes = await getObject(db, "aes", "iv-" + row.key, "readwrite", "");
-      // if (!ivBytes) {
-      //   const ivv = await getObjectBytes(access.bucket, "iv-" + row.key)
-      //   await setObject(db, "aes", "iv-" + row.key, ivv, "readwrite", "");
-      // } 
+      const db = await openDB('s3', 1, ['s3',"aes"]);
       // const keyBytes = await getObject(db, "aes", "key-" + row.key, "readwrite", "");
       // if (!keyBytes) {
-      //   const key = await generateFixedKey(password.value, "AES-CTR")
+      //   const key = await generateFixedKey(password.value, "AES-GCM")
       //   await setObject(db, "aes", "key-" + row.key, key, "readwrite", "");
       // }
+      const key = await generateFixedKey(password.value, "AES-GCM")
+      const keyBytes = await getObject(db, "aes", "key-" + row.key, "readwrite", "");
+      if (keyBytes) {
+        await deleteObject(db, "aes", "key-" + row.key, "readwrite");
+      }
+      await setObject(db, "aes", "key-" + row.key, key, "readwrite", "");
     }
     url = await getObjectSignedUrl(access.bucket, row.key)
   } else {
@@ -1110,12 +1109,22 @@ const getObjectUrl = async (row: ListObject, secret, preview) => {
     } else {
       const aLink = document.createElement('a');
       aLink.style.display = 'none';
-      aLink.href = url;
       aLink.download = row.key;
-      //   aLink.target = '_parent';
-      document.body.appendChild(aLink);
-      aLink.click();
-      document.body.removeChild(aLink); 
+      if (isDownloadDirect.value && password.value) {
+        fetch(url).then(async function(response) {
+          aLink.href = URL.createObjectURL(await response.blob());
+          document.body.appendChild(aLink);
+          aLink.click();
+          document.body.removeChild(aLink);
+          URL.revokeObjectURL(url);
+        })
+        .catch(error => console.log(error))
+      } else {
+        aLink.href = url;
+        document.body.appendChild(aLink);
+        aLink.click();
+        document.body.removeChild(aLink);
+      } 
     }
   }
 }
@@ -1164,13 +1173,13 @@ function downloadObject (row: ListObject)  {
         url = URL.createObjectURL(response.data);
       }
       const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = row.key;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+      a.style.display = 'none';
+      a.href = url;
+      a.download = row.key;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     })
 }
 
