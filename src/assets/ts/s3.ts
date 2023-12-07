@@ -14,6 +14,8 @@ let s3Client
 const initS3Client = (init:boolean) => {
     if (s3Client != null && !init) {
         return s3Client
+    } else {
+        uploadPromises = []
     }
     if (access.region == "") {
         if (access.platform == "cloudflare") {

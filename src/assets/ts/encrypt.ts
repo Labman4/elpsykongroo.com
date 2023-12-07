@@ -41,7 +41,7 @@ async function generateFixedKey(text, algorithm) {
     return key;
 }
  
-async function encryptData(data, text, iv, algorithm) {
+async function encryptData(data, text, algorithm) {
     let key = await generateFixedKey(text, algorithm);
     let plaintextData
     if (typeof data != "string") {
@@ -50,13 +50,12 @@ async function encryptData(data, text, iv, algorithm) {
         const encoder = new TextEncoder();
         plaintextData = encoder.encode(data);
     }
-    if (iv == null || iv == "") {
-        if (algorithm == "AES-GCM") {
-            iv = crypto.getRandomValues(new Uint8Array(12));
-        } else {
-            iv = crypto.getRandomValues(new Uint8Array(16));
-        }
-    }    
+    let iv 
+    if (algorithm == "AES-GCM") {
+        iv = crypto.getRandomValues(new Uint8Array(12));
+    } else {
+        iv = crypto.getRandomValues(new Uint8Array(16));
+    }
     let encryptionParams
     if (algorithm == "AES-CTR") {
         encryptionParams = {
@@ -79,7 +78,7 @@ async function encryptData(data, text, iv, algorithm) {
     result.set(iv);
     result.set(new Uint8Array(encryptedData), iv.length);
     return {
-        cipher: result.buffer,
+        cipher: result,
         ciphertext: encryptedData,
         iv: iv,
         ciphertextWithoutTag: result.slice(0, result.length - 16),
@@ -87,16 +86,17 @@ async function encryptData(data, text, iv, algorithm) {
     };
 }
 
-async function decryptData(ciphertext, iv, text, algorithm) {
+async function decryptData(ciphertext, text, algorithm) {
     const key = await generateFixedKey(text, algorithm);
-    if (iv == null || iv == "") {
-        if (algorithm != "AES-GCM") {
-            return
-        } else {
-            iv = ciphertext.slice(0, 12);
-            ciphertext = ciphertext.slice(12, ciphertext.length)
-        }
+    let iv
+    if (algorithm == "AES-GCM") {
+        iv = ciphertext.slice(0, 12);
+        ciphertext = ciphertext.slice(12, ciphertext.length)
+    } else {
+        iv = ciphertext.slice(0, 16);
+        ciphertext = ciphertext.slice(16, ciphertext.length)
     }
+
     let decryptionParams = {
         name: algorithm,
         iv: iv,
