@@ -126,18 +126,18 @@
     :width=visible.dialogWidth
     align-center>
     <span>need secret to load exist s3 Info</span>
-    <el-form :model="s3FormData">
-        <el-form-item label="secret" :label-width=visible.labelWidth>
+    <el-form :model="s3FormData" ref="secretformRef">
+        <el-form-item label="secret" :label-width=visible.labelWidth :required=true>
           <el-input v-model="s3Secret"/>       
         </el-form-item>
-        <el-form-item label="bucket" :label-width=visible.labelWidth>
-          <el-input v-model="access.bucket"/>       
+        <el-form-item label="bucket" :label-width=visible.labelWidth :required=true>
+          <el-input v-model="access.bucket" />       
         </el-form-item>
       </el-form>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="cancelLoad()">Cancel</el-button>
-        <el-button type="primary" @click="initS3Info(access.accessKey)">load</el-button>
+        <el-button type="primary" @click="initS3Info(access.accessKey, secretformRef)">load</el-button>
         <el-button type="primary" @click="saveS3Info()">save</el-button>
       </span>
     </template>
@@ -165,6 +165,7 @@ import { uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes, cre
 import { ListObject } from '~/assets/ts/interface'
 import VideoPlayer from '~/components/VideoPlayer.vue';
 const player = ref<InstanceType<typeof VideoPlayer> | null>(null)
+const secretformRef = ref<FormInstance>()
 
 interface s3Info {
   accessKey: string,
@@ -704,7 +705,7 @@ const saveS3Info = async() => {
 
 const loadS3Info = async(row: s3Info) => {
   if (s3Secret.value) {
-    initS3Info(row.accessKey)
+    initS3Info(row.accessKey, secretformRef)
   }
   access.endpoint = row.endpoint
   access.region = row.region
@@ -731,7 +732,7 @@ const clearS3Info = async() => {
   access.endpoint = s3FormData.endpoint
   access.region = s3FormData.region       
   access.platform = s3FormData.platform 
-  await initS3Info("");
+  await initS3Info("", secretformRef);
   Object.assign(s3FormData, initS3FormData());
 }
 
@@ -751,110 +752,109 @@ const getS3Info = async() => {
   return db
 }
 
-const initS3Info = async(accessKey) => {
+const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
+  if (!access.bucket) {
+    access.bucket = access.sub
+  } 
   //for local s3 dev
-  const domain = window.location.hostname;
+  if (!formEl) return
+  // const domain = window.location.hostname;
   // if (domain.split(":")[0] == "127.0.0.1" || domain.split(":")[0] == "localhost") {
   //   access.id_token = ""
   //   access.sub = "admin"
   // }
-  if (access.bucket == "") {
-    access.bucket = access.sub
-  }
-  if (!access.bucket) {
-    ElMessageBox.alert("please enter bucket name")
-    return
-  }
-  const db = await getS3Info();
-  if (data.s3InfoList.length > 0) {
-    if (access.platform == "default") {
-        access.platform = data.s3InfoList[0].platform
-        access.bucket = access.sub
-    }
-    let cipher
-    if (!accessKey) {
-      cipher = await getObject(db, "aes", "cipher-" + data.s3InfoList[0].accessKey, "readwrite", "")
-    } else {
-      cipher = await getObject(db, "aes", "cipher-" + accessKey, "readwrite", "");
-    }
-    if (cipher) {
-      try {
-        if (!s3Secret.value) {
-          saveS3InfoForm.value = true
-          access.accessSecret = ""
-          return;
-        }
-        const resp = await decryptData(base64ToArrayBuffer(cipher), s3Secret.value, "AES-GCM");
-        const secretData = new TextDecoder().decode(resp)
-        if (secretData) {
-          saveS3InfoForm.value = false
-          access.accessSecret = secretData
-        }     
-        if (access.accessSecret) {
-            if (data.s3InfoList.length > 1) {
-              if (!s3Init.value) {
+  if (formEl) {
+    const db = await getS3Info();
+    if (data.s3InfoList.length > 0) {
+      if (access.platform == "default") {
+          access.platform = data.s3InfoList[0].platform
+          access.bucket = access.sub
+      }
+      let cipher
+      if (!accessKey) {
+        cipher = await getObject(db, "aes", "cipher-" + data.s3InfoList[0].accessKey, "readwrite", "")
+      } else {
+        cipher = await getObject(db, "aes", "cipher-" + accessKey, "readwrite", "");
+      }
+      if (cipher) {
+        try {
+          if (!s3Secret.value) {
+            saveS3InfoForm.value = true
+            access.accessSecret = ""
+            return;
+          }
+          const resp = await decryptData(base64ToArrayBuffer(cipher), s3Secret.value, "AES-GCM");
+          const secretData = new TextDecoder().decode(resp)
+          if (secretData) {
+            saveS3InfoForm.value = false
+            access.accessSecret = secretData
+          }     
+          if (access.accessSecret) {
+              if (data.s3InfoList.length > 1) {
+                if (!s3Init.value) {
+                  access.accessKey = data.s3InfoList[0].accessKey
+                  access.platform = data.s3InfoList[0].platform
+                  access.endpoint = data.s3InfoList[0].endpoint
+                  access.region = data.s3InfoList[0].region
+                  s3InfoTable.value = true;
+                  s3Init.value = true;
+                  initS3Client(true)
+                  return;
+                } else {         
+                  saveS3InfoForm.value = false;
+                  s3InfoTable.value = false;
+                }
+              }
+              if (data.s3InfoList.length == 1) {
                 access.accessKey = data.s3InfoList[0].accessKey
                 access.platform = data.s3InfoList[0].platform
                 access.endpoint = data.s3InfoList[0].endpoint
                 access.region = data.s3InfoList[0].region
-                s3InfoTable.value = true;
-                s3Init.value = true;
-                initS3Client(true)
-                return;
-              } else {         
-                saveS3InfoForm.value = false;
                 s3InfoTable.value = false;
               }
-            }
-            if (data.s3InfoList.length == 1) {
-              access.accessKey = data.s3InfoList[0].accessKey
-              access.platform = data.s3InfoList[0].platform
-              access.endpoint = data.s3InfoList[0].endpoint
-              access.region = data.s3InfoList[0].region
-              s3InfoTable.value = false;
-            }
-        } else {
-          access.platform = ""
-          access.accessKey = ""
-          access.endpoint = ""
-          access.region = ""
+          } else {
+            access.platform = ""
+            access.accessKey = ""
+            access.endpoint = ""
+            access.region = ""
+          }
+        } catch (error) {
+          if (s3Secret.value) {
+            ElMessageBox.alert("incorrect secret, will open default s3, please try again later by load button")
+            s3Secret.value = ""
+            saveS3InfoForm.value = true
+            access.accessSecret = ""
+            access.platform = ""
+            access.accessKey = ""
+            access.endpoint = ""
+            access.region = ""
+          }
+          if (!s3Init.value) {
+            saveS3InfoForm.value = false  
+          }
+          storageTable.value = true
+          listObject()
+          return;
         }
-      } catch (error) {
-        if (s3Secret.value) {
-          ElMessageBox.alert("incorrect secret, will open default s3, please try again later by load button")
-          s3Secret.value = ""
-          saveS3InfoForm.value = true
-          access.accessSecret = ""
-          access.platform = ""
-          access.accessKey = ""
-          access.endpoint = ""
-          access.region = ""
-        }
-        if (!s3Init.value) {
-          saveS3InfoForm.value = false  
-        }
-        storageTable.value = true
-        listObject()
-        return;
       }
+      s3Init.value = true;
+      storageTable.value = true
+      listObject()
+      initS3Client(true)
+    } else if (access.platform == "default") {
+      s3Form.value = true
+      access.platform = "";
+    } else {
+      storageTable.value = true
+      listObject()
+      s3Form.value = false
     }
-    s3Init.value = true;
-    storageTable.value = true
-    listObject()
-    initS3Client(true)
-  } else if (access.platform == "default") {
-    s3Form.value = true
-    access.platform = "";
-  } else {
-    storageTable.value = true
-    listObject()
-    s3Form.value = false
   }
 }
  
 const initS3 = async() => {
   if (!s3Init.value) {
-    await initS3Info("")
+    await initS3Info("", secretformRef)
   } else {
     storageTable.value = true
     listObject()
