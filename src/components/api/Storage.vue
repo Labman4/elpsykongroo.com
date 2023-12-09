@@ -343,7 +343,7 @@ async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
 }    
 
 const downloadMethod = async() => {
-  isDownloadDirect.value = false;
+  isDirect.value = false;
   await ElMessageBox.confirm('please choose download method',{
     confirmButtonText: 'proxy',
     cancelButtonText: 'direct',
