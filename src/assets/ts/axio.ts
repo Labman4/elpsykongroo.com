@@ -36,13 +36,12 @@ axios.interceptors.response.use(async function (response) {
     }
     return response;
   }, function (error) {
-    if (axios.isCancel(error)) {
-      console.log('Request canceled', error.message);
-    } 
     if (error.request.status === 401) {
-      if (error.request.response == "no access") {
+      if (!access.sub) { 
+        ElMessageBox.alert("please login first")
+      } else if (error.request.response == "no access") {
         ElMessageBox.alert("no access, please ensure and retry")
-      } else if (handleCookie().length != 0 && access.sub != "" && access.sub != undefined) {
+      } else if (handleCookie().length != 0) {
         visible.refreshlogin = true
       } else {
         refreshToken()
@@ -50,24 +49,27 @@ axios.interceptors.response.use(async function (response) {
     }
     if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
       console.log("cors error")
-      if (error.response != undefined && error.response.status === 401) {
-        if (error.response.data === 'no access') {
+      if (error.response && error.response.status === 401) {
+        if (!access.sub) {
+          ElMessageBox.alert("please login first")
+        } else if (error.response.data == "no access") {
           ElMessageBox.alert("no access, please ensure and retry")
-        } else if (handleCookie().length != 0 && access.sub != "" && access.sub != undefined) {
-            visible.refreshlogin = true
+        } else if (handleCookie().length != 0) {
+          visible.refreshlogin = true
         } else {
-          refreshToken(); 
-          return  
+          refreshToken()
         }
       } else if (error.config.url == "/login" || error.config.url == "/register") {
         ElMessageBox.alert("service error, please try again later")
-      }   
+      } else {
+        console.log(error)
+      }
     }
     return error
   });
 
   const refreshToken = () => {
-    if(access.refresh_token != "" && access.refresh_token != undefined) {
+    if(access.refresh_token) {
       refresh()
     }
   }
