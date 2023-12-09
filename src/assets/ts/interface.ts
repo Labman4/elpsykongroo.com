@@ -34,4 +34,11 @@ interface authority {
     authority: string
     id: string
 }
-export type { user, notification, topic, group, authority };
+
+interface ListObject {
+  "key": string
+  "timestamp": number
+  "size": number
+}
+
+export type { user, notification, topic, group, authority, ListObject };

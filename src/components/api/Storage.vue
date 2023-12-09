@@ -5,6 +5,8 @@
     <el-button type="" @click="s3Form = true">connect</el-button>
     <el-button type="" @click="s3InfoTable = true">load</el-button>
     <el-button @click="listObject()">refresh</el-button>
+    <el-button type="success" @click="isDirect = false" v-if="isDirect">mode: direct </el-button>
+    <el-button type="primary" @click="isDirect = true" v-if="!isDirect">mode: proxy </el-button>
     <el-table :data="data.files" @selection-change="handleSelectChange">
       <el-table-column type="selection"/>
       <el-table-column property="key" label="file" width="auto"/>
@@ -159,15 +161,10 @@ import { dayjs } from 'element-plus';
 import { visible } from '~/assets/ts/visible'
 import { setObject, deleteObject, getObject, openDB } from '~/assets/ts/indexDB'
 import { encryptData, decryptData, computeFileSHA256, arrayBufferToBase64, base64ToArrayBuffer, generateFixedKey } from '~/assets/ts/encrypt'
-import { uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes, getObjectSignedUrlWithParams } from '~/assets/ts/s3'
+import { uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes, createMultipartUpload, listObjectsCommand, deleteObjectsCommand, deleteObjectCommand, uploadObjectCommand } from '~/assets/ts/s3'
+import { ListObject } from '~/assets/ts/interface'
 import VideoPlayer from '~/components/VideoPlayer.vue';
 const player = ref<InstanceType<typeof VideoPlayer> | null>(null)
-
-interface ListObject {
-    "key": string
-    "timestamp": number
-    "size": number
-}
 
 interface s3Info {
   accessKey: string,
@@ -186,13 +183,10 @@ const s3Form = ref(false)
 const s3Init = ref(false)
 const saveS3InfoForm = ref(false)
 const s3Secret = ref("")
-const isDirect = ref(false)
-const isDownloadDirect = ref(false)
+const isDirect = ref(true)
 const isEncrypt = ref(false)
 const isStream = ref(false)
-// const isSafe = ref(false)
 const password = ref("")
-let iv
 
 let initS3FormData  = () => ({
   accessKey: "",
@@ -238,7 +232,9 @@ const kb = (row: ListObject) => {
 }
 
 const refreshList = (response: any, uploadFile: UploadFile) => {
-    listObject();
+    if (response) {
+      listObject();
+    }
 }
 
 const encryptOrNot: UploadProps['beforeUpload'] = async(rawFile: UploadRawFile) => {
@@ -264,8 +260,21 @@ const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
   )
 }
 
+const directPreflight = async() => {
+  if (!await checkCors()) {
+      ElMessageBox.alert("the bucket is not support cors, please try to config by maunal or login for auto config")
+      return
+  }
+  initS3Client(true)
+}
+
 const getUploadId = async (fileName, sha256, partCount, partNum) => {
-    const option = {
+    let uploadId
+    if (isDirect.value) {
+      await directPreflight()
+      uploadId = await createMultipartUpload(access.bucket, fileName)
+    } else {
+      const option = {
         baseURL: env.storageUrl,
         url: "/storage/object",
         method: "POST",
@@ -286,55 +295,56 @@ const getUploadId = async (fileName, sha256, partCount, partNum) => {
             'Authorization': 'Bearer '+ access.access_token,
             "Content-Type": "application/json"
         }
-    }
-    return axios(option).then(function(resp) {
-      return resp.data
-   })
+      }
+    await axios(option).then(function(resp) {
+      uploadId = resp.data
+    })
+  }
+  return uploadId
 }
 
 async function chunkedUpload(options: UploadRequestOptions, chunkSize) {
     await uploadMode()
     let fileName = options.file.name;
-    let tagList, tag, result;
-    var uploadId;
-    if (access.platform != "" && access.platform != "default") {
-      const upload = await getUploadId(fileName, "", "", "");
-      uploadId = upload;
-    }
-    var partCount = Math.ceil(options.file.size / chunkSize);
-    if (isEncrypt.value && password.value != "" ) {
-      fileName = "encrypt-" + options.file.name
-      uploadId = await abortMultiPart(fileName, uploadId)
-    }
-    var completeSize = 0;
-    for (const { index, chunk } of chunks(options.file, chunkSize)) {
-          chunk.arrayBuffer().then(async function(arrayBuffer) {  
-            let checkUpload
-            if (isStream.value) {
-              const sha256 = await computeFileSHA256(arrayBuffer)
-              checkUpload = await getUploadId(fileName, sha256, partCount, index)
-              if (checkUpload == "" || checkUpload == undefined) {
-                  completeSize ++;
-              } else if (access.platform != "" && access.platform != "default" && access.platform != "cloudflare" && uploadId != checkUpload) {
-                return 
-              }
-              if (completeSize == partCount) {
-                uploadPart(chunk, options.file.name, partCount, index, uploadId, "")
-              }
-            } 
-            if (isEncrypt.value && password.value != "") {
-              const cipher = await encryptBydecryptMethod(arrayBuffer, options.file.name)
-              uploadPart(cipher, "encrypt-"+ options.file.name, partCount, index, uploadId, "")
-            } else { 
+    let uploadId;
+    const upload = await getUploadId(fileName, "", "", "");
+    uploadId = upload;
+    if (uploadId) {
+      var partCount = Math.ceil(options.file.size / chunkSize);
+      if (isEncrypt.value && password.value != "" ) {
+        fileName = "encrypt-" + options.file.name
+        uploadId = await abortMultiPart(fileName, uploadId)
+      }
+      let completeSize = 0;
+      for (const { index, chunk } of chunks(options.file, chunkSize)) {
+        chunk.arrayBuffer().then(async function(arrayBuffer) {
+          let checkUpload
+          if (isStream.value) {
+            const sha256 = await computeFileSHA256(arrayBuffer)
+            checkUpload = await getUploadId(fileName, sha256, partCount, index)
+            if (checkUpload == "" || checkUpload == undefined) {
+                completeSize ++;
+            } else if (access.platform != "" && access.platform != "default" && access.platform != "cloudflare" && uploadId != checkUpload) {
+              return 
+            }
+            if (completeSize == partCount) {
               uploadPart(chunk, options.file.name, partCount, index, uploadId, "")
-            }      
-        }) 
+            }
+          } 
+          if (isEncrypt.value && password.value != "") {
+            const cipher = await encryptBydecryptMethod(arrayBuffer, options.file.name)
+            uploadPart(cipher, "encrypt-"+ options.file.name, partCount, index, uploadId, "")
+          } else { 
+            uploadPart(chunk, options.file.name, partCount, index, uploadId, "")
+          }            
+      }) 
+    }
   }
 }    
 
-const uploadMethod = async() => {
-  isDirect.value = false;
-  await ElMessageBox.confirm('please choose upload method?',{
+const downloadMethod = async() => {
+  isDownloadDirect.value = false;
+  await ElMessageBox.confirm('please choose download method',{
     confirmButtonText: 'proxy',
     cancelButtonText: 'direct',
   })
@@ -343,20 +353,6 @@ const uploadMethod = async() => {
   })
   .catch(() => {
     isDirect.value = true;
-  })
-}
-
-const downloadMethod = async() => {
-  isDownloadDirect.value = false;
-  await ElMessageBox.confirm('please choose download method?',{
-    confirmButtonText: 'proxy',
-    cancelButtonText: 'direct',
-  })
-  .then(() => {
-    isDownloadDirect.value = false;
-  })
-  .catch(() => {
-    isDownloadDirect.value = true;
   })
 }
 
@@ -393,7 +389,17 @@ const uint8ArrayToFile = (uint8Array, fileName, mimeType = 'application/octet-st
 
 const uploadPart = async(chunk, filename, partCount, partNum, uploadId, offset) => {
     if (isDirect.value) {
-      uploadPartDirect(chunk, access.bucket, filename, uploadId, partNum, partCount)
+      try {
+        uploadPartDirect(chunk, access.bucket, filename, uploadId, partNum, partCount)
+      } catch {
+        await ElMessageBox.confirm('something wrong with upload throgh direct, u can choose proxy and try again after login')
+        .then(() => {
+          isDirect.value = false;
+        })
+        .catch(() => {
+          isDirect.value = true;
+        })      
+      } 
     } else {
       uploadPartProxy(chunk, filename, partCount, partNum, uploadId, offset)
     }
@@ -402,7 +408,7 @@ const uploadPart = async(chunk, filename, partCount, partNum, uploadId, offset) 
 const uploadMode = async() => {
   isStream.value = false;
   if (!isDirect.value) {
-    await ElMessageBox.confirm("please select upload mode",{
+    await ElMessageBox.confirm("please select upload mode, stream mode can keep upload process(need login)", {
     confirmButtonText: 'stream',
     cancelButtonText: 'direct',
     })
@@ -469,13 +475,7 @@ function* chunks(file, chunkSize) {
 
 const upload = async (options: UploadRequestOptions) => {
     if (options.file.size > 1024*1024*5) {
-      await uploadMethod()
-      if (isDirect.value) {
-        if (!await checkCors()) {
-          ElMessageBox.alert("the bucket is not support cors, please try to choose proxy")
-          return
-        }
-      }
+      await directPreflight()
       await chunkedUpload(options, 1024*1024*5);
       // be careful minio must big than 5mb and oracle no limit
       // if (access.platform == "" || access.platform == "default" || access.platform == "cloudflare" || access.platform == "c2" ) {
@@ -494,9 +494,14 @@ const upload = async (options: UploadRequestOptions) => {
       } else {
         fileData = options.file
       }
-      uploadFileDirect(fileData, "")
+      if (isDirect.value) {
+        uploadObjectCommand(access.bucket, options.file.name, fileData)
+      } else {
+        uploadFileDirect(fileData, "")
+      }
    }
 }
+
 let corsFlag
 let corsCount
 
@@ -520,10 +525,12 @@ const checkCors = async() => {
     }
     corsCount ++
     const CORSRules = await getCorsRule(access.bucket);
-    for(let rule of CORSRules.data) {
+    if (CORSRules && CORSRules.data) {
+      for(let rule of CORSRules.data) {
         if (rule["allowedOrigins"] && rule["allowedOrigins"].includes(env.redirectUrl)) {
           corsFlag = true
         }    
+      }
     }
   }
   if (!corsFlag) {
@@ -663,7 +670,7 @@ const connect = async() => {
     access.region = s3FormData.region   
     if (s3FormData.accessSecret != "") {
         const result = await listObject()
-        if (result != "" && result != undefined && result.length >= 0 ) {
+        if (result && result.length >= 0 ) {
           saveS3Warning.value = true;
         } else {
           ElMessageBox.alert("check failed, please ensure and try again")
@@ -696,14 +703,14 @@ const saveS3Info = async() => {
 }
 
 const loadS3Info = async(row: s3Info) => {
-  if (s3Secret.value != "") {
+  if (s3Secret.value) {
     initS3Info(row.accessKey)
   }
   access.endpoint = row.endpoint
   access.region = row.region
   access.platform = row.platform 
   access.accessKey = row.accessKey
-  if (access.accessSecret == ""){
+  if (!access.accessSecret){
     s3Secret.value = ""
     saveS3InfoForm.value = true;
   }
@@ -747,10 +754,10 @@ const getS3Info = async() => {
 const initS3Info = async(accessKey) => {
   //for local s3 dev
   const domain = window.location.hostname;
-  if (domain.split(":")[0] == "127.0.0.1" || domain.split(":")[0] == "localhost") {
-    access.id_token = ""
-    access.sub = "admin"
-  }
+  // if (domain.split(":")[0] == "127.0.0.1" || domain.split(":")[0] == "localhost") {
+  //   access.id_token = ""
+  //   access.sub = "admin"
+  // }
   if (access.bucket == "") {
     access.bucket = access.sub
   }
@@ -761,25 +768,25 @@ const initS3Info = async(accessKey) => {
         access.bucket = access.sub
     }
     let cipher
-    if (accessKey == "" || accessKey == undefined) {
+    if (!accessKey) {
       cipher = await getObject(db, "aes", "cipher-" + data.s3InfoList[0].accessKey, "readwrite", "")
     } else {
       cipher = await getObject(db, "aes", "cipher-" + accessKey, "readwrite", "");
     }
-    if (cipher != undefined && cipher != "") {
+    if (cipher) {
       try {
-        if (s3Secret.value == "") {
+        if (!s3Secret.value) {
           saveS3InfoForm.value = true
           access.accessSecret = ""
           return;
         }
         const resp = await decryptData(base64ToArrayBuffer(cipher), s3Secret.value, "AES-GCM");
         const secretData = new TextDecoder().decode(resp)
-        if (secretData != "") {
+        if (secretData) {
           saveS3InfoForm.value = false
           access.accessSecret = secretData
         }     
-        if (access.accessSecret != "") {
+        if (access.accessSecret) {
             if (data.s3InfoList.length > 1) {
               if (!s3Init.value) {
                 access.accessKey = data.s3InfoList[0].accessKey
@@ -809,7 +816,7 @@ const initS3Info = async(accessKey) => {
           access.region = ""
         }
       } catch (error) {
-        if (s3Secret.value != "") {
+        if (s3Secret.value) {
           ElMessageBox.alert("incorrect secret, will open default s3, please try again later by load button")
           s3Secret.value = ""
           saveS3InfoForm.value = true
@@ -851,7 +858,19 @@ const initS3 = async() => {
 }
 
 const listObject = async() => {
-  const option = {
+  let result
+  if (isDirect.value) {
+    await directPreflight()
+    const listObjects:ListObject[] = await listObjectsCommand(access.bucket)
+    if (listObjects && listObjects.length > 0) {
+        const filterObject = listObjects.filter( obj => {
+          return !obj.key.startsWith(access.bucket)
+        })
+        data.files = filterObject;
+    }
+    result = listObjects
+  } else {
+    const option = {
       baseURL: env.storageUrl,
       url: "/storage/object/list",
       method: "POST",
@@ -869,17 +888,19 @@ const listObject = async() => {
           "Content-Type": "application/json"
       }
   }
-  let result
   await axios(option).then(function(response) {
-    if (response.data != "" && response.data != undefined) {
-      const listObject:listObject[] = response.data
-      const filterObject = listObject.filter( obj => {
-          return !obj.key.startsWith(access.bucket) && !obj.key.startsWith("iv-")
-      })
-      data.files = filterObject;
-      result = response.data
+    if (response.data) {
+      const listObjects:ListObject[] = response.data
+      if (listObjects && listObjects.length > 0) {
+        const filterObject = listObject.filter( obj => {
+          return !obj.key.startsWith(access.bucket)
+        })
+        data.files = filterObject;
+      }
     }
+    result = response.data
   })
+  }
   return result
 }
 
@@ -912,31 +933,38 @@ const abortMultiPart = async (name, uploadId) => {
   return upload
 }
 
-const deleteS3 = (index:number, row: ListObject) => {
+const deleteS3 = async (index:number, row: ListObject) => {
+  if (isDirect.value) {
+    const resp = await deleteObjectCommand(access.bucket, row.key)
+    if (resp) {
+      data.files.splice(index, 1);
+    }
+  } else {
     const option = {
-        baseURL: env.storageUrl,
-        url: "/storage/object/delete",
-        method: "POST",
-        data: {
-            bucket: access.bucket,
-            key: row.key,
-            idToken: access.id_token,
-            accessKey: access.accessKey,
-            accessSecret: access.accessSecret,
-            endpoint: access.endpoint, 
-            region: access.region,
-            platform: access.platform
-        },
-        headers: {
-            'Authorization': 'Bearer '+ access.access_token,
-            "Content-Type": "application/json"
-        }
+      baseURL: env.storageUrl,
+      url: "/storage/object/delete",
+      method: "POST",
+      data: {
+          bucket: access.bucket,
+          key: row.key,
+          idToken: access.id_token,
+          accessKey: access.accessKey,
+          accessSecret: access.accessSecret,
+          endpoint: access.endpoint, 
+          region: access.region,
+          platform: access.platform
+      },
+      headers: {
+          'Authorization': 'Bearer '+ access.access_token,
+          "Content-Type": "application/json"
+      }
     }
     axios(option).then(function (response) {
         if (response.status == 200) {
             data.files.splice(index, 1);
         }    
     })   
+  } 
 }
 
 const handleSelectChange = (val: ListObject[]) => {
@@ -951,41 +979,65 @@ const multipleSelect = ref<ListObject[]>([])
 
 const selected:string[] = [];
 
-const DeleteSelect = () => {
-  const option = {
-    baseURL: env.storageUrl,
-    url: "/storage/object/delete",
-    method: "POST",
-    data: {
-      bucket: access.bucket,
-      key: selected.toString(),
-      idToken: access.id_token,
-      accessKey: access.accessKey,
-      accessSecret: access.accessSecret,
-      endpoint: access.endpoint, 
-      region: access.region,
-      platform: access.platform
-    },
-    headers: {
-      'Authorization': 'Bearer '+ access.access_token,
-      "Content-Type": "application/json"
-    },
-  }
-  axios(option).then(function (response) {
-    var count = response.data;
-    if (count == selected.length) {
-      selected.forEach(function(item, index){
-        data.files.forEach(function(i, ind){
-            if (item === i.key) {
-              data.files.splice(ind, 1)
-            }
-        }) 
-      });
-      if (data.files.length == 0) {
-          listObject();
-      } 
+const DeleteSelect = async () => {
+  if (isDirect.value) {
+    let objs = []
+    selected.map((c) => {
+                const obj = {
+                    Key: c,
+                }
+                objs.push(obj)
+            });
+   const resp = await deleteObjectsCommand(access.bucket, objs)
+   if (resp.length == selected.length) {
+    selected.forEach(function(item, index){
+          data.files.forEach(function(i, ind){
+              if (item === i.key) {
+                data.files.splice(ind, 1)
+              }
+          }) 
+        });
+        if (data.files.length == 0) {
+            listObject();
+        } 
+   };
+  } else {
+    const option = {
+      baseURL: env.storageUrl,
+      url: "/storage/object/delete",
+      method: "POST",
+      data: {
+        bucket: access.bucket,
+        key: selected.toString(),
+        idToken: access.id_token,
+        accessKey: access.accessKey,
+        accessSecret: access.accessSecret,
+        endpoint: access.endpoint, 
+        region: access.region,
+        platform: access.platform
+      },
+      headers: {
+        'Authorization': 'Bearer '+ access.access_token,
+        "Content-Type": "application/json"
+      },
     }
-  })
+    axios(option).then(function (response) {
+      var count = response.data;
+      if (count == selected.length) {
+        selected.forEach(function(item, index){
+          data.files.forEach(function(i, ind){
+              if (item === i.key) {
+                data.files.splice(ind, 1)
+              }
+          }) 
+        });
+        if (data.files.length == 0) {
+            listObject();
+        } 
+      }
+    })
+  }
+  
 }
 
 const download = async(row: ListObject, preview) => {
@@ -993,9 +1045,11 @@ const download = async(row: ListObject, preview) => {
   if (row.key.startsWith("encrypt-")) {
     await downloadWithDecrypt();
   }
-  await downloadMethod()
+  if (access.sub) {
+    await downloadMethod()
+  }
   let secret 
-  if (password.value && !isDownloadDirect.value) {
+  if (password.value && !isDirect.value) {
     const option = {
         baseURL: env.apiUrl,
         url: "/public/key",
@@ -1041,7 +1095,7 @@ const download = async(row: ListObject, preview) => {
 
 const getObjectUrl = async (row: ListObject, secret, preview) => {
   let url
-  if (isDownloadDirect.value) {
+  if (isDirect.value) {
     if (password.value) {
       const db = await openDB('s3', 1, ['s3',"aes"]);
       // const keyBytes = await getObject(db, "aes", "key-" + row.key, "readwrite", "");
@@ -1110,7 +1164,7 @@ const getObjectUrl = async (row: ListObject, secret, preview) => {
       const aLink = document.createElement('a');
       aLink.style.display = 'none';
       aLink.download = row.key;
-      if (isDownloadDirect.value && password.value) {
+      if (isDirect.value && password.value) {
         fetch(url).then(async function(response) {
           aLink.href = URL.createObjectURL(await response.blob());
           document.body.appendChild(aLink);
