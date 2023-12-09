@@ -37,7 +37,7 @@ axios.interceptors.response.use(async function (response) {
     return response;
   }, function (error) {
     if (error.request.status === 401) {
-      if (!access.sub) { 
+      if (!access.sub && error.config.url != "/access") { 
         ElMessageBox.alert("please login first")
       } else if (error.request.response == "no access") {
         ElMessageBox.alert("no access, please ensure and retry")
@@ -50,7 +50,7 @@ axios.interceptors.response.use(async function (response) {
     if (error.message === 'Network Error' && error.request.status === 0 && error.request.responseURL === '') {
       console.log("cors error")
       if (error.response && error.response.status === 401) {
-        if (!access.sub) {
+        if (!access.sub && error.config.url != "/access") {
           ElMessageBox.alert("please login first")
         } else if (error.response.data == "no access") {
           ElMessageBox.alert("no access, please ensure and retry")
