@@ -761,6 +761,10 @@ const initS3Info = async(accessKey) => {
   if (access.bucket == "") {
     access.bucket = access.sub
   }
+  if (!access.bucket) {
+    ElMessageBox.alert("please enter bucket name")
+    return
+  }
   const db = await getS3Info();
   if (data.s3InfoList.length > 0) {
     if (access.platform == "default") {
