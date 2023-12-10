@@ -171,6 +171,7 @@ const authorityList = () => {
 // }
 
 const userAuthorityList = (row:user) => {
+    authorityIds.value = ""
     username.value = row.username
     datas.transfer = initTransfer();
     datas.transfer.splice(0,1);
@@ -472,6 +473,7 @@ const handleChange = (
     } else {
         Ids.value += value + ','
     }
+    // console.log(authorityIds.value)
 }
 
 const authorityPageChange = (newPage: number) => {

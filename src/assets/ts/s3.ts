@@ -4,9 +4,17 @@ import {
     CompleteMultipartUploadCommand,
     ListPartsCommand,
     GetObjectCommand,
+    CreateMultipartUploadCommand,
+    ListObjectsV2Command,
+    DeleteObjectsCommand,
+    DeleteObjectCommand,
+    PutObjectCommand
 } from "@aws-sdk/client-s3";
 import { access } from '~/assets/ts/access';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { ListObject } from '~/assets/ts/interface'
+import { dayjs } from "element-plus";
+
 let uploadPromises:any= [];
 
 let s3Client
@@ -36,6 +44,7 @@ const initS3Client = (init:boolean) => {
     s3Client = client
     return s3Client
 }
+
 
 const uploadPartDirect = async (data, bucket, key, uploadId, partNum, partSize) => {
     const client = initS3Client(false)
@@ -88,4 +97,99 @@ const getObjectBytes = async(bucket, key) => {
     return await resp.Body.transformToByteArray()
 
 }
-export {uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes}
+
+const createMultipartUpload = async(bucket, key) => {
+    const client = initS3Client(false)
+    const multipartUpload = await client.send(
+        new CreateMultipartUploadCommand({
+          Bucket: bucket,
+          Key: key,
+        }),
+      );
+    return multipartUpload.UploadId;
+}
+
+const listObjectsCommand = async(bucket) => {
+    const client = initS3Client(false)
+    const command = new ListObjectsV2Command({
+        Bucket: bucket,
+        // The default and maximum number of keys returned is 1000. This limits it to
+        // one for demonstration purposes.
+        MaxKeys: 1000,
+      });
+    
+      try {
+        let isTruncated = true;
+        let listObject:ListObject[] = [];
+        while (isTruncated) {
+          const { Contents, IsTruncated, NextContinuationToken } = await client.send(command);
+          if (Contents) {
+            Contents.map((c) => {
+                const obj:ListObject = {
+                    key: c.Key,
+                    size: c.Size,
+                    timestamp: formatTimestamp(c.LastModified)/1000
+                }
+                listObject.push(obj)
+            });
+          }
+          isTruncated = IsTruncated;
+          command.input.ContinuationToken = NextContinuationToken;
+        }
+        return listObject
+      } catch (err) {
+        console.error(err);
+      }
+}
+
+const deleteObjectsCommand = async (bucket, obj) => {
+    const client = initS3Client(false)
+    const command = new DeleteObjectsCommand({
+        Bucket: bucket,
+        Delete: {
+          Objects: obj,
+        },
+      });
+    
+      try {
+        const { Deleted } = await client.send(command);
+        return Deleted
+      } catch (err) {
+        console.error(err);
+      }
+}
+
+const deleteObjectCommand = async (bucket, key) => {
+    const client = initS3Client(false)
+    const command = new DeleteObjectCommand({
+        Bucket: bucket,
+        Key: key
+      });
+    
+      try {
+        const response = await client.send(command);
+        return response
+      } catch (err) {
+        console.error(err);
+      }
+}
+
+const uploadObjectCommand = async (bucket, key, body) => {
+    const client = initS3Client(false)
+    const command = new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: body,
+      });
+    
+      try {
+        const response = await client.send(command);
+      } catch (err) {
+        console.error(err);
+      }
+}
+function formatTimestamp(obj) {
+    return dayjs(obj).valueOf();
+}
+
+export {uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes, createMultipartUpload, listObjectsCommand, deleteObjectsCommand, deleteObjectCommand, uploadObjectCommand}
