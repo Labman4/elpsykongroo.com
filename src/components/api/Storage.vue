@@ -550,7 +550,7 @@ const checkCors = async() => {
             platform: access.platform,
             corsRules: [{
                 allowedHeaders: ["*"],
-                allowedMethods: ["GET", "PUT", "POST"],
+                allowedMethods: ["GET", "PUT", "POST", "DELETE"],
                 allowedOrigins: [env.redirectUrl],
                 exposeHeaders: ["ETag"],
                 maxAgeSeconds: 3600,
