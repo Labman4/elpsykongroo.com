@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }).catch(function(error) { 
       return ""
     })
-    if (jwtString != "" && jwtString != undefined) {
+    if (jwtString) {
       const jwt = JSON.parse(jwtString);
       access.sub = jwt["sub"]
       access.permission = jwt["permission"]
@@ -320,7 +320,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       access.client_id = jwt["azp"]
       access.expires_in = jwt["exp"] - jwt["iat"]
       access.update(access.access_token, access.expires_in);
-      access.avatarUrl = env.storageUrl + "/storage/object?bucket=" + access.sub + "&key=" + jwt['picture'] + "&idToken=" + access.id_token;
+      if (jwt["picture"]) {
+        access.avatarUrl = env.apiUrl + "/storage/object?bucket=" + access.sub + "&key=" + jwt['picture'] + "&idToken=" + access.id_token;
+      }
       await register(access.sub)
       toggleDark();
       countDown();
