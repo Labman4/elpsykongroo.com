@@ -1,12 +1,12 @@
 <template>
     <el-icon class="storage" @click="openStorage()"><UploadFilled /></el-icon>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
-    <el-avatar class="whiteMode" :icon="UserFilled" size="small" @click="visible.webauthnFormVisible = true" v-if="access.sub == ''|| access.sub == undefined "/>
-    <el-avatar class="whiteMode" size="small" v-if="access.sub != '' && access.sub != undefined " :src="access.avatarUrl" fit="fill" @click="openUser()"></el-avatar>
-    <el-badge class="message" :is-dot=visible.isDot v-if="access.sub == '' ">
+    <el-avatar class="whiteMode" :icon="UserFilled" size="small" @click="visible.webauthnFormVisible = true" v-if = "!access.sub"/>
+    <el-avatar class="whiteMode" size="small" v-if = "access.sub" :src="access.avatarUrl" fit="fill" @click="openUser()"></el-avatar>
+    <el-badge class="message" :is-dot=visible.isDot v-if="!access.sub">
       <el-icon @click="visible.noticeDrawer = true, noticeListByUser('', false)"><Message/></el-icon>
     </el-badge>
-    <el-badge class="message" :is-dot=visible.isDot v-if="access.sub != '' ">
+    <el-badge class="message" :is-dot=visible.isDot v-if="access.sub">
       <el-icon @click="visible.noticeDrawer = true, noticeListByUser(access.sub, false)"><Message/></el-icon>
     </el-badge>
     <el-dialog v-model="visible.webauthnFormVisible" width="65%">
