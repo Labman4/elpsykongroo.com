@@ -16,7 +16,7 @@ jobs:
       - name: Create Environment
         uses: mkyai/env-builder@v1.0.1
         with:
-          secrets: ${{ toJson({{secrets}}) }}
+          secrets: ${{ toJson(secrets) }}
           variables: ${{ toJson(vars) }}
           production: true
           
