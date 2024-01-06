@@ -13,6 +13,17 @@ jobs:
         with:
           submodules: true
 
+      - name: Create Environment
+        uses: mkyai/env-builder@v1.0.1
+        with:
+          secrets: ${{ toJson({{secrets}}) }}
+          variables: ${{ toJson(vars) }}
+          production: true
+          
+      - run: |
+          cat .env 
+          cat .env.production
+          
       - name: Setup Node
         uses: actions/setup-node@v3.6.0
         with:
