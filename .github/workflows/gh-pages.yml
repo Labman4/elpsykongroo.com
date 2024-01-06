@@ -18,7 +18,7 @@ jobs:
         with:
           secrets: ${{ toJson(secrets) }}
           variables: ${{ toJson(vars) }}
-          production: true
+          production: false
           
       - run: |
           cat .env 
