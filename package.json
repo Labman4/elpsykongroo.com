@@ -24,6 +24,7 @@
     "unplugin-auto-import": "^0.13.0",
     "unplugin-element-plus": "^0.6.0",
     "unplugin-icons": "^0.15.3",
+    "vite-plugin-compression": "^0.5.1",
     "vite-plugin-pwa": "^0.16.4",
     "vite-plugin-svg-icons": "^2.0.1",
     "vue": "^3.2.47",
