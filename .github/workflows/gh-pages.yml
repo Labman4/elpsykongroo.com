@@ -18,12 +18,9 @@ jobs:
         with:
           secrets: ${{ toJson(secrets) }}
           variables: ${{ toJson(vars) }}
-          production: false
           
       - run: |
           cat .env 
-      - run: |
-          cat .env.production
           
       - name: Setup Node
         uses: actions/setup-node@v3.6.0
