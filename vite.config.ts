@@ -9,7 +9,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
 import ElementPlus from 'unplugin-element-plus/vite';
 import Unocss from 'unocss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
-import ViteCompressionPlugin from 'vite-plugin-compression';
+// import ViteCompressionPlugin from 'vite-plugin-compression';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
 import {
@@ -51,11 +51,11 @@ export default defineConfig({
     },
   },
   plugins: [
-    ViteCompressionPlugin({
-      algorithm: 'gzip',  // 'gzip', 'brotli'
-      ext: '.gz',         
-      deleteOriginFile: true 
-    }),
+    // ViteCompressionPlugin({
+    //   algorithm: 'gzip',  // 'gzip', 'brotli'
+    //   ext: '.gz',         
+    //   deleteOriginFile: true 
+    // }),
     VitePWA({
       srcDir: 'public',
       strategies: 'injectManifest',
