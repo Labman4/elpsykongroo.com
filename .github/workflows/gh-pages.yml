@@ -6,6 +6,9 @@ on:
       - main
 jobs:
   deploy:
+    permissions:
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.3.0
@@ -31,10 +34,22 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3.9.2
+        
+      - name: upload-pages
+        uses: actions/upload-pages-artifact@v3.0.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          force_orphan: true
+          # Path of the directory containing the static assets.
+          path: dist/
+
+      - name: Deploy GitHub Pages site
+        uses: actions/deploy-pages@v4.0.2
+        with:
+          token: ${{ github.token }}
+          preview: false
+          
+      # - name: Deploy
+      #   uses: peaceiris/actions-gh-pages@v3.9.2
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./dist
+      #     force_orphan: true
