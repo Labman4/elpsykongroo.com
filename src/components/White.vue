@@ -1,4 +1,7 @@
 <template>
+    <el-icon class="github" @click="openGithub()">     
+      <Icon icon="grommet-icons:github" />
+    </el-icon>
     <el-icon class="storage" @click="openStorage()"><UploadFilled /></el-icon>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
     <el-avatar class="whiteMode" :icon="UserFilled" size="small" @click="visible.webauthnFormVisible = true" v-if = "!access.sub"/>
@@ -168,6 +171,11 @@ import { loadUser, noticeListByUser, updateUser, loadUserInfo} from '~/assets/ts
 import { userFormData, dynamicClaimForm, userInfoTableData, inituserInfoTable,} from '~/assets/ts/dataInterface'
 import Notice from '~/components/api/Notice.vue';
 import Storage from '~/components/api/Storage.vue';
+import { Icon } from '@iconify/vue';
+
+const openGithub = () => {
+  window.open(env.githubUrl, "_blank");
+}
 
 const storage = ref<InstanceType<typeof Storage> | null>(null)
 
@@ -421,6 +429,12 @@ const resetUseInfo = (username:string) => {
     position:absolute;right: 110px; top:15px;
     color: #409EFF;
   }
+
+  .github {
+    position:absolute;right: 140px; top:15px;
+    color: #409EFF;
+  }
+
   .avatar-uploader .el-upload {
     border: 1px dashed var(--el-border-color);
     border-radius: 6px;

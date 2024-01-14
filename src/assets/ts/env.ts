@@ -13,5 +13,6 @@ export const env = reactive(
     messageUrl: import.meta.env.VITE_MESSAGE_URL,
     publicKey: import.meta.env.VITE_PUBLIC_KEY,
     clientId: import.meta.env.VITE_CLIENT_ID,
-    clientSecret: import.meta.env.VITE_CLIENT_SECRET
+    clientSecret: import.meta.env.VITE_CLIENT_SECRET,
+    githubUrl: import.meta.env.VITE_GITHUB_URL
 })
