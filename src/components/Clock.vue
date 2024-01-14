@@ -4,16 +4,16 @@
         <div id='nixietube-template' style='display:none;'>
             <div id='nixie-tube-[order]' class='nixie-container'>
                 <div class='nixie-background'></div>
-                <SvgIcon class='nixie-number nixie-number-0' name="clock-0"></SvgIcon>
-                <SvgIcon class='nixie-number nixie-number-1' name="clock-1"></SvgIcon>
-                <SvgIcon class='nixie-number nixie-number-2' name="clock-2"></SvgIcon>
-                <SvgIcon class='nixie-number nixie-number-3' name="clock-3"></SvgIcon>
-                <SvgIcon class='nixie-number nixie-number-4' name="clock-4"></SvgIcon>
-                <SvgIcon class='nixie-number nixie-number-5' name="clock-5"></SvgIcon>
-                <SvgIcon class='nixie-number nixie-number-6' name="clock-6"></SvgIcon>
-                <SvgIcon class='nixie-number nixie-number-7' name="clock-7"></SvgIcon>
-                <SvgIcon class='nixie-number nixie-number-8' name="clock-8"></SvgIcon>
-                <SvgIcon class='nixie-number nixie-number-9' name="clock-9"></SvgIcon>
+                <ClockIcon class='nixie-number nixie-number-0' name="clock-0"></ClockIcon>
+                <ClockIcon class='nixie-number nixie-number-1' name="clock-1"></ClockIcon>
+                <ClockIcon class='nixie-number nixie-number-2' name="clock-2"></ClockIcon>
+                <ClockIcon class='nixie-number nixie-number-3' name="clock-3"></ClockIcon>
+                <ClockIcon class='nixie-number nixie-number-4' name="clock-4"></ClockIcon>
+                <ClockIcon class='nixie-number nixie-number-5' name="clock-5"></ClockIcon>
+                <ClockIcon class='nixie-number nixie-number-6' name="clock-6"></ClockIcon>
+                <ClockIcon class='nixie-number nixie-number-7' name="clock-7"></ClockIcon>
+                <ClockIcon class='nixie-number nixie-number-8' name="clock-8"></ClockIcon>
+                <ClockIcon class='nixie-number nixie-number-9' name="clock-9"></ClockIcon>
             </div>
         </div>
         <div id='clock-surface'></div>
