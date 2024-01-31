@@ -8,7 +8,8 @@ import {
     ListObjectsV2Command,
     DeleteObjectsCommand,
     DeleteObjectCommand,
-    PutObjectCommand
+    PutObjectCommand,
+    ListBucketsCommand
 } from "@aws-sdk/client-s3";
 import { access } from '~/assets/ts/access';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -188,8 +189,19 @@ const uploadObjectCommand = async (bucket, key, body) => {
         console.error(err);
       }
 }
+
+const listBucketsCommand = async() => {
+  const client = initS3Client(false)
+  const command = new ListBucketsCommand({});
+  try {
+    return await client.send(command);
+  } catch (err) {
+    console.error(err);
+  }
+}
 function formatTimestamp(obj) {
     return dayjs(obj).valueOf();
 }
 
-export {uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes, createMultipartUpload, listObjectsCommand, deleteObjectsCommand, deleteObjectCommand, uploadObjectCommand}
+export {uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes, listBucketsCommand,
+  createMultipartUpload, listObjectsCommand, deleteObjectsCommand, deleteObjectCommand, uploadObjectCommand}
