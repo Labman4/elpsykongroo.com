@@ -61,6 +61,7 @@
         <el-button size="small" type="danger" @click="deleteS3Info(scope.$index, scope.row)">Delete</el-button>
         <el-button size="small" type="primary" @click="loadS3Info(scope.row)" v-if = "access.accessKey != scope.row.accessKey">select</el-button>
         <el-button size="small" type="info" v-if = "access.accessKey == scope.row.accessKey" @click="listObject(), storageTable = true, s3InfoTable = false">open</el-button>
+        <el-button size="small" type="primary" @click="saveS3InfoForm = true" >change bucket</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -161,7 +162,8 @@ import { dayjs } from 'element-plus';
 import { visible } from '~/assets/ts/visible'
 import { setObject, deleteObject, getObject, openDB } from '~/assets/ts/indexDB'
 import { encryptData, decryptData, computeFileSHA256, arrayBufferToBase64, base64ToArrayBuffer, generateFixedKey } from '~/assets/ts/encrypt'
-import { uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes, createMultipartUpload, listObjectsCommand, deleteObjectsCommand, deleteObjectCommand, uploadObjectCommand } from '~/assets/ts/s3'
+import { uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes, createMultipartUpload, listBucketsCommand,
+   listObjectsCommand, deleteObjectsCommand, deleteObjectCommand, uploadObjectCommand } from '~/assets/ts/s3'
 import { ListObject } from '~/assets/ts/interface'
 import VideoPlayer from '~/components/VideoPlayer.vue';
 const player = ref<InstanceType<typeof VideoPlayer> | null>(null)
@@ -670,8 +672,8 @@ const connect = async() => {
     access.endpoint = s3FormData.endpoint
     access.region = s3FormData.region   
     if (s3FormData.accessSecret != "") {
-        const result = await listObject()
-        if (result && result.length >= 0 ) {
+        const result = await listBucketsCommand()
+        if (result) {
           saveS3Warning.value = true;
         } else {
           ElMessageBox.alert("check failed, please ensure and try again")

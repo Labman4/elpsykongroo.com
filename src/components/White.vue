@@ -1,4 +1,14 @@
 <template>
+    <el-dialog v-model=chartTable width="75%">
+      <el-button type="primary" @click="openStatus()" >refresh</el-button>
+      <Line ref="lineChart" v-if="loaded" :data=statuses :options="options"></Line>
+    </el-dialog>
+    <el-badge class="status" :is-dot=true type="success" @click="chartTable = true, openStatus()" v-if="healthDot">
+      <el-icon><Coin/></el-icon>
+    </el-badge>
+    <el-badge class="status" :is-dot=true type="warning" @click="chartTable = true, openStatus()" v-if="!healthDot">
+      <el-icon><Coin/></el-icon>
+    </el-badge>
     <el-icon class="github" @click="openGithub()">     
       <Icon icon="grommet-icons:github" />
     </el-icon>
@@ -157,14 +167,14 @@
 </template>
 
 <script lang="ts" setup >
-import { Iphone, Message, UploadFilled, UserFilled, Plus } from '@element-plus/icons-vue';
+import { Iphone, Message, UploadFilled, UserFilled, Plus, Coin } from '@element-plus/icons-vue';
 import { webauthnRegister, webauthnLogin, tmpLogin, logout, qrcodeLogin } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
 import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
 import { axios } from '~/assets/ts/axio';
 import * as webauthnJson from "@github/webauthn-json";
-import { ElLoading, ElMessageBox, ElNotification } from 'element-plus';
+import { dayjs, ElLoading, ElLoadingDirective, ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
 import { loadUser, noticeListByUser, updateUser, loadUserInfo} from '~/assets/ts/commonApi';
@@ -172,17 +182,124 @@ import { userFormData, dynamicClaimForm, userInfoTableData, inituserInfoTable,} 
 import Notice from '~/components/api/Notice.vue';
 import Storage from '~/components/api/Storage.vue';
 import { Icon } from '@iconify/vue';
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Colors 
+} from 'chart.js'
+import { Line, ChartComponentRef } from 'vue-chartjs'
+const lineChart = ref<ChartComponentRef | null>(null)
+
+ChartJS.register(  
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Colors)
+
+window.onload = function () {
+  setInterval(() => {
+    const option = {
+        baseURL: env.apiUrl,
+        url: "/public/ip",
+        method: "GET",
+        headers: {
+         
+        }, 
+    } 
+    axios(option).then(function(response) {
+      if (response.status == 200) {
+        healthDot.value = true
+      } else {
+        healthDot.value = false
+        const currentTime = dayjs().format("YYYY-MM-DD HH:mm:ss")
+        let param = {}
+        if (response.status == undefined) {
+          param[currentTime] = "500"
+        } else {
+          param[currentTime] = response.status
+        }
+        const option = {
+          baseURL: env.statusUrl,
+          url: "/status",
+          method: "PUT",
+          headers: {},
+          params: param,
+        }  
+        axios(option).then(function(response) {
+
+        })
+      }
+    }).catch(function(error) {
+      healthDot.value = false
+    })
+  }, 100000)
+}
 
 const openGithub = () => {
   window.open(env.githubUrl, "_blank");
 }
 
 const storage = ref<InstanceType<typeof Storage> | null>(null)
-
+const healthDot = ref(false)
 const imageUrl = ref('')
 const username = ref("")
 const userForm = ref(false)
 const claimForm = ref(false);
+const chartTable = ref(false)
+const loaded = ref(false)
+const options = {
+  responsive: true,
+  plugins: {
+    title: {
+        display: true,
+        text: 'downtime'
+    },
+    legend: {
+      display: false
+    
+    }
+  } 
+}
+let initStatusData  = () => ({
+  datasets: [{
+    data: [{}]
+  }]
+})
+
+let statuses = reactive(initStatusData()); 
+
+const openStatus = async() => {
+  loaded.value = false
+  Object.assign(statuses, initStatusData());
+  const option = {
+      baseURL: env.statusUrl,
+      url: "/status",
+      method: "GET",
+      params: {
+        limit: 30
+      },
+      headers: {
+        
+      }, 
+  }  
+  await axios(option).then(async function(response) {
+      statuses.datasets[0].data = response.data
+      lineChart.value?.chart?.update()
+  })
+  loaded.value = true
+
+}
+
 
 const initclaimFormData = () => ({
   key: "",
@@ -432,6 +549,11 @@ const resetUseInfo = (username:string) => {
 
   .github {
     position:absolute;right: 140px; top:15px;
+    color: #409EFF;
+  }
+
+  .status {
+    position:absolute;right: 170px; top:15px;
     color: #409EFF;
   }
 

@@ -159,27 +159,27 @@ const openStatus = () => {
         }, 
     }  
     axios(option).then(function(response) {
-    if (response.data["status"] == "UP") {
+      if (response.data["status"] == "UP") {
+        const status:status = {
+          service: s,
+          status: "online"
+        }
+        data.statuses.push(status)
+      } else {
+        const status:status = {
+          service: s,
+          status: "offline"
+        }
+        data.statuses.push(status)
+      }
+    }).catch(function(error) {
       const status:status = {
-        service: s,
-        status: "online"
-      }
-      data.statuses.push(status)
-    } else {
-      const status:status = {
-        service: s,
-        status: "offline"
-      }
-      data.statuses.push(status)
-    }
-  }).catch(function(error) {
-    const status:status = {
-        service: s,
-        status: "offline"
-      }
-      data.statuses.push(status)
-  })
-}
+          service: s,
+          status: "offline"
+        }
+        data.statuses.push(status)
+    })
+  }
 }
 const data = reactive({statuses})
 const openIp = () => {
