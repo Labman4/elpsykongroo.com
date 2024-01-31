@@ -232,7 +232,9 @@ window.onload = function () {
           baseURL: env.statusUrl,
           url: "/status",
           method: "PUT",
-          headers: {},
+          headers: {
+            'Authorization': 'Bearer '+ access.access_token
+          },
           params: param,
         }  
         axios(option).then(function(response) {
@@ -289,7 +291,7 @@ const openStatus = async() => {
         limit: 30
       },
       headers: {
-        
+        'Authorization': 'Bearer '+ access.access_token
       }, 
   }  
   await axios(option).then(async function(response) {
