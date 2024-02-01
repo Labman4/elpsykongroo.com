@@ -245,7 +245,7 @@ window.onload = function () {
     }).catch(function(error) {
       healthDot.value = false
     })
-  }, 10000)
+  }, env.healthCheckDuration * 1000)
 }
 
 const openGithub = () => {
