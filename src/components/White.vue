@@ -224,16 +224,17 @@ window.onload = function () {
         const currentTime = dayjs().format("YYYY-MM-DD HH:mm:ss Z")
         let param = {}
         if (response.status == undefined) {
-          param[encodeURIComponent(currentTime)] = "500"
+          param[currentTime] = "500"
         } else {
-          param[encodeURIComponent(currentTime)] = response.status
+          param[currentTime] = response.status
         }
         const option = {
           baseURL: env.statusUrl,
           url: "/status",
           method: "PUT",
           headers: {
-            'Authorization': 'Bearer '+ access.access_token
+            'Authorization': 'Bearer '+ access.access_token,
+            "Content-Type": "application/x-www-form-urlencoded"
           },
           params: param,
         }  
@@ -244,7 +245,7 @@ window.onload = function () {
     }).catch(function(error) {
       healthDot.value = false
     })
-  }, 100000)
+  }, env.healthCheckDuration * 1000)
 }
 
 const openGithub = () => {

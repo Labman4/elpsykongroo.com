@@ -15,5 +15,6 @@ export const env = reactive(
     publicKey: import.meta.env.VITE_PUBLIC_KEY,
     clientId: import.meta.env.VITE_CLIENT_ID,
     clientSecret: import.meta.env.VITE_CLIENT_SECRET,
-    githubUrl: import.meta.env.VITE_GITHUB_URL
+    githubUrl: import.meta.env.VITE_GITHUB_URL,
+    healthCheckDuration: import.meta.env.VITE_HEALTH_CHECK_DURATION
 })
