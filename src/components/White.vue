@@ -224,9 +224,9 @@ window.onload = function () {
         const currentTime = dayjs().format("YYYY-MM-DD HH:mm:ss Z")
         let param = {}
         if (response.status == undefined) {
-          param[currentTime] = "500"
+          param[encodeURIComponent(currentTime)] = "500"
         } else {
-          param[currentTime] = response.status
+          param[encodeURIComponent(currentTime)] = response.status
         }
         const option = {
           baseURL: env.statusUrl,
