@@ -205,10 +205,12 @@ async function webauthnLogin() {
                 visible.loading = true
                 var publicKeyCredential;
                 publicKeyCredential = await webauthnJson.get(response.data).catch((error) => {
-                    ElMessage(error)
+                    console.log(error)
+                    console.log(error.message)
+                    alert(error.message)
                     return
                 });
-                if (publicKeyCredential != null) {
+                if (publicKeyCredential) {
                     const indexOption = {
                         baseURL: env.authUrl,
                         url: "/welcome",

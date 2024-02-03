@@ -672,6 +672,7 @@ const connect = async() => {
     access.endpoint = s3FormData.endpoint
     access.region = s3FormData.region   
     if (s3FormData.accessSecret != "") {
+        await directPreflight()
         const result = await listBucketsCommand()
         if (result) {
           saveS3Warning.value = true;
