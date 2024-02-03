@@ -669,16 +669,34 @@ const connect = async() => {
     }
     access.accessKey = s3FormData.accessKey
     access.accessSecret = s3FormData.accessSecret
+    if (access.platform == "cloudflare") {
+      access.endpoint = s3FormData.endpoint + "/" + access.sub
+    }
     access.endpoint = s3FormData.endpoint
-    access.region = s3FormData.region   
+    if (s3FormData.platform == "cloudflare") {
+      access.region = "auto"
+    } else {
+      access.region = s3FormData.region   
+    }
     if (s3FormData.accessSecret != "") {
+      if (access.sub != "") {
         await directPreflight()
-        const result = await listBucketsCommand()
-        if (result) {
-          saveS3Warning.value = true;
-        } else {
-          ElMessageBox.alert("check failed, please ensure and try again")
+      } else {
+        if (!await checkEndpointCors()) {
+          ElMessageBox.alert("u s3 not support cors, plead login first and try again through our service")
+          return
         }
+      }
+      const result = await listBucketsCommand()
+      if (result) {
+        if (access.platform == "cloudflare") {
+          access.endpoint = s3FormData.endpoint
+          initS3Client(true)
+        }
+        saveS3Warning.value = true;
+      } else {
+        ElMessageBox.alert("check failed, please ensure and try again")
+      }
         // return;
     } else {
       s3Form.value = false
