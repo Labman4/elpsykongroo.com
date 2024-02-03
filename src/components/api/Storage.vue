@@ -671,8 +671,9 @@ const connect = async() => {
     access.accessSecret = s3FormData.accessSecret
     if (access.platform == "cloudflare") {
       access.endpoint = s3FormData.endpoint + "/" + access.sub
+    } else {
+      access.endpoint = s3FormData.endpoint
     }
-    access.endpoint = s3FormData.endpoint
     if (s3FormData.platform == "cloudflare") {
       access.region = "auto"
     } else {
