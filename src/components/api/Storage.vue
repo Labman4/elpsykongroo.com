@@ -776,6 +776,9 @@ const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
   if (!access.bucket) {
     access.bucket = access.sub
   }
+  if (access.platform == "cloudflare" && access.sub != "") {
+    await directPreflight()
+  }
   //for local s3 dev
   if (!formEl) return
   // const domain = window.location.hostname;
@@ -810,31 +813,28 @@ const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
             access.accessSecret = secretData
           }     
           if (access.accessSecret) {
-              if (data.s3InfoList.length > 1) {
-                if (!s3Init.value) {
-                  access.accessKey = data.s3InfoList[0].accessKey
-                  access.platform = data.s3InfoList[0].platform
-                  access.endpoint = data.s3InfoList[0].endpoint
-                  access.region = data.s3InfoList[0].region
-                  s3InfoTable.value = true;
-                  s3Init.value = true;
-                  initS3Client(true)
-                  return;
-                } else {         
-                  saveS3InfoForm.value = false;
-                  s3InfoTable.value = false;
-                }
-              }
-              if (data.s3InfoList.length == 1) {
+            if (data.s3InfoList.length > 1) {
+              if (!s3Init.value) {
                 access.accessKey = data.s3InfoList[0].accessKey
                 access.platform = data.s3InfoList[0].platform
                 access.endpoint = data.s3InfoList[0].endpoint
                 access.region = data.s3InfoList[0].region
+                s3InfoTable.value = true;
+                s3Init.value = true;
+                initS3Client(true)
+                return;
+              } else {         
+                saveS3InfoForm.value = false;
                 s3InfoTable.value = false;
               }
-              if (access.platform == "cloudflare" && access.sub != "") {
-                  await directPreflight()
-              }
+            }
+            if (data.s3InfoList.length == 1) {
+              access.accessKey = data.s3InfoList[0].accessKey
+              access.platform = data.s3InfoList[0].platform
+              access.endpoint = data.s3InfoList[0].endpoint
+              access.region = data.s3InfoList[0].region
+              s3InfoTable.value = false;
+            }
           } else {
             access.platform = ""
             access.accessKey = ""
