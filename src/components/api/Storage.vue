@@ -725,7 +725,8 @@ const saveS3Info = async() => {
 
 const loadS3Info = async(row: s3Info) => {
   if (s3Secret.value) {
-    if (access.platform == "cloudflare" && access.sub != "") {
+    console.log(access)
+    if (row.platform == "cloudflare" && access.sub != "") {
       await directPreflight()
     }
     initS3Info(row.accessKey, secretformRef)
