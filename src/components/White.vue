@@ -174,7 +174,7 @@ import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
 import { axios } from '~/assets/ts/axio';
 import * as webauthnJson from "@github/webauthn-json";
-import { dayjs, ElLoading, ElLoadingDirective, ElMessage, ElMessageBox, ElNotification } from 'element-plus';
+import { dayjs, ElLoading, ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
 import { loadUser, noticeListByUser, updateUser, loadUserInfo} from '~/assets/ts/commonApi';

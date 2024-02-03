@@ -112,12 +112,12 @@
             }
         });
 
-        if (background.classList.contains('active')) {
-            background.classList.remove('active');
+        if (background?.classList.contains('active')) {
+            background?.classList.remove('active');
         }
 
-        document.querySelector(childSelector).classList.add('active');
-        background.classList.add('active');
+        document.querySelector(childSelector)?.classList.add('active');
+        background?.classList.add('active');
     }
 }
 
@@ -128,18 +128,18 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function initializeNixieTube(number, whiteSpaceSpan) {
-    var template = document.getElementById('nixietube-template').innerHTML;
-    var targetHTML = "";
+    var template = document.getElementById('nixietube-template')?.innerHTML;
+    var targetHTML;
     var whiteSpace = "<div class='white-space'></div>";
     var CurrentTubeNumber = 0;
     
     while (CurrentTubeNumber < number) {
         if (whiteSpaceSpan > 0) {
             if (CurrentTubeNumber % whiteSpaceSpan == 0 && CurrentTubeNumber > 0)
-                document.getElementById('clock-surface').insertAdjacentHTML('beforeend', whiteSpace);
+                document.getElementById('clock-surface')?.insertAdjacentHTML('beforeend', whiteSpace);
         }
-        targetHTML = template.replace("[order]", CurrentTubeNumber);
-        document.getElementById('clock-surface').insertAdjacentHTML('beforeend', targetHTML);
+        targetHTML = template?.replace("[order]", CurrentTubeNumber + "");
+        document.getElementById('clock-surface')?.insertAdjacentHTML('beforeend', targetHTML);
         CurrentTubeNumber++;
     }
 }
