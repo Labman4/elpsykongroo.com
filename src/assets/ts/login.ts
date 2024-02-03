@@ -204,7 +204,10 @@ async function webauthnLogin() {
             } else if (response.status != 403 && response.message != "Network Error"){    
                 visible.loading = true
                 var publicKeyCredential;
-                publicKeyCredential = await webauthnJson.get(response.data).catch((error) => {console.log(error)});
+                publicKeyCredential = await webauthnJson.get(response.data).catch((error) => {
+                    ElMessage(error)
+                    return
+                });
                 if (publicKeyCredential != null) {
                     const indexOption = {
                         baseURL: env.authUrl,
