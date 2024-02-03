@@ -274,7 +274,6 @@ const directPreflight = async() => {
 const getUploadId = async (fileName, sha256, partCount, partNum) => {
     let uploadId
     if (isDirect.value) {
-      await directPreflight()
       uploadId = await createMultipartUpload(access.bucket, fileName)
     } else {
       const option = {
@@ -478,7 +477,6 @@ function* chunks(file, chunkSize) {
 
 const upload = async (options: UploadRequestOptions) => {
     if (options.file.size > 1024*1024*5) {
-      await directPreflight()
       await chunkedUpload(options, 1024*1024*5);
       // be careful minio must big than 5mb and oracle no limit
       // if (access.platform == "" || access.platform == "default" || access.platform == "cloudflare" || access.platform == "c2" ) {
@@ -886,7 +884,6 @@ const initS3 = async() => {
 const listObject = async() => {
   let result
   if (isDirect.value) {
-    await directPreflight()
     const resp = await listObjectsCommand(access.bucket)
     if (resp && resp.length > 0) {
         const filterObject = resp.filter( obj => {
