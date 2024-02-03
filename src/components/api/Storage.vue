@@ -274,7 +274,6 @@ const directPreflight = async() => {
 const getUploadId = async (fileName, sha256, partCount, partNum) => {
     let uploadId
     if (isDirect.value) {
-      await directPreflight()
       uploadId = await createMultipartUpload(access.bucket, fileName)
     } else {
       const option = {
@@ -478,7 +477,6 @@ function* chunks(file, chunkSize) {
 
 const upload = async (options: UploadRequestOptions) => {
     if (options.file.size > 1024*1024*5) {
-      await directPreflight()
       await chunkedUpload(options, 1024*1024*5);
       // be careful minio must big than 5mb and oracle no limit
       // if (access.platform == "" || access.platform == "default" || access.platform == "cloudflare" || access.platform == "c2" ) {
@@ -669,15 +667,36 @@ const connect = async() => {
     }
     access.accessKey = s3FormData.accessKey
     access.accessSecret = s3FormData.accessSecret
-    access.endpoint = s3FormData.endpoint
-    access.region = s3FormData.region   
+    if (access.platform == "cloudflare") {
+      access.endpoint = s3FormData.endpoint + "/" + access.sub
+    } else {
+      access.endpoint = s3FormData.endpoint
+    }
+    if (s3FormData.platform == "cloudflare") {
+      access.region = "auto"
+      s3FormData.region = "auto"
+    } else {
+      access.region = s3FormData.region   
+    }
     if (s3FormData.accessSecret != "") {
-        const result = await listBucketsCommand()
-        if (result) {
-          saveS3Warning.value = true;
-        } else {
-          ElMessageBox.alert("check failed, please ensure and try again")
+      if (access.sub != "") {
+        await directPreflight()
+      } else {
+        if (!await checkEndpointCors()) {
+          ElMessageBox.alert("u s3 not support cors, plead login first and try again through our service")
+          return
         }
+      }
+      const result = await listBucketsCommand()
+      if (result) {
+        if (access.platform == "cloudflare") {
+          access.endpoint = s3FormData.endpoint
+          initS3Client(true)
+        }
+        saveS3Warning.value = true;
+      } else {
+        ElMessageBox.alert("check failed, please ensure and try again")
+      }
         // return;
     } else {
       s3Form.value = false
@@ -706,7 +725,7 @@ const saveS3Info = async() => {
 }
 
 const loadS3Info = async(row: s3Info) => {
-  if (s3Secret.value) {
+  if (s3Secret.value) {   
     initS3Info(row.accessKey, secretformRef)
   }
   access.endpoint = row.endpoint
@@ -757,7 +776,10 @@ const getS3Info = async() => {
 const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
   if (!access.bucket) {
     access.bucket = access.sub
-  } 
+  }
+  if (access.platform == "cloudflare" && access.sub != "") {
+    await directPreflight()
+  }
   //for local s3 dev
   if (!formEl) return
   // const domain = window.location.hostname;
@@ -792,28 +814,28 @@ const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
             access.accessSecret = secretData
           }     
           if (access.accessSecret) {
-              if (data.s3InfoList.length > 1) {
-                if (!s3Init.value) {
-                  access.accessKey = data.s3InfoList[0].accessKey
-                  access.platform = data.s3InfoList[0].platform
-                  access.endpoint = data.s3InfoList[0].endpoint
-                  access.region = data.s3InfoList[0].region
-                  s3InfoTable.value = true;
-                  s3Init.value = true;
-                  initS3Client(true)
-                  return;
-                } else {         
-                  saveS3InfoForm.value = false;
-                  s3InfoTable.value = false;
-                }
-              }
-              if (data.s3InfoList.length == 1) {
+            if (data.s3InfoList.length > 1) {
+              if (!s3Init.value) {
                 access.accessKey = data.s3InfoList[0].accessKey
                 access.platform = data.s3InfoList[0].platform
                 access.endpoint = data.s3InfoList[0].endpoint
                 access.region = data.s3InfoList[0].region
+                s3InfoTable.value = true;
+                s3Init.value = true;
+                initS3Client(true)
+                return;
+              } else {         
+                saveS3InfoForm.value = false;
                 s3InfoTable.value = false;
               }
+            }
+            if (data.s3InfoList.length == 1) {
+              access.accessKey = data.s3InfoList[0].accessKey
+              access.platform = data.s3InfoList[0].platform
+              access.endpoint = data.s3InfoList[0].endpoint
+              access.region = data.s3InfoList[0].region
+              s3InfoTable.value = false;
+            }
           } else {
             access.platform = ""
             access.accessKey = ""
@@ -866,7 +888,6 @@ const initS3 = async() => {
 const listObject = async() => {
   let result
   if (isDirect.value) {
-    await directPreflight()
     const resp = await listObjectsCommand(access.bucket)
     if (resp && resp.length > 0) {
         const filterObject = resp.filter( obj => {
