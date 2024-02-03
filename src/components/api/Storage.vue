@@ -674,6 +674,7 @@ const connect = async() => {
     }
     if (s3FormData.platform == "cloudflare") {
       access.region = "auto"
+      s3FormData.region = "auto"
     } else {
       access.region = s3FormData.region   
     }
