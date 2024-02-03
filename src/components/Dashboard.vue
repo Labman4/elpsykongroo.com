@@ -115,7 +115,7 @@
 import { access } from '~/assets/ts/access';
 import { visible } from '~/assets/ts/visible';
 import { ref } from 'vue';
-import { Timer, Operation, SwitchButton, Expand, Fold, Menu, UploadFilled, MessageBox, Platform} from '@element-plus/icons-vue';
+import { Timer, Operation, SwitchButton, Expand, Fold, Menu, MessageBox, Platform} from '@element-plus/icons-vue';
 import IP from '~/components/api/IP.vue';
 import Record from '~/components/api/Record.vue';
 import AuthClient from '~/components/api/AuthClient.vue';

@@ -174,7 +174,7 @@ import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
 import { axios } from '~/assets/ts/axio';
 import * as webauthnJson from "@github/webauthn-json";
-import { dayjs, ElLoading, ElLoadingDirective, ElMessage, ElMessageBox, ElNotification } from 'element-plus';
+import { dayjs, ElLoading, ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import QrcodeVue from 'qrcode.vue';
 import { refreshlogin } from '~/assets/ts/login';
 import { loadUser, noticeListByUser, updateUser, loadUserInfo} from '~/assets/ts/commonApi';
@@ -207,8 +207,14 @@ ChartJS.register(
   Colors)
 
 window.onload = function () {
+  healthCheck()
   setInterval(() => {
-    const option = {
+    healthCheck()
+  }, env.healthCheckDuration * 1000)
+}
+
+const healthCheck = () => {
+  const option = {
         baseURL: env.apiUrl,
         url: "/public/ip",
         method: "GET",
@@ -245,7 +251,6 @@ window.onload = function () {
     }).catch(function(error) {
       healthDot.value = false
     })
-  }, env.healthCheckDuration * 1000)
 }
 
 const openGithub = () => {

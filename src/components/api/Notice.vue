@@ -324,4 +324,4 @@ const pushNotice = (index, row) => {
   })
 }
 
-</script>~/assets/ts/commonApi
+</script>

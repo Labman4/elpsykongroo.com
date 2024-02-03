@@ -157,12 +157,12 @@
 import { axios } from '~/assets/ts/axio';
 import { env } from '~/assets/ts/env';
 import { access } from '~/assets/ts/access';
-import { ElMessageBox, ElNotification, UploadFile, UploadProps, UploadRawFile, UploadRequestOptions, UploadUserFile } from 'element-plus';
-import { dayjs } from 'element-plus';
+import { dayjs, ElMessageBox, ElNotification, FormInstance } from 'element-plus';
+import type { UploadFile, UploadRawFile, UploadProps, UploadUserFile, UploadRequestOptions } from 'element-plus'
 import { visible } from '~/assets/ts/visible'
 import { setObject, deleteObject, getObject, openDB } from '~/assets/ts/indexDB'
 import { encryptData, decryptData, computeFileSHA256, arrayBufferToBase64, base64ToArrayBuffer, generateFixedKey } from '~/assets/ts/encrypt'
-import { uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes, createMultipartUpload, listBucketsCommand,
+import { uploadPartDirect, initS3Client, getObjectSignedUrl, createMultipartUpload, listBucketsCommand,
    listObjectsCommand, deleteObjectsCommand, deleteObjectCommand, uploadObjectCommand } from '~/assets/ts/s3'
 import { ListObject } from '~/assets/ts/interface'
 import VideoPlayer from '~/components/VideoPlayer.vue';
@@ -489,7 +489,7 @@ const upload = async (options: UploadRequestOptions) => {
         // const sha256origin = await computeFileSHA256(options.file)
         // console.log("origin", sha256origin)
         await options.file.arrayBuffer().then(async function(arrayBuffer) {
-          const sha256array = await computeFileSHA256(arrayBuffer)
+          // const sha256array = await computeFileSHA256(arrayBuffer)
           // console.log("sha256array", sha256array)
           const cipher = await encryptBydecryptMethod(arrayBuffer, options.file.name)
           fileData = uint8ArrayToFile(cipher, "encrypt-" + options.file.name)
@@ -867,14 +867,14 @@ const listObject = async() => {
   let result
   if (isDirect.value) {
     await directPreflight()
-    const listObjects:ListObject[] = await listObjectsCommand(access.bucket)
-    if (listObjects && listObjects.length > 0) {
-        const filterObject = listObjects.filter( obj => {
+    const resp = await listObjectsCommand(access.bucket)
+    if (resp && resp.length > 0) {
+        const filterObject = resp.filter( obj => {
           return !obj.key.startsWith(access.bucket)
         })
         data.files = filterObject;
     }
-    result = listObjects
+    result = resp
   } else {
     const option = {
       baseURL: env.storageUrl,
@@ -898,7 +898,7 @@ const listObject = async() => {
     if (response.data) {
       const listObjects:ListObject[] = response.data
       if (listObjects && listObjects.length > 0) {
-        const filterObject = listObject.filter( obj => {
+        const filterObject = listObjects.filter( obj => {
           return !obj.key.startsWith(access.bucket)
         })
         data.files = filterObject;
@@ -987,7 +987,7 @@ const selected:string[] = [];
 
 const DeleteSelect = async () => {
   if (isDirect.value) {
-    let objs = []
+    let objs:any[] = []
     selected.map((c) => {
                 const obj = {
                     Key: c,

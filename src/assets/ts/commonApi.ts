@@ -98,7 +98,7 @@ const noticeListByUser = async(user, draft) => {
   return notices
 }
 
-const noticeList = async(topic:string[], draft:boolean) => {
+const noticeList = async(topic:string[], draft: string) => {
   let notices
   const option = {
     baseURL: env.messageUrl,
@@ -106,11 +106,13 @@ const noticeList = async(topic:string[], draft:boolean) => {
     method: "POST",
     data: {
       topic: topic,
-      draft: draft
     },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
     },
+  }
+  if (draft != "") {
+    option.data["draft"] = Boolean(draft)
   }
   await axios(option).then(function(response){
     notices = response.data
