@@ -724,11 +724,7 @@ const saveS3Info = async() => {
 }
 
 const loadS3Info = async(row: s3Info) => {
-  if (s3Secret.value) {
-    console.log(access)
-    if (row.platform == "cloudflare" && access.sub != "") {
-      await directPreflight()
-    }
+  if (s3Secret.value) {   
     initS3Info(row.accessKey, secretformRef)
   }
   access.endpoint = row.endpoint
@@ -779,7 +775,7 @@ const getS3Info = async() => {
 const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
   if (!access.bucket) {
     access.bucket = access.sub
-  } 
+  }
   //for local s3 dev
   if (!formEl) return
   // const domain = window.location.hostname;
@@ -835,6 +831,9 @@ const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
                 access.endpoint = data.s3InfoList[0].endpoint
                 access.region = data.s3InfoList[0].region
                 s3InfoTable.value = false;
+              }
+              if (access.platform == "cloudflare" && access.sub != "") {
+                  await directPreflight()
               }
           } else {
             access.platform = ""
