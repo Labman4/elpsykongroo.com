@@ -162,12 +162,12 @@ import type { UploadFile, UploadRawFile, UploadProps, UploadUserFile, UploadRequ
 import { visible } from '~/assets/ts/visible'
 import { setObject, deleteObject, getObject, openDB } from '~/assets/ts/indexDB'
 import { encryptData, decryptData, computeFileSHA256, arrayBufferToBase64, base64ToArrayBuffer, generateFixedKey } from '~/assets/ts/encrypt'
-import { uploadPartDirect, initS3Client, getObjectSignedUrl, getObjectBytes, createMultipartUpload, listBucketsCommand,
+import { uploadPartDirect, initS3Client, getObjectSignedUrl, createMultipartUpload, listBucketsCommand,
    listObjectsCommand, deleteObjectsCommand, deleteObjectCommand, uploadObjectCommand } from '~/assets/ts/s3'
 import { ListObject } from '~/assets/ts/interface'
 import VideoPlayer from '~/components/VideoPlayer.vue';
 const player = ref<InstanceType<typeof VideoPlayer> | null>(null)
-const secretformRef = ref<FormInstance>().value
+const secretformRef = ref<FormInstance>()
 
 interface s3Info {
   accessKey: string,

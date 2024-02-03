@@ -207,8 +207,14 @@ ChartJS.register(
   Colors)
 
 window.onload = function () {
+  healthCheck()
   setInterval(() => {
-    const option = {
+    healthCheck()
+  }, env.healthCheckDuration * 1000)
+}
+
+const healthCheck = () => {
+  const option = {
         baseURL: env.apiUrl,
         url: "/public/ip",
         method: "GET",
@@ -245,7 +251,6 @@ window.onload = function () {
     }).catch(function(error) {
       healthDot.value = false
     })
-  }, env.healthCheckDuration * 1000)
 }
 
 const openGithub = () => {
