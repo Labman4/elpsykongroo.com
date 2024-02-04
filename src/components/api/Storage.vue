@@ -780,11 +780,16 @@ const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
     access.bucket = access.sub
   }
   if (access.platform == "cloudflare") {
-    if (!access.sub) {
-      if (!await checkEndpointCors) {
+    if (access.sub != "") {
+      if (!await checkCors()) {
+        ElMessageBox.alert("something wrong with bucket, if the bucket not exist, please try again, or check bucket cors by maunal");
+        return
+      }
+    } else {
+      if (!await checkEndpointCors()) {
         ElMessageBox.alert("the bucket is not support cors, please try to config by maunal or login for auto config")
         return
-      }    
+      }
     }
   } 
   //for local s3 dev
