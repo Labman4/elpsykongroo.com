@@ -667,11 +667,7 @@ const connect = async() => {
     }
     access.accessKey = s3FormData.accessKey
     access.accessSecret = s3FormData.accessSecret
-    // if (access.platform == "cloudflare") {
-    //   access.endpoint = s3FormData.endpoint + "/" + access.sub
-    // } else {
-      access.endpoint = s3FormData.endpoint
-    // }
+    access.endpoint = s3FormData.endpoint
     if (s3FormData.platform == "cloudflare") {
       access.region = "auto"
       s3FormData.region = "auto"
@@ -681,19 +677,26 @@ const connect = async() => {
     if (s3FormData.accessSecret != "") {
       if (access.sub != "") {
         corsFlag = false
-        await directPreflight()
+        if (!await checkCors()) {
+          ElMessageBox.alert("can not auto config cors, please try to config by maunal")
+          return
+        }
       } else {
         if (!await checkEndpointCors()) {
           ElMessageBox.alert("the bucket is not support cors, please try to config by maunal or login for auto config")
           return
         }
       }
+      if (access.platform == "cloudflare") {
+        access.endpoint = s3FormData.endpoint + "/" + access.sub
+        initS3Client(true)
+      }
       const result = await listBucketsCommand()
       if (result) {
-        // if (access.platform == "cloudflare") {
-        //   access.endpoint = s3FormData.endpoint
-        //   initS3Client(true)
-        // }
+        if (access.platform == "cloudflare") {
+          access.endpoint = s3FormData.endpoint
+          initS3Client(true)
+        }
         saveS3Warning.value = true;
       } else {
         ElMessageBox.alert("check failed, please ensure and try again")
