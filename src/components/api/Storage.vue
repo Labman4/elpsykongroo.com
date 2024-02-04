@@ -263,13 +263,6 @@ const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
   )
 }
 
-const directPreflight = async() => {
-  if (!await checkCors()) {
-    return
-  }
-  initS3Client(true)
-}
-
 const getUploadId = async (fileName, sha256, partCount, partNum) => {
     let uploadId
     if (isDirect.value) {
@@ -534,12 +527,7 @@ const checkCors = async() => {
         }
       }
     } catch (error) {
-      console.error(error);
-      if (access.sub != "") {
-        ElMessageBox.alert("something wrong with bucket, if the bucket not exist, please try again, or check bucket cors by maunal");
-      } else {
-        ElMessageBox.alert("the bucket is not support cors, please try to config by maunal or login for auto config")
-      }
+      console.error(error)
       corsFlag = false
     }
   }
@@ -793,7 +781,10 @@ const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
   }
   if (access.platform == "cloudflare") {
     if (access.sub != "") {
-      await directPreflight()
+      if (!await checkCors()) {
+        ElMessageBox.alert("something wrong with bucket, if the bucket not exist, please try again, or check bucket cors by maunal");
+        return
+      }
     } else {
       if (!await checkEndpointCors) {
         ElMessageBox.alert("the bucket is not support cors, please try to config by maunal or login for auto config")

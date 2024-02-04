@@ -242,9 +242,8 @@ async function webauthnLogin() {
                         visible.tmpLogin = true
                     }
                 } catch (error) {
-                    console.log(error)
-                    console.log(error.message)
                     alert(error.message)
+                    visible.loading = false
                     return
                 }   
             }
