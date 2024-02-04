@@ -61,7 +61,7 @@
         <el-button size="small" type="danger" @click="deleteS3Info(scope.$index, scope.row)">Delete</el-button>
         <el-button size="small" type="primary" @click="loadS3Info(scope.row)" v-if = "access.accessKey != scope.row.accessKey">select</el-button>
         <el-button size="small" type="info" v-if = "access.accessKey == scope.row.accessKey" @click="listObject(), storageTable = true, s3InfoTable = false">open</el-button>
-        <el-button size="small" type="primary" @click="saveS3InfoForm = true" >change bucket</el-button>
+        <el-button size="small" type="primary" @click="corsFlag = false, saveS3InfoForm = true" >change bucket</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -261,14 +261,6 @@ const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
     () => true,
     () => false
   )
-}
-
-const directPreflight = async() => {
-  if (!await checkCors()) {
-      ElMessageBox.alert("the bucket is not support cors, please try to config by maunal or login for auto config")
-      return
-  }
-  initS3Client(true)
 }
 
 const getUploadId = async (fileName, sha256, partCount, partNum) => {
@@ -525,13 +517,18 @@ const checkCors = async() => {
       return true
     }
     corsCount ++
-    const CORSRules = await getCorsRule(access.bucket);
-    if (CORSRules && CORSRules.data) {
-      for(let rule of CORSRules.data) {
-        if (rule["allowedOrigins"] && rule["allowedOrigins"].includes(env.redirectUrl)) {
-          corsFlag = true
-        }    
+    try {
+      const CORSRules = await getCorsRule(access.bucket);
+      if (CORSRules && CORSRules.data && CORSRules.data.length > 0) {
+        for(let rule of CORSRules.data) {
+          if (rule["allowedOrigins"] && rule["allowedOrigins"].includes(env.redirectUrl)) {
+            corsFlag = true
+          }    
+        }
       }
+    } catch (error) {
+      console.error(error)
+      corsFlag = false
     }
   }
   if (!corsFlag) {
@@ -778,14 +775,18 @@ const getS3Info = async() => {
 }
 
 const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
+  data.files = []
   if (!access.bucket) {
     access.bucket = access.sub
   }
   if (access.platform == "cloudflare") {
     if (access.sub != "") {
-      await directPreflight()
+      if (!await checkCors()) {
+        ElMessageBox.alert("something wrong with bucket, if the bucket not exist, please try again, or check bucket cors by maunal");
+        return
+      }
     } else {
-      if (!await checkEndpointCors) {
+      if (!await checkEndpointCors()) {
         ElMessageBox.alert("the bucket is not support cors, please try to config by maunal or login for auto config")
         return
       }

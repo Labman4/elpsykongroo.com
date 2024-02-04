@@ -203,47 +203,49 @@ async function webauthnLogin() {
                 ElMessageBox.alert("service error, please try again later")
             } else if (response.status != 403 && response.message != "Network Error"){    
                 visible.loading = true
-                const publicKeyCredential = await webauthnJson.get(response.data).catch((error) => {
-                    console.log(error.message)
-                    alert(error.message)
-                    return
-                });
-                if (publicKeyCredential) {
-                    const indexOption = {
-                        baseURL: env.authUrl,
-                        url: "/welcome",
-                        method: "POST",
-                        data: {
-                            username: access.username,
-                            credential: JSON.stringify(publicKeyCredential),
-                        },
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },   
-                        withCredentials: true      
-                    }
-                    axios(indexOption).then(function (response) {
-                        if(response.data == 200) {
-                            visible.loading = false;
-                            visible.webauthnFormVisible = false
-                            console.log(idp)
-                            if (idp == undefined || idp == "elpsykongroo" || idp == "labroom" || idp == "preview") {
-                                refreshlogin(access.username);
-                            } else if (redirect != null && state != null) {
-                                window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
-                            }
-                            // else if (idp != "") {
-                            //     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                            // } 
-                        } else if(response.data == 401) { 
-                            ElMessageBox.alert("authentication failed")
-                        } else {
-                            window.location.href = response.data;
+                try {
+                    const publicKeyCredential = await webauthnJson.get(response.data)
+                    if (publicKeyCredential) {
+                        const indexOption = {
+                            baseURL: env.authUrl,
+                            url: "/welcome",
+                            method: "POST",
+                            data: {
+                                username: access.username,
+                                credential: JSON.stringify(publicKeyCredential),
+                            },
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },   
+                            withCredentials: true      
                         }
-                    });
-                } else {
-                    visible.tmpLogin = true
-                }
+                        axios(indexOption).then(function (response) {
+                            if(response.data == 200) {
+                                visible.loading = false;
+                                visible.webauthnFormVisible = false
+                                console.log(idp)
+                                if (idp == undefined || idp == "elpsykongroo" || idp == "labroom" || idp == "preview") {
+                                    refreshlogin(access.username);
+                                } else if (redirect != null && state != null) {
+                                    window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
+                                }
+                                // else if (idp != "") {
+                                //     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
+                                // } 
+                            } else if(response.data == 401) { 
+                                ElMessageBox.alert("authentication failed")
+                            } else {
+                                window.location.href = response.data;
+                            }
+                        });
+                    } else {
+                        visible.tmpLogin = true
+                    }
+                } catch (error) {
+                    alert(error.message)
+                    visible.loading = false
+                    return
+                }   
             }
         })
     }
