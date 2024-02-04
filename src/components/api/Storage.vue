@@ -667,11 +667,11 @@ const connect = async() => {
     }
     access.accessKey = s3FormData.accessKey
     access.accessSecret = s3FormData.accessSecret
-    if (access.platform == "cloudflare") {
-      access.endpoint = s3FormData.endpoint + "/" + access.sub
-    } else {
+    // if (access.platform == "cloudflare") {
+    //   access.endpoint = s3FormData.endpoint + "/" + access.sub
+    // } else {
       access.endpoint = s3FormData.endpoint
-    }
+    // }
     if (s3FormData.platform == "cloudflare") {
       access.region = "auto"
       s3FormData.region = "auto"
@@ -680,19 +680,20 @@ const connect = async() => {
     }
     if (s3FormData.accessSecret != "") {
       if (access.sub != "") {
+        corsFlag = false
         await directPreflight()
       } else {
         if (!await checkEndpointCors()) {
-          ElMessageBox.alert("u s3 not support cors, plead login first and try again through our service")
+          ElMessageBox.alert("the bucket is not support cors, please try to config by maunal or login for auto config")
           return
         }
       }
       const result = await listBucketsCommand()
       if (result) {
-        if (access.platform == "cloudflare") {
-          access.endpoint = s3FormData.endpoint
-          initS3Client(true)
-        }
+        // if (access.platform == "cloudflare") {
+        //   access.endpoint = s3FormData.endpoint
+        //   initS3Client(true)
+        // }
         saveS3Warning.value = true;
       } else {
         ElMessageBox.alert("check failed, please ensure and try again")
@@ -777,9 +778,16 @@ const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
   if (!access.bucket) {
     access.bucket = access.sub
   }
-  if (access.platform == "cloudflare" && access.sub != "") {
-    await directPreflight()
-  }
+  if (access.platform == "cloudflare") {
+    if (access.sub != "") {
+      await directPreflight()
+    } else {
+      if (!await checkEndpointCors) {
+        ElMessageBox.alert("the bucket is not support cors, please try to config by maunal or login for auto config")
+        return
+      }
+    }
+  } 
   //for local s3 dev
   if (!formEl) return
   // const domain = window.location.hostname;
