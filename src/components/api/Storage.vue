@@ -525,17 +525,19 @@ const checkCors = async() => {
       return true
     }
     corsCount ++
-    const CORSRules = await getCorsRule(access.bucket).catch((error) => {
-      console.log(error)
-      ElMessageBox.alert("something wrong with bucket, pleaset try again")
-      return
-    })
-    if (CORSRules && CORSRules.data) {
-      for(let rule of CORSRules.data) {
-        if (rule["allowedOrigins"] && rule["allowedOrigins"].includes(env.redirectUrl)) {
-          corsFlag = true
-        }    
+    try {
+      const CORSRules = await getCorsRule(access.bucket);
+      if (CORSRules && CORSRules.data) {
+        for(let rule of CORSRules.data) {
+          if (rule["allowedOrigins"] && rule["allowedOrigins"].includes(env.redirectUrl)) {
+            corsFlag = true
+          }    
+        }
       }
+    } catch (error) {
+      console.error(error);
+      ElMessageBox.alert("something wrong with bucket, please try again");
+      return
     }
   }
   if (!corsFlag) {
