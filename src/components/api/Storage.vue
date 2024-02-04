@@ -525,7 +525,11 @@ const checkCors = async() => {
       return true
     }
     corsCount ++
-    const CORSRules = await getCorsRule(access.bucket);
+    const CORSRules = await getCorsRule(access.bucket).catch((error) => {
+      console.log(error)
+      ElMessageBox.alert("something wrong with bucket, pleaset try again")
+      return
+    })
     if (CORSRules && CORSRules.data) {
       for(let rule of CORSRules.data) {
         if (rule["allowedOrigins"] && rule["allowedOrigins"].includes(env.redirectUrl)) {
@@ -778,6 +782,7 @@ const getS3Info = async() => {
 }
 
 const initS3Info = async(accessKey, formEl: FormInstance | undefined) => {
+  data.files = []
   if (!access.bucket) {
     access.bucket = access.sub
   }
