@@ -689,8 +689,8 @@ const connect = async() => {
       }
       if (access.platform == "cloudflare") {
         access.endpoint = s3FormData.endpoint + "/" + access.sub
-        initS3Client(true)
       }
+      initS3Client(true)
       const result = await listBucketsCommand()
       if (result) {
         if (access.platform == "cloudflare") {
