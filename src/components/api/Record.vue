@@ -1,9 +1,12 @@
 <template>
-    <el-dialog v-model="recordTable" :width=visible.dialogWidth>
-    <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
-    <el-button type="" @click="recordForm = true">batch</el-button>
-    <el-button type="" @click="recordList(recordPage.order)">refresh</el-button>
-    <el-table :data="data.records" @selection-change="handleRecordSelectChange">
+    <el-dialog  v-model="recordTable" :width=visible.dialogWidth>
+      <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
+      <el-button type="" @click="recordForm = true">batch</el-button>
+      <el-button type="" @click="recordList(recordPage.order)">refresh</el-button>
+    <el-table :data="data.records" 
+      :infinite-scroll-distance=30 
+      :infinite-scroll-immediate=false 
+      v-infinite-scroll=list @selection-change="handleRecordSelectChange">
       <el-table-column type="selection"/>
       <el-table-column property="accessPath" label="path"  width="170px"/>
       <el-table-column property="userAgent" label="userAgent"  width="300px"/>
@@ -20,11 +23,11 @@
       </template>
       </el-table-column>
     </el-table>
-    <el-pagination layout="prev, pager, next, sizes" :total="50" 
+    <!-- <el-pagination layout="prev, pager, next, sizes" :total="50" 
       :current-page="recordPage.pageNumber"  
       :page-size="recordPage.pageSize"
       @update:current-page="recordPageChange"
-      @update:page-size="recordPageSizeChange"/>
+      @update:page-size="recordPageSizeChange"/> -->
   </el-dialog>
 
   <el-dialog v-model="recordForm" :width=visible.dialogWidth>
@@ -159,6 +162,7 @@ const DeleteCustom = () => {
   }
   axios(option).then(function (response) {
     if (response.status == 200) {
+      ElMessageBox.alert("delete amount:" + response.data)
       recordList(recordPage.order)
     }
   })
@@ -188,11 +192,16 @@ const DeleteRecord = (index: number, row: Record) => {
 function recordTimestamp(row:Record) {
   return dayjs(row.timestamp).format("YYYY-MM-DD HH:mm:ss");
 }
-  
-  
-function recordList(order:string) {
+
+var scrollId
+
+const recordList = async(order:string) => {
+   recordPage.order = order
+   list()
+}
+
+const list = async() => {
   recordTable.value = true;
-  recordPage.order = order;
   const option = {
     baseURL: env.apiUrl,
     url: "/record",
@@ -200,14 +209,18 @@ function recordList(order:string) {
     params: {
       "pageNumber": recordPage.pageNumber-1,
       "pageSize": recordPage.pageSize,
-      "order": recordPage.order
+      "order": recordPage.order,
+      "scrollId": scrollId
     },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
     },
   } 
-  axios(option).then(function (response) {
-  data.records = response.data;
+  await axios(option).then(function (response) {
+    if (response.status == 200) {
+      data.records = response.data["hits"]
+      scrollId = response.data["scrollId"]
+    }
   })
 }
 
