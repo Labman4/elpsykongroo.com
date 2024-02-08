@@ -1,4 +1,4 @@
-     <svg  xmlns="https://www.w3.org/2000/svg" viewBox="0 0 256 512" version="1.1">
+     <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512" version="1.1">
                 <path class="nixie-number-part"
                       d="M22,410.8c16.8,46.4,57.9,86.3,106,85.9c59.7-0.5,115-63,115-140.6c0-74.1-50.4-126.7-93.5-138.1"/>
                 <line class="nixie-number-part" x1="149.5" y1="218" x2="243" y2="13"/>

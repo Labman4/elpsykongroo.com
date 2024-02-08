@@ -1,4 +1,4 @@
-      <svg  xmlns="https://www.w3.org/2000/svg" viewBox="0 0 256 512" version="1.1">
+      <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512" version="1.1">
                 <circle class="nixie-number-part" cx="128" cy="128" r="115"/>
                 <line class="nixie-number-part" x1="237.4" y1="163.7" x2="135.8" y2="499"/>
             </svg>
