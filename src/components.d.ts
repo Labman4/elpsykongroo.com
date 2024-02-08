@@ -52,6 +52,7 @@ declare module '@vue/runtime-core' {
     Group: typeof import('./components/api/Group.vue')['default']
     Harbor: typeof import('./components/dashboard/Harbor.vue')['default']
     Home: typeof import('./components/Home.vue')['default']
+    InfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
     IP: typeof import('./components/api/IP.vue')['default']
     Kafka: typeof import('./components/dashboard/Kafka.vue')['default']
     Kibana: typeof import('./components/dashboard/Kibana.vue')['default']
