@@ -210,7 +210,7 @@ const list = async() => {
       "pageNumber": recordPage.pageNumber-1,
       "pageSize": recordPage.pageSize,
       "order": recordPage.order,
-      "scrollId": scrollId
+      "id": scrollId
     },
     headers: {
       'Authorization': 'Bearer '+ access.access_token

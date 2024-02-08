@@ -1,7 +1,10 @@
 <template>
   <el-dialog v-model="ipTable" :width=visible.dialogWidth>
     <el-button type="" @click="openIpAdd">Update</el-button>
-    <el-table :data="data.ips">
+    <el-table :data="data.ips"
+      :infinite-scroll-distance=0 
+      :infinite-scroll-immediate=true 
+      v-infinite-scroll=ipList>
       <el-table-column property="address" label="address" width="auto"/>
       <el-table-column property="black" label="black" width="100px"/>
       <el-table-column property="timestamp" label="date" sortable width="auto"/>
@@ -15,11 +18,11 @@
       </template>
       </el-table-column>
     </el-table>
-    <el-pagination layout="prev, pager, next, sizes" :total="50" 
+    <!-- <el-pagination layout="prev, pager, next, sizes" :total="50" 
       :current-page="ipPage.pageNumber"  
       :page-size="ipPage.pageSize"
       @update:current-page="ipPageChange"
-      @update:page-size="ipPageSizeChange"/>
+      @update:page-size="ipPageSizeChange"/> -->
   </el-dialog>
   <el-dialog v-model="ipForm" :width=visible.dialogWidth>
     <el-form :model="ipFormData">
@@ -160,7 +163,7 @@ const ipBlock = (index: number, address, black, id) => {
       }
     }) 
   }
-
+ var scrollId
   const ipList = () => {
     ipTable.value = true;
     const option = {
@@ -171,14 +174,18 @@ const ipBlock = (index: number, address, black, id) => {
         black: "",
         pageNumber: ipPage.pageNumber-1,
         pageSize: ipPage.pageSize,
-        order: ipPage.order
+        order: ipPage.order,
+        id: scrollId
       },
       headers: {
         'Authorization': 'Bearer '+ access.access_token,
       },
     }
     axios(option).then(function (response) {
-      data.ips=response.data;
+      if (response.status == 200) {
+        data.ips = response.data["hits"]
+        scrollId = response.data["scrollId"]
+      }
     })
   }
 
