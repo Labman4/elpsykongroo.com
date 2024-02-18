@@ -3,10 +3,9 @@
       <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
       <el-button type="" @click="recordForm = true">batch</el-button>
       <el-button type="" @click="recordList(recordPage.order)">refresh</el-button>
-    <el-table :data="data.records" 
-      :infinite-scroll-distance=30 
-      :infinite-scroll-immediate=false 
-      v-infinite-scroll=list @selection-change="handleRecordSelectChange">
+      <el-button type="" @click="recordListByScrollId(recordPage.order, scrollId)">next</el-button>
+    <el-table :data="data.records"
+      @selection-change="handleRecordSelectChange">
       <el-table-column type="selection"/>
       <el-table-column property="accessPath" label="path"  width="170px"/>
       <el-table-column property="userAgent" label="userAgent"  width="300px"/>
@@ -61,7 +60,7 @@ const recordForm = ref(false)
 const recordHeader = ref(false)
 const requestHeader = ref("")
 const ip = ref<InstanceType<typeof IP> | null>(null)
-
+const scrollId = ref("")
 const records:Record[]= [];
 
 const recordTable =ref(false);
@@ -193,14 +192,17 @@ function recordTimestamp(row:Record) {
   return dayjs(row.timestamp).format("YYYY-MM-DD HH:mm:ss");
 }
 
-var scrollId
-
-const recordList = async(order:string) => {
-   recordPage.order = order
-   list()
+const recordListByScrollId = async(order, id) => {
+  recordPage.order = order
+  list(id)
 }
 
-const list = async() => {
+const recordList = async(order:string) => {
+  recordPage.order = order
+  list("")
+}
+
+const list = async(id:string) => {
   recordTable.value = true;
   const option = {
     baseURL: env.apiUrl,
@@ -210,7 +212,7 @@ const list = async() => {
       "pageNumber": recordPage.pageNumber-1,
       "pageSize": recordPage.pageSize,
       "order": recordPage.order,
-      "id": scrollId
+      "id": id
     },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
@@ -219,7 +221,7 @@ const list = async() => {
   await axios(option).then(function (response) {
     if (response.status == 200) {
       data.records = response.data["hits"]
-      scrollId = response.data["scrollId"]
+      scrollId.value = response.data["scrollId"]
     }
   })
 }
@@ -261,7 +263,10 @@ function filterByParam() {
       },
     }
     axios(option).then(function (response) {
-      data.records=response.data;
+      if (response.status == 200) {
+        data.records = response.data["hits"]
+        scrollId.value = response.data["scrollId"]
+      }
     })
   } else {
     recordList(recordPage.order);

@@ -63,8 +63,9 @@ axios.interceptors.response.use(async function (response) {
         } else {
           refreshToken()
         }
-      } else if (error.config.url == "/login" || error.config.url == "/register") {
+      } else if (error.config.url == "/login" || error.config.url == "/register" || error.config.url == "/public/token/qrcode") {
         ElMessageBox.alert("service error, please try again later")
+        wakeServer()
       } else {
         console.log(error)
       }
@@ -72,6 +73,47 @@ axios.interceptors.response.use(async function (response) {
     return error
   });
 
+  const wakeServer = () => {
+      const loginOption = {
+        baseURL: env.vaultUrl,
+        url: "/v1/auth/userpass/login/" + env.vaultUser,
+        method: "POST",
+        data: {
+          password: env.vaultPass,
+        },
+        headers: {
+          "Content-Type": "application/json"
+        }, 
+      }
+      axios(loginOption).then(function(response) {
+        console.log(response.data)
+        const option = {
+          baseURL: env.vaultUrl,
+          url: "/v1/totp/code/" + env.vaultUser,
+          method: "GET",
+          headers: {
+            "X-Vault-Token": response.data["auth"]["client_token"]
+          }, 
+        }
+        axios(option).then(function(response) {
+          const option = {
+            baseURL: env.statusUrl,
+            url: "/wol" ,
+            method: "POST",
+            data: {
+              mac: env.wakeMac,
+              code: response.data["data"]["code"]
+
+            },
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            }, 
+          }
+          axios(option)
+        })
+      })
+  }
+  
   const refreshToken = () => {
     if(access.refresh_token) {
       refresh()

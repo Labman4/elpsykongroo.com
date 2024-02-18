@@ -1,10 +1,9 @@
 <template>
   <el-dialog v-model="ipTable" :width=visible.dialogWidth>
     <el-button type="" @click="openIpAdd">Update</el-button>
-    <el-table :data="data.ips"
-      :infinite-scroll-distance=0 
-      :infinite-scroll-immediate=true 
-      v-infinite-scroll=ipList>
+    <el-button type="" @click="ipList('')">refresh</el-button>
+    <el-button type="" @click="ipList(ipScrollId)">Next</el-button>
+    <el-table :data="data.ips">
       <el-table-column property="address" label="address" width="auto"/>
       <el-table-column property="black" label="black" width="100px"/>
       <el-table-column property="timestamp" label="date" sortable width="auto"/>
@@ -58,8 +57,8 @@ import { axios } from '~/assets/ts/axio';
 import { ElDialog, ElButton, ElTable, ElTableColumn, ElPagination, ElForm, ElFormItem, ElSelect, ElInput } from 'element-plus';
 
 const ipForm = ref(false);
-const ipTable =ref(false);
-
+const ipTable = ref(false);
+const ipScrollId = ref("")
 const ips = [{}];
 const data = reactive({ips});
 
@@ -99,7 +98,7 @@ function addIp() {
     },
   }
   axios(option).then(function(response){
-      ipList();   
+      ipList("");   
     
   })
 }
@@ -124,19 +123,19 @@ const DeleteIP = (address) => {
   axios(option).then(function (response) {
     if (response.status == 200) {
       ipForm.value = false
-      ipList()
+      ipList("")
     }
   }) 
 }
 
 const ipPageChange = (newPage: number) => {
   ipPage.pageNumber = newPage;
-  ipList();
+  ipList("");
 }
 
 const ipPageSizeChange = (newPage: number) => {
   ipPage.pageSize = newPage;
-  ipList();
+  ipList("");
 }
 
 const ipBlock = (index: number, address, black, id) => {
@@ -159,12 +158,12 @@ const ipBlock = (index: number, address, black, id) => {
     }
     axios(option).then(function (response) {
       if (response.data == "UPDATED") {
-        ipList()
+        ipList("")
       }
     }) 
   }
- var scrollId
-  const ipList = () => {
+
+  const ipList = (id) => {
     ipTable.value = true;
     const option = {
       baseURL: env.apiUrl,
@@ -175,7 +174,7 @@ const ipBlock = (index: number, address, black, id) => {
         pageNumber: ipPage.pageNumber-1,
         pageSize: ipPage.pageSize,
         order: ipPage.order,
-        id: scrollId
+        id: id
       },
       headers: {
         'Authorization': 'Bearer '+ access.access_token,
@@ -184,7 +183,7 @@ const ipBlock = (index: number, address, black, id) => {
     axios(option).then(function (response) {
       if (response.status == 200) {
         data.ips = response.data["hits"]
-        scrollId = response.data["scrollId"]
+        ipScrollId.value = response.data["scrollId"]
       }
     })
   }
