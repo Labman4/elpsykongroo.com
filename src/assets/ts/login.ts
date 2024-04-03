@@ -24,7 +24,9 @@ const qrcodeLogin = () => {
       access.code_verifier = response.data
       access.qrcodeUrl = env.authUrl + "/login/qrcode?text=" + response.data
     //   console.log(access.qrcodeUrl)
-      checkToken();
+    if (access.code_verifier != undefined && access.code_verifier != "") {
+        checkToken();
+    }
     });
 }
 

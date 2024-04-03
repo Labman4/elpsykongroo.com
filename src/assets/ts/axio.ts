@@ -9,7 +9,7 @@ const timeCount= ref(0);
 let csrfToken
 let retry = 0;
 // const source = axios.CancelToken.source();
-
+axios.defaults.timeout = 5000;
 axios.interceptors.request.use(config => {
   if (csrfToken) {
     config.headers['X-CSRF-TOKEN'] = csrfToken;
