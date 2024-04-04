@@ -117,14 +117,17 @@ const webauthnRegister = () => {
         axios(registerOption).then(async function (response) {
             if (response.message === 'Network Error' && response.request.status === 0 && response.request.responseURL === '') {
                 visible.loading = false
+                return;
             }
             if (response.data == 409) {
                 ElMessageBox.alert("the user already exist")
                 visible.loading = false; 
                 return;
             }
-            const publicKeyCredential = await webauthnJson.create(response.data);
-            finishauth(publicKeyCredential)
+            if (response.data) {
+                const publicKeyCredential = await webauthnJson.create(response.data);
+                finishauth(publicKeyCredential)
+            }
         });
     }
 }
@@ -203,45 +206,47 @@ async function webauthnLogin() {
                 ElMessageBox.alert("network error, please try again later")
             } else if(response.status == 500) {
                 ElMessageBox.alert("service error, please try again later")
-            } else if (response.status != 403 && response.message != "Network Error"){    
+            } else if (response.status != 403 && response.message != "Network Error"){
                 visible.loading = true
                 try {
-                    const publicKeyCredential = await webauthnJson.get(response.data)
-                    if (publicKeyCredential) {
-                        const indexOption = {
-                            baseURL: env.authUrl,
-                            url: "/welcome",
-                            method: "POST",
-                            data: {
-                                username: access.username,
-                                credential: JSON.stringify(publicKeyCredential),
-                            },
-                            headers: {
-                                "Content-Type": "application/x-www-form-urlencoded"
-                            },   
-                            withCredentials: true      
-                        }
-                        axios(indexOption).then(function (response) {
-                            if(response.data == 200) {
-                                visible.loading = false;
-                                visible.webauthnFormVisible = false
-                                console.log(idp)
-                                if (idp == undefined || idp == "elpsykongroo" || idp == "labroom" || idp == "preview") {
-                                    refreshlogin(access.username);
-                                } else if (redirect != null && state != null) {
-                                    window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
-                                }
-                                // else if (idp != "") {
-                                //     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
-                                // } 
-                            } else if(response.data == 401) { 
-                                ElMessageBox.alert("authentication failed")
-                            } else {
-                                window.location.href = response.data;
+                    if (response.data) {
+                        const publicKeyCredential = await webauthnJson.get(response.data)
+                        if (publicKeyCredential) {
+                            const indexOption = {
+                                baseURL: env.authUrl,
+                                url: "/welcome",
+                                method: "POST",
+                                data: {
+                                    username: access.username,
+                                    credential: JSON.stringify(publicKeyCredential),
+                                },
+                                headers: {
+                                    "Content-Type": "application/x-www-form-urlencoded"
+                                },   
+                                withCredentials: true      
                             }
-                        });
-                    } else {
-                        visible.tmpLogin = true
+                            axios(indexOption).then(function (response) {
+                                if(response.data == 200) {
+                                    visible.loading = false;
+                                    visible.webauthnFormVisible = false
+                                    console.log(idp)
+                                    if (idp == undefined || idp == "elpsykongroo" || idp == "labroom" || idp == "preview") {
+                                        refreshlogin(access.username);
+                                    } else if (redirect != null && state != null) {
+                                        window.location.href = env.authUrl + "/oauth2/authorize" + window.location.search;
+                                    }
+                                    // else if (idp != "") {
+                                    //     window.location.href=env.authUrl+"/oauth2/authorization/" + idp;
+                                    // } 
+                                } else if(response.data == 401) { 
+                                    ElMessageBox.alert("authentication failed")
+                                } else {
+                                    window.location.href = response.data;
+                                }
+                            });
+                        } else {
+                            visible.tmpLogin = true
+                        }
                     }
                 } catch (error) {
                     console.log(error)

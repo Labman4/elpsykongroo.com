@@ -63,13 +63,14 @@ axios.interceptors.response.use(async function (response) {
         } else {
           refreshToken()
         }
-      } else if (error.config.url == "/login" || error.config.url == "/register" || error.config.url == "/public/token/qrcode") {
-        ElMessageBox.alert("service error, please try again later")
-        wakeServer()
-      } else {
-        console.log(error)
-      }
+      }  
     }
+    if (error.config.url == "/login" || error.config.url == "/register" || error.config.url == "/public/token/qrcode") {
+      ElMessageBox.alert("service error, please try again later")
+      wakeServer()
+    } else {
+      console.log(error)
+    }    
     return error
   });
 
