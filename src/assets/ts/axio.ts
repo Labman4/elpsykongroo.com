@@ -9,7 +9,7 @@ const timeCount= ref(0);
 let csrfToken
 let retry = 0;
 // const source = axios.CancelToken.source();
-
+// axios.defaults.timeout = 5000;
 axios.interceptors.request.use(config => {
   if (csrfToken) {
     config.headers['X-CSRF-TOKEN'] = csrfToken;
@@ -63,13 +63,12 @@ axios.interceptors.response.use(async function (response) {
         } else {
           refreshToken()
         }
-      } else if (error.config.url == "/login" || error.config.url == "/register" || error.config.url == "/public/token/qrcode") {
-        ElMessageBox.alert("service error, please try again later")
-        wakeServer()
-      } else {
-        console.log(error)
-      }
+      }  
     }
+    if (error.config.url == "/login" || error.config.url == "/register" || error.config.url == "/public/token/qrcode") {
+      ElMessageBox.alert("service error, please try again later")
+      wakeServer()
+    } 
     return error
   });
 
