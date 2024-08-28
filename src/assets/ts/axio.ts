@@ -88,7 +88,7 @@ axios.interceptors.response.use(async function (response) {
         console.log(response.data)
         const option = {
           baseURL: env.vaultUrl,
-          url: "/v1/totp/code/" + env.vaultUser,
+          url: "/v1/totp/code/" + env.vaultPublicUser,
           method: "GET",
           headers: {
             "X-Vault-Token": response.data["auth"]["client_token"]
