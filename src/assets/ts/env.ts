@@ -19,6 +19,7 @@ export const env = reactive(
     healthCheckDuration: import.meta.env.VITE_HEALTH_CHECK_DURATION,
     vaultUrl: import.meta.env.VITE_VAULT_URL,
     vaultUser: import.meta.env.VITE_VAULT_USER,
+    vaultPublicUser: import.meta.env.VITE_VAULT_PUBLIC_USER,
     vaultPass: import.meta.env.VITE_VAULT_PASS,
     wakeMac: import.meta.env.VITE_WAKE_MAC,
 
