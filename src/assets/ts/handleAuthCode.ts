@@ -7,6 +7,7 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { visible } from "./visible";
 import { ElNotification } from "element-plus";
+import { getPeerInstance } from '~/assets/ts/webrtc';
 
 // import { registerSW } from 'virtual:pwa-register';
 
@@ -218,8 +219,7 @@ if (code != null && state != null) {
         },   
         withCredentials: true                  
     }
-      axios(authOption).then(function (response) {
-      }) 
+      axios(authOption).then(function (response) {}) 
   }
 
   const handleCookie = () => {
@@ -292,6 +292,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   const handleAccess = async(option) => {
+    try {
+      const peer = getPeerInstance();
+      peer.on('open', id => {
+        access.peerId = id;
+      });
+  
+    } catch (error) {
+      console.error('Error creating peer:', error);
+    }
     const jwtString = await axios(option).then(function (response) {
       let decoded
       if (response.data == undefined && response.data == "") {
@@ -326,6 +335,19 @@ document.addEventListener('DOMContentLoaded', async function() {
       await register(access.sub)
       toggleDark();
       countDown();
+      const option = {
+        baseURL: env.peerUrl,
+        url: "/peer/",
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        }, 
+        data: {
+          username: access.sub,
+          peerId: access.peerId
+        }
+      }
+      axios(option);
     }
     return jwtString
   }

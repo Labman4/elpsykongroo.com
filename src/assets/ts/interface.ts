@@ -41,4 +41,12 @@ interface ListObject {
   "size": number
 }
 
-export type { user, notification, topic, group, authority, ListObject };
+interface peer {
+  _id: string
+  username: string
+  lastActive: string
+  peerId: string
+  status: string
+}
+
+export type { user, notification, topic, group, authority, ListObject, peer };

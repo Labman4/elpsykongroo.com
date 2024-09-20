@@ -13,6 +13,7 @@
       <Icon icon="grommet-icons:github" />
     </el-icon>
     <el-icon class="storage" @click="openStorage()"><UploadFilled /></el-icon>
+    <el-icon class="chat" @click="visible.chatTable = true,openChat()"><ChatLineRound /></el-icon>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
     <el-avatar class="whiteMode" :icon="UserFilled" size="small" @click="visible.webauthnFormVisible = true" v-if = "!access.sub"/>
     <el-avatar class="whiteMode" size="small" v-if = "access.sub" :src="access.avatarUrl" fit="fill" @click="openUser()"></el-avatar>
@@ -161,15 +162,19 @@
     <QrcodeVue :value=access.qrcodeUrl :size="200" level="H" /> 
   </el-dialog>
 
+  <el-dialog v-model=visible.chatTable width="75%">
+    <Chat></Chat>
+  </el-dialog>
   <Notice></Notice>
   <Storage ref="storage"></Storage>
 
 </template>
 
 <script lang="ts" setup >
-import { Iphone, Message, UploadFilled, UserFilled, Plus, Coin } from '@element-plus/icons-vue';
+import { Iphone, Message, UploadFilled, UserFilled, Plus, Coin, ChatLineRound } from '@element-plus/icons-vue';
 import { webauthnRegister, webauthnLogin, tmpLogin, logout, qrcodeLogin } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
+import { connect } from '~/assets/ts/webrtc';
 import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
 import { axios } from '~/assets/ts/axio';
@@ -181,6 +186,9 @@ import { loadUser, noticeListByUser, updateUser, loadUserInfo} from '~/assets/ts
 import { userFormData, dynamicClaimForm, userInfoTableData, inituserInfoTable,} from '~/assets/ts/dataInterface'
 import Notice from '~/components/api/Notice.vue';
 import Storage from '~/components/api/Storage.vue';
+import Chat from '~/components/api/Chat.vue';
+import { getPeerInstance } from '~/assets/ts/webrtc';
+
 import { Icon } from '@iconify/vue';
 import {
   Chart as ChartJS,
@@ -213,8 +221,16 @@ window.onload = function () {
   }, env.healthCheckDuration * 1000)
 }
 
+
+const openChat = async() => {
+  const peer = getPeerInstance();
+  peer.on('open', id => {
+    console.log('First peer ID: ' + id);
+});
+}
+
 const healthCheck = () => {
-  const option = {
+    const option = {
         baseURL: env.apiUrl,
         url: "/public/ip",
         method: "GET",
@@ -307,7 +323,6 @@ const openStatus = async() => {
   loaded.value = true
 
 }
-
 
 const initclaimFormData = () => ({
   key: "",
@@ -562,6 +577,11 @@ const resetUseInfo = (username:string) => {
 
   .status {
     position:absolute;right: 170px; top:15px;
+    color: #409EFF;
+  }
+
+  .chat {
+    position:absolute;right: 200px; top:15px;
     color: #409EFF;
   }
 
