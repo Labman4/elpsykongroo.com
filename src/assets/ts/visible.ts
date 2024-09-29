@@ -20,5 +20,7 @@ export const visible = reactive(
     "topicLoad": true,
     "noticeDrawer": false,
     "loadingText": "Logining",
-    "chatTable": false
+    "chatTable": false,
+    "isDotMessage": false,
+    "chatDrawer": false
 })

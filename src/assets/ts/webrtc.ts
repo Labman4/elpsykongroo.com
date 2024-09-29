@@ -1,36 +1,79 @@
-import { Peer } from "peerjs";
+import { defineStore } from 'pinia';
+import Peer from 'peerjs';
+import { env } from '~/assets/ts/env';
+import { visible } from '~/assets/ts/visible';
+import { data } from '~/assets/ts/dataInterface'
+import { access } from '~/assets/ts/access';
 
-let peerInstance = null;
+export const usePeerStore = defineStore('peerStore', {
+  state: () => ({
+    peerInstance: null as Peer | null,
+    peerId: '' as string | null,
+  }),
+  actions: {
+    async initPeer() {
+      if (!this.peerInstance) {
+        try {
 
-function getPeerInstance() {
-    if (!peerInstance) {
-        peerInstance = new Peer(null, {
-            host: "127.0.0.1",
+          this.peerInstance = new Peer(null, {
+            host: env.peerServerUrl,
             port: 9091,
-            path: "/app",
-            secure: false // 如果是自建服务器，且不使用 HTTPS
-        });
-    }
-    return peerInstance;
-}
+            path: '/app',
+            secure: true,
+            debug: 0,
+            // config: {
+            //   iceServers: []  // 不使用 STUN/TURN 服务器
+            // }
+          });
 
-async function connect() {
-    // const peer = new Peer();
-    const peer = new Peer(null, {
-        host: "127.0.0.1",
-        port: 9091,
-        path: "/app",
-        secure: false // 如果是自建服务器，且不使用 HTTPS
-    });
-    return new Promise((resolve, reject) => {
-        peer.on('open', (id) => {
-            resolve(id); // 当连接建立时，返回 Peer ID
-        });
+          this.peerInstance.on('open', (id: string) => {
+            this.peerId = id;
+            console.log(id);
+          });
 
-        peer.on('error', (err) => {
-            reject(err); // 发生错误时拒绝 Promise
-        });
-    });
-}
+          this.peerInstance.on('connection', (conn) => {
+            console.log('New connection established');
+            this.handleConnection(conn);
+          });
 
-export { connect, getPeerInstance }
+          this.peerInstance.on('error', (err: any) => {
+            console.error('Peer connection error:', err);
+          });
+          this.peerInstance.on('disconnected', () => {
+            console.log('Disconnected from the signaling server');
+            this.peerInstance.reconnect()
+          });
+          
+        } catch (error) {
+          console.error('Failed to initialize PeerJS instance:', error);
+        }
+      }
+    },
+    handleConnection(conn: any) {
+      access.connectId = conn.peer;
+      conn.on('open', function() {
+        conn.on('data', function(datas) {
+          const d = datas.split("*");
+          const time = Number(d[2]);
+          visible.isDotMessage = true;
+          data.messages.push({
+            text: d[0],
+            sender: "received",
+            timestamp: time,
+            user: d[1]
+          })
+        });
+      });
+      conn.on('close', () => {
+        console.log('Connection closed');
+      });
+
+      conn.on('error', (err: any) => {
+        console.error('Connection error:', err);
+      });
+    },
+    getPeer() {
+      return this.peerInstance;
+    },
+  },
+});

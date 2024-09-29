@@ -13,7 +13,9 @@
       <Icon icon="grommet-icons:github" />
     </el-icon>
     <el-icon class="storage" @click="openStorage()"><UploadFilled /></el-icon>
-    <el-icon class="chat" @click="visible.chatTable = true,openChat()"><ChatLineRound /></el-icon>
+    <el-badge class="chat" :is-dot=visible.isDotMessage>
+      <el-icon  @click="openChat()"><ChatLineRound /></el-icon>
+    </el-badge>
     <el-icon class="phoneMode" @click="qrcodeLogin" ><Iphone /></el-icon>
     <el-avatar class="whiteMode" :icon="UserFilled" size="small" @click="visible.webauthnFormVisible = true" v-if = "!access.sub"/>
     <el-avatar class="whiteMode" size="small" v-if = "access.sub" :src="access.avatarUrl" fit="fill" @click="openUser()"></el-avatar>
@@ -161,10 +163,7 @@
     :width=visible.dialogWidth>
     <QrcodeVue :value=access.qrcodeUrl :size="200" level="H" /> 
   </el-dialog>
-
-  <el-dialog v-model=visible.chatTable width="75%">
-    <Chat></Chat>
-  </el-dialog>
+  <Chat></Chat>
   <Notice></Notice>
   <Storage ref="storage"></Storage>
 
@@ -174,7 +173,6 @@
 import { Iphone, Message, UploadFilled, UserFilled, Plus, Coin, ChatLineRound } from '@element-plus/icons-vue';
 import { webauthnRegister, webauthnLogin, tmpLogin, logout, qrcodeLogin } from '~/assets/ts/login';
 import { access } from '~/assets/ts/access';
-import { connect } from '~/assets/ts/webrtc';
 import { visible } from "~/assets/ts/visible";
 import { env } from '~/assets/ts/env';
 import { axios } from '~/assets/ts/axio';
@@ -187,9 +185,9 @@ import { userFormData, dynamicClaimForm, userInfoTableData, inituserInfoTable,} 
 import Notice from '~/components/api/Notice.vue';
 import Storage from '~/components/api/Storage.vue';
 import Chat from '~/components/api/Chat.vue';
-import { getPeerInstance } from '~/assets/ts/webrtc';
-
 import { Icon } from '@iconify/vue';
+import { usePeerStore } from '~/assets/ts/webrtc';
+
 import {
   Chart as ChartJS,
   Title,
@@ -202,7 +200,7 @@ import {
   Colors 
 } from 'chart.js'
 import { Line, ChartComponentRef } from 'vue-chartjs'
-const lineChart = ref<ChartComponentRef | null>(null)
+const lineChart = ref<ChartComponentRef | null>(null);
 
 ChartJS.register(  
   CategoryScale,
@@ -214,19 +212,15 @@ ChartJS.register(
   Legend,
   Colors)
 
-window.onload = function () {
-  healthCheck()
-  setInterval(() => {
-    healthCheck()
-  }, env.healthCheckDuration * 1000)
-}
-
-
-const openChat = async() => {
-  const peer = getPeerInstance();
-  peer.on('open', id => {
-    console.log('First peer ID: ' + id);
-});
+function openChat() {
+  if (!visible.isDotMessage) {
+    visible.chatTable = true;
+  } else {
+    visible.chatDrawer = true;
+    visible.isDotMessage = false;
+  }
+  const peerStore = usePeerStore();
+  peerStore.initPeer();
 }
 
 const healthCheck = () => {
@@ -267,6 +261,13 @@ const healthCheck = () => {
     }).catch(function(error) {
       healthDot.value = false
     })
+}
+
+window.onload = function () {
+  healthCheck();
+  setInterval(() => {
+    healthCheck()
+  }, env.healthCheckDuration * 1000)
 }
 
 const openGithub = () => {

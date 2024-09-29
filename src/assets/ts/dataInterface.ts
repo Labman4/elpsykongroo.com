@@ -1,10 +1,11 @@
-import { user, notification, topic  } from '~/assets/ts/interface';
+import { user, notification, topic, message  } from '~/assets/ts/interface';
 
-const notification:notification[] = [];
+const notifications:notification[] = [];
 const users:user[] = []
-const topic:topic[] = []
+const topics:topic[] = []
+const messages:message[] = [];
 
-const data = reactive({notification, users, topic});
+const data = reactive({notifications, users, topics, messages});
 
 let inituserFormData  = () => ({
     email: "",
@@ -44,4 +45,4 @@ let inituserInfoTable  = () => ({
 })
 
 let userInfoTableData = reactive(inituserInfoTable());
-export { dynamicClaimForm, userFormData, userInfoTableData, inituserInfoTable,data }
+export { dynamicClaimForm, userFormData, userInfoTableData, inituserInfoTable, data }

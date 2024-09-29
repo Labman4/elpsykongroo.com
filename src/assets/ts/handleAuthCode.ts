@@ -7,8 +7,7 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { visible } from "./visible";
 import { ElNotification } from "element-plus";
-import { getPeerInstance } from '~/assets/ts/webrtc';
-
+import { usePeerStore } from "./webrtc";
 // import { registerSW } from 'virtual:pwa-register';
 
 const firebaseConfig = {
@@ -290,17 +289,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       return ""
     }
   }
-
   const handleAccess = async(option) => {
-    try {
-      const peer = getPeerInstance();
-      peer.on('open', id => {
-        access.peerId = id;
-      });
-  
-    } catch (error) {
-      console.error('Error creating peer:', error);
-    }
     const jwtString = await axios(option).then(function (response) {
       let decoded
       if (response.data == undefined && response.data == "") {
@@ -335,19 +324,28 @@ document.addEventListener('DOMContentLoaded', async function() {
       await register(access.sub)
       toggleDark();
       countDown();
-      const option = {
-        baseURL: env.peerUrl,
-        url: "/peer/",
-        method: "POST",
-        headers: {
-          "content-type": "application/json"
-        }, 
-        data: {
-          username: access.sub,
-          peerId: access.peerId
+      
+      const peerStore = usePeerStore();
+      peerStore.initPeer();
+      const peer = peerStore.getPeer();
+
+      peer?.on('open', (id: string) => {
+        access.peerId = id;
+        const option = {
+          baseURL: env.peerUrl,
+          url: "/peer/",
+          method: "POST",
+          headers: {
+            "content-type": "application/json"
+          }, 
+          data: {
+            username: access.sub,
+            peerId: access.peerId
+          }
         }
-      }
-      axios(option);
+        axios(option);
+      });
+      
     }
     return jwtString
   }

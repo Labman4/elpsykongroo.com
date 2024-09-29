@@ -8,6 +8,7 @@ declare module '@vue/runtime-core' {
     AuthClient: typeof import('./components/api/AuthClient.vue')['default']
     Authority: typeof import('./components/api/Authority.vue')['default']
     Bootstrap: typeof import('./components/layouts/Bootstrap.vue')['default']
+    Chat: typeof import('./components/api/Chat.vue')['default']
     Clock: typeof import('./components/Clock.vue')['default']
     ClockIcon: typeof import('./components/Svg/ClockIcon.vue')['default']
     Dark: typeof import('./components/Dark.vue')['default']

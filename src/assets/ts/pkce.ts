@@ -33,7 +33,7 @@ async function pkce () {
           response_type: "code",
           code_challenge_method: "S256",
           code_challenge: access.code_challenge,
-          redirect_uri: access.redirect_uri,
+          redirect_uri: "http://127.0.0.1:15173",
           scope: "openid permission",
           client_id: "pkce"
         },

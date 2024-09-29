@@ -23,4 +23,6 @@ export const env = reactive(
     vaultPass: import.meta.env.VITE_VAULT_PASS,
     wakeMac: import.meta.env.VITE_WAKE_MAC,
     peerUrl: import.meta.env.VITE_PEER_URL,
+    peerServerUrl: import.meta.env.VITE_PEER_SERVER_URL,
+
 })
