@@ -143,8 +143,8 @@ const searchPeer = async(username) => {
     datas.peers = [];
     datas.peers.push(response.data);
     const option = {
-      baseURL: env.peerUrl,
-      url: "/online/",
+      baseURL: "https://" + env.peerServerUrl,
+      url: "/app/peerjs/peers",
       method: "GET",
       headers: {
         "content-type": "application/json"
