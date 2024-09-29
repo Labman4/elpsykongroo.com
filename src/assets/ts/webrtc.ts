@@ -9,15 +9,17 @@ export const usePeerStore = defineStore('peerStore', {
   state: () => ({
     peerInstance: null as Peer | null,
     peerId: '' as string | null,
+    isFirst: true as boolean | false 
   }),
   actions: {
     async initPeer() {
       if (!this.peerInstance) {
         try {
 
+          // this.peerInstance = new Peer();
           this.peerInstance = new Peer(null, {
             host: env.peerServerUrl,
-            port: 9091,
+            port: 443,
             path: '/app',
             secure: true,
             debug: 0,
@@ -28,7 +30,7 @@ export const usePeerStore = defineStore('peerStore', {
 
           this.peerInstance.on('open', (id: string) => {
             this.peerId = id;
-            console.log(id);
+            this.isFirst = false;
           });
 
           this.peerInstance.on('connection', (conn) => {
@@ -37,13 +39,17 @@ export const usePeerStore = defineStore('peerStore', {
           });
 
           this.peerInstance.on('error', (err: any) => {
+            if (this.isFirst) {
+              this.peerInstance = null;
+            } 
             console.error('Peer connection error:', err);
           });
           this.peerInstance.on('disconnected', () => {
             console.log('Disconnected from the signaling server');
-            this.peerInstance.reconnect()
-          });
-          
+            if (!this.isFirst) {
+              this.peerInstance.reconnect()
+            }
+          }); 
         } catch (error) {
           console.error('Failed to initialize PeerJS instance:', error);
         }
