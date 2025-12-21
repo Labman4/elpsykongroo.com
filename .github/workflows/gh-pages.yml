@@ -54,4 +54,5 @@ jobs:
           publish_dir: ./dist
           force_orphan: true
           cname: ${{ secrets.VITE_CNAME }}
-
+          custom_headers: |
+            /.well-known/apple-app-site-association: content-type=application/json
