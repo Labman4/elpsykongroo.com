@@ -27,7 +27,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3.6.0
         with:
-          node-version: "19.x"
+          node-version: "20"
 
       - name: Install Dependencies
         run: npm install
@@ -54,4 +54,5 @@ jobs:
           publish_dir: ./dist
           force_orphan: true
           cname: ${{ secrets.VITE_CNAME }}
-
+          custom_headers: |
+            /.well-known/apple-app-site-association: content-type=application/json
