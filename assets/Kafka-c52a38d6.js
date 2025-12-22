@@ -1,0 +1,1 @@
+import{d as o,o as n,c as t,a,n as r}from"./index-05242b77.js";const m=o({__name:"Kafka",setup(s){const e=window.innerHeight+"px";return(c,i)=>(n(),t("div",null,[a("iframe",{src:"https://akhq.elpsykongroo.com",scrolling:"no",frameborder:"0",style:r({width:"100%",height:e})},null,4)]))}});export{m as default};
