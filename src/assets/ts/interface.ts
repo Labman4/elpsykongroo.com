@@ -36,9 +36,24 @@ interface authority {
 }
 
 interface ListObject {
-  "key": string
-  "timestamp": number
-  "size": number
+  key: string
+  timestamp: number
+  size: number
 }
 
-export type { user, notification, topic, group, authority, ListObject };
+interface pid {
+  _id: string
+  username: string
+  lastActive: string
+  peerId: string
+  status: string
+}
+
+interface message  {
+  text: string
+  timestamp: number
+  sender: string,
+  user: string
+}
+
+export type { user, notification, topic, group, authority, ListObject, pid, message };

@@ -7,7 +7,7 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { visible } from "./visible";
 import { ElNotification } from "element-plus";
-
+import { usePeerStore } from "./webrtc";
 // import { registerSW } from 'virtual:pwa-register';
 
 const firebaseConfig = {
@@ -218,8 +218,7 @@ if (code != null && state != null) {
         },   
         withCredentials: true                  
     }
-      axios(authOption).then(function (response) {
-      }) 
+      axios(authOption).then(function (response) {}) 
   }
 
   const handleCookie = () => {
@@ -290,7 +289,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       return ""
     }
   }
-
   const handleAccess = async(option) => {
     const jwtString = await axios(option).then(function (response) {
       let decoded
@@ -326,6 +324,28 @@ document.addEventListener('DOMContentLoaded', async function() {
       await register(access.sub)
       toggleDark();
       countDown();
+      
+      const peerStore = usePeerStore();
+      peerStore.initPeer();
+      const peer = peerStore.getPeer();
+
+      peer?.on('open', (id: string) => {
+        access.peerId = id;
+        const option = {
+          baseURL: env.peerUrl,
+          url: "/peer/",
+          method: "POST",
+          headers: {
+            "content-type": "application/json"
+          }, 
+          data: {
+            username: access.sub,
+            peerId: access.peerId
+          }
+        }
+        axios(option);
+      });
+      
     }
     return jwtString
   }

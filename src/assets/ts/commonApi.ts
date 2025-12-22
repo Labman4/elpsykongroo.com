@@ -93,7 +93,7 @@ const noticeListByUser = async(user, draft) => {
     notices.forEach( obj => {
         obj.timestamp = dayjs(obj.timestamp).format("YYYY-MM-DD HH:mm:ss")
     })
-    data.notification = notices 
+    data.notifications = notices 
   })
   return notices
 }
@@ -119,7 +119,7 @@ const noticeList = async(topic:string[], draft: string) => {
     notices.forEach( obj => {
         obj.timestamp = dayjs(obj.timestamp).format("YYYY-MM-DD HH:mm:ss")
     })
-    data.notification = notices 
+    data.notifications = notices 
   //      window.Notification.requestPermission().then(function(permssion) {
   //     console.log(permssion)
   //     const notification = new Notification("标题", {
@@ -149,7 +149,7 @@ const topicList = async() => {
   await axios(option).then(function(response){
     topics = response.data
     visible.topicLoad = false
-    data.topic = topics
+    data.topics = topics
   })
   return topics
 }

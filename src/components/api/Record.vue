@@ -255,7 +255,8 @@ function filterByParam() {
         "params": search.value,
         "pageNumber": recordPage.pageNumber-1,
         "pageSize": recordPage.pageSize,
-        "order": recordPage.order
+        "order": recordPage.order,
+        "id": scrollId
       },
       headers: {
         'Authorization': 'Bearer '+ access.access_token,

@@ -65,7 +65,7 @@
             :remote-method="topicList"
             :loading="visible.topicLoad">
             <el-option
-                v-for="item in data.topic"
+                v-for="item in data.topics"
                 :key="item.name"
                 :label="item.name"
                 :value="item.name"
@@ -129,7 +129,7 @@
     :width=visible.dialogWidth
     align-center>
     <el-button type="" @click="topicDialog = true">Add</el-button>
-    <el-table :data="data.topic" @selection-change="">
+    <el-table :data="data.topics" @selection-change="">
       <el-table-column type="selection"/>
       <el-table-column property="name" label="name"/>
       <el-table-column property="registers" label="registers" />
@@ -151,7 +151,7 @@
     :width=visible.dialogWidth
     align-center>
     <el-button type="" @click="notificationDialog = true">Add</el-button>
-    <el-table :data="data.notification" @selection-change="">
+    <el-table :data="data.notifications" @selection-change="">
       <el-table-column type="selection"/>
       <!-- <el-table-column property="id" label="id"/> -->
       <el-table-column property="title" label="title"/>
@@ -281,7 +281,7 @@ const deleteTopic = (index, row) => {
       },
   }
   axios(option).then(function(response){
-    data.topic.splice(index, 1);
+    data.topics.splice(index, 1);
   })
 }
 
@@ -298,7 +298,7 @@ const deleteNotice = (index, row) => {
       },
   }
   axios(option).then(function(response){
-    data.notification.splice(index, 1);
+    data.notifications.splice(index, 1);
   })
 }
 
