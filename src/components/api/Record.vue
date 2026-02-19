@@ -2,8 +2,10 @@
     <el-dialog  v-model="recordTable" :width=visible.dialogWidth>
       <el-button type="danger" @click="DeleteSelect()">DeleteSelect</el-button>
       <el-button type="" @click="recordForm = true">batch</el-button>
-      <el-button type="" @click="recordList(recordPage.order)">refresh</el-button>
-      <el-button type="" @click="recordListByScrollId(recordPage.order, scrollId)">next</el-button>
+      <el-button type="" @click="recordList()">refresh</el-button>
+      <el-button type="success" @click="order = 'asc'" v-if="order!='asc'">desc </el-button>
+      <el-button type="primary" @click="order = 'desc'" v-if="order=='asc'">asc </el-button>
+      <el-button type="" @click="filterByParam()">next</el-button>
     <el-table :data="data.records"
       @selection-change="handleRecordSelectChange">
       <el-table-column type="selection"/>
@@ -18,7 +20,7 @@
       <template #default="scope">
         <el-button size="small" type="" @click="openRecord(scope.row)">headers</el-button>
         <el-button size="small" type="danger" @click="DeleteRecord(scope.$index, scope.row)">Delete</el-button>
-        <el-button size="small" type="danger" @click="block(scope.$index, scope.row.sourceIP, 'false', '')">lock</el-button>
+        <el-button size="small" type="danger" @click="block(null, scope.$index, scope.row.sourceIP, 'false', '')">lock</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -60,12 +62,16 @@ const recordForm = ref(false)
 const recordHeader = ref(false)
 const requestHeader = ref("")
 const ip = ref<InstanceType<typeof IP> | null>(null)
-const scrollId = ref("")
+const order = ref("asc")
 const records:Record[]= [];
-
 const recordTable =ref(false);
 
 const data = reactive({records})
+
+const searchAfter = reactive({
+    timestamp: "",
+    id: ""
+})
 
 const recordFormData =  reactive({
   timestamp: "",
@@ -75,12 +81,6 @@ const recordFormData =  reactive({
   userAgent: "",
   requestHeader: {}
 })
-
-const recordPage = {
-  "pageNumber": 1,
-  "pageSize": 10,
-  "order": "0"
-};
 
 interface Record {
   timestamp: string
@@ -95,7 +95,9 @@ const handleRecordSelectChange = (val: Record[]) => {
   multipleRecordSelect.value = val;
   selectRecord.splice(0, selectRecord.length);
   for(let i of multipleRecordSelect.value) {
-    selectRecord.push(i.id);
+    if (selectRecord.length < 20) {
+      selectRecord.push(i.id);
+    }
   }
 }
  
@@ -129,7 +131,7 @@ const DeleteSelect= () => {
         if (search.value != '') {
           filterByParam();
         } else {
-          recordList(recordPage.order);
+          recordList();
         }
       } 
     }
@@ -162,7 +164,7 @@ const DeleteCustom = () => {
   axios(option).then(function (response) {
     if (response.status == 200) {
       ElMessageBox.alert("delete amount:" + response.data)
-      recordList(recordPage.order)
+      recordList()
     }
   })
 }
@@ -192,27 +194,22 @@ function recordTimestamp(row:Record) {
   return dayjs(row.timestamp).format("YYYY-MM-DD HH:mm:ss");
 }
 
-const recordListByScrollId = async(order, id) => {
-  recordPage.order = order
-  list(id)
+const recordList = async() => {
+  searchAfter.timestamp = ""
+  searchAfter.id = ""
+  list()
 }
 
-const recordList = async(order:string) => {
-  recordPage.order = order
-  list("")
-}
-
-const list = async(id:string) => {
+const list = async() => {
   recordTable.value = true;
   const option = {
     baseURL: env.apiUrl,
     url: "/record",
     method: "GET",
     params: {
-      "pageNumber": recordPage.pageNumber-1,
-      "pageSize": recordPage.pageSize,
-      "order": recordPage.order,
-      "id": id
+      "order": order.value,
+      "timestamp": searchAfter.timestamp,
+      "id": searchAfter.id,
     },
     headers: {
       'Authorization': 'Bearer '+ access.access_token
@@ -221,28 +218,12 @@ const list = async(id:string) => {
   await axios(option).then(function (response) {
     if (response.status == 200) {
       data.records = response.data["hits"]
-      scrollId.value = response.data["scrollId"]
+      searchAfter.timestamp = response.data["searchAfter"][0]
+      searchAfter.id = response.data["searchAfter"][1]
     }
   })
 }
 
-const recordPageChange = (newPage: number) => {
-  recordPage.pageNumber = newPage;
-  if (search.value != '') {
-    filterByParam();
-  } else {
-    recordList(recordPage.order);
-  }
-}
-
-const recordPageSizeChange = (newPage: number) => {
-  recordPage.pageSize = newPage;
-  if (search.value != '') {
-    filterByParam();
-  } else {
-    recordList(recordPage.order);
-  }
-}
 const search = ref('')
 
 function filterByParam() {
@@ -253,10 +234,9 @@ function filterByParam() {
       method: "POST",
       data: {
         "params": search.value,
-        "pageNumber": recordPage.pageNumber-1,
-        "pageSize": recordPage.pageSize,
-        "order": recordPage.order,
-        "id": scrollId
+        "timestamp": searchAfter.timestamp,
+        "id": searchAfter.id,
+        "order": order.value
       },
       headers: {
         'Authorization': 'Bearer '+ access.access_token,
@@ -266,11 +246,12 @@ function filterByParam() {
     axios(option).then(function (response) {
       if (response.status == 200) {
         data.records = response.data["hits"]
-        scrollId.value = response.data["scrollId"]
+        searchAfter.timestamp = response.data["searchAfter"][0]
+        searchAfter.id = response.data["searchAfter"][1]
       }
     })
   } else {
-    recordList(recordPage.order);
+      list()
   }
 }
 

@@ -1,8 +1,8 @@
 <template>
   <el-dialog v-model="ipTable" :width=visible.dialogWidth>
     <el-button type="" @click="openIpAdd">Update</el-button>
-    <el-button type="" @click="ipList('')">refresh</el-button>
-    <el-button type="" @click="ipList(ipScrollId)">Next</el-button>
+    <el-button type="" @click="searchAfter.timestamp = '', searchAfter.id = '', ipList()">refresh</el-button>
+    <el-button type="" @click="ipList()">Next</el-button>
     <el-table :data="data.ips">
       <el-table-column property="address" label="address" width="auto"/>
       <el-table-column property="black" label="black" width="100px"/>
@@ -74,6 +74,11 @@ const ipPage = {
   "order": 0
 };
 
+const searchAfter = reactive({
+    timestamp: "",
+    id: ""
+})
+
 const ipFormData =  reactive({
   "address": "",
   "black": ""
@@ -98,7 +103,7 @@ function addIp() {
     },
   }
   axios(option).then(function(response){
-      ipList("");   
+      ipList();   
     
   })
 }
@@ -123,22 +128,22 @@ const DeleteIP = (address) => {
   axios(option).then(function (response) {
     if (response.status == 200) {
       ipForm.value = false
-      ipList("")
+      ipList()
     }
   }) 
 }
 
 const ipPageChange = (newPage: number) => {
   ipPage.pageNumber = newPage;
-  ipList("");
+  ipList();
 }
 
 const ipPageSizeChange = (newPage: number) => {
   ipPage.pageSize = newPage;
-  ipList("");
+  ipList();
 }
 
-const ipBlock = (index: number, address, black, id) => {
+const ipBlock = (index, address, black, id) => { 
     var flag = "false";
     if (black == "false") {
       flag = "true"
@@ -158,12 +163,12 @@ const ipBlock = (index: number, address, black, id) => {
     }
     axios(option).then(function (response) {
       if (response.data == "UPDATED") {
-        ipList("")
+        ipList()
       }
     }) 
   }
 
-  const ipList = (id) => {
+  const ipList = () => {
     ipTable.value = true;
     const option = {
       baseURL: env.apiUrl,
@@ -174,7 +179,8 @@ const ipBlock = (index: number, address, black, id) => {
         pageNumber: ipPage.pageNumber-1,
         pageSize: ipPage.pageSize,
         order: ipPage.order,
-        id: id
+        timestamp: searchAfter.timestamp,
+        id: searchAfter.id
       },
       headers: {
         'Authorization': 'Bearer '+ access.access_token,
@@ -183,7 +189,8 @@ const ipBlock = (index: number, address, black, id) => {
     axios(option).then(function (response) {
       if (response.status == 200) {
         data.ips = response.data["hits"]
-        ipScrollId.value = response.data["scrollId"]
+        searchAfter.timestamp = response.data["searchAfter"][0]
+        searchAfter.id = response.data["searchAfter"][1]
       }
     })
   }

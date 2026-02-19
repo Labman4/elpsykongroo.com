@@ -31,9 +31,9 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="visible.authFormVisible = false">Cancel</el-button>
-          <el-button type="primary" @click="oauth()" >
+          <!-- <el-button type="primary" @click="oauth()" >
             Confirm
-          </el-button>
+          </el-button> -->
         </span>
       </template>
     </el-dialog>
@@ -206,24 +206,7 @@ const clientCredentials = () => {
     })   
 }
 
-const oauth = () =>{  
-  visible.authFormVisible = false;
-  if (access.grant_type == "client_credentials") {
-      clientCredentials();   
-  } else if (access.grant_type == "password") {
-      passowrd();
-  } else if (access.grant_type == "code") {
-      authorizationCode();
-  } else if (access.grant_type == "token") {
-      implicit();
-  } else if (access.grant_type == "github") {
-      github();
-  } else if (access.grant_type == "pkce") {
-     pkce();
-  } else if (access.grant_type == "info") {
-    userInfo()
-  }
-}
+
 
 </script>
 

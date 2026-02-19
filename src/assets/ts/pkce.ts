@@ -13,18 +13,13 @@ async function generateCodeVerifier() {
     sha256.update(base64Str);
     var codeChallenge = sha256.getHash("B64");
     codeChallenge = codeChallenge.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-    access.code_challenge = codeChallenge;
+    return codeChallenge;
 }
 
-async function pkce () {
-    await generateCodeVerifier();
-    if (document.domain == "localhost") {
-      access.redirect_uri = env.redirectUrl
-    } else if (document.referrer != "" ) {
-      access.redirect_uri = document.referrer
-    } else {
-      access.redirect_uri = window.location.origin
-    } 
+async function pkce (code_challenge) {
+    if (code_challenge == "") {
+       code_challenge = await generateCodeVerifier();
+    }
     const pkceOption = {
         baseURL: env.authUrl,
         url: "oauth2/authorize",
@@ -32,10 +27,10 @@ async function pkce () {
         params: {
           response_type: "code",
           code_challenge_method: "S256",
-          code_challenge: access.code_challenge,
-          redirect_uri: access.redirect_uri,
+          code_challenge: code_challenge,
+          redirect_uri: env.redirectAppUrl,
           scope: "openid permission",
-          client_id: "pkce"
+          client_id: "app"
         },
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -55,7 +50,7 @@ async function pkce () {
     })
   }
 
-  async function openaiPkce () {
+  async function openaiPkce (code_challenge) {
     await generateCodeVerifier();
     const pkceOption = {
         baseURL: "https://auth0.openai.com",
@@ -65,7 +60,7 @@ async function pkce () {
           audience: "https://api.openai.com",
           response_type: "code",
           code_challenge_method: "S256",
-          code_challenge: access.code_challenge,
+          code_challenge: code_challenge,
           redirect_uri: "com.openai.chat://auth0.openai.com/ios/com.openai.chat/",
           scope: "openid email offline_access model.request model.read organization.read offline",
           client_id: "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh",
@@ -80,13 +75,13 @@ async function pkce () {
         //   return status >= 200 && status < 500; // default
         // },                
       }
-      const loginUrl ="https://auth0.openai.com/authorize?client_id=pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh\u0026audience=https%3A%2F%2Fapi.openai.com%2Fv1\u0026redirect_uri=com.openai.chat%3A%2F%2Fauth0.openai.com%2Fios%2Fcom.openai.chat%2Fcallback\u0026scope=openid%20email%20profile%20offline_access%20model.request%20model.read%20organization.read%20offline\u0026response_type=code\u0026code_challenge=" +  access.code_challenge + "\u0026code_challenge_method=S256\u0026prompt=login"
+      const loginUrl ="https://auth0.openai.com/authorize?client_id=pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh\u0026audience=https%3A%2F%2Fapi.openai.com%2Fv1\u0026redirect_uri=com.openai.chat%3A%2F%2Fauth0.openai.com%2Fios%2Fcom.openai.chat%2Fcallback\u0026scope=openid%20email%20profile%20offline_access%20model.request%20model.read%20organization.read%20offline\u0026response_type=code\u0026code_challenge=" +  code_challenge + "\u0026code_challenge_method=S256\u0026prompt=login"
 
       const openaiLogin = "https://auth0.openai.com/authorize?client_id=pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh" + 
       // "&audience=https%3A%2F%2Fapi.openai.com%2Fv1&redirect_uri=com.openai.chat%3A%2F%2Fauth0.openai.com%2Fios%2Fcom.openai.chat%2Fcallback" +
       // "&scope=openid%20email%20profile%20offline_access%20model.request%20model.read%20organization.read%20offline" +
       "&response_type=code&code_challenge_method=S256" + "&prompt=login"
-      "&code_challenge=" + access.code_challenge 
+      "&code_challenge=" + code_challenge 
        window.location.href = loginUrl
       // axios.get(loginUrl).then(function (response){
       //   const redirectUrl = window.location.href;

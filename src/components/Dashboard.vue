@@ -45,12 +45,8 @@
             </template>
             <el-menu-item-group>
               <el-menu-item index="2-1"  @click="openIp()">ip</el-menu-item>
+              <el-menu-item index="2-2"  @click="openRecord()">record</el-menu-item>
             </el-menu-item-group>
-            <el-sub-menu index="2-2">
-              <template #title><span>record</span></template>
-              <el-menu-item index="2-2-1" @click="openRecordAsc()" >Asc</el-menu-item>
-              <el-menu-item index="2-2-2" @click="openRecordDesc()" >Desc</el-menu-item>
-            </el-sub-menu>
             <el-sub-menu index="2-3" >
               <template #title><span>oauth2</span></template>
               <el-menu-item index="2-3-1" @click="openAuthClient()" >client</el-menu-item>
@@ -186,13 +182,11 @@ const openIp = () => {
   ip.value?.ipList();
 }
 
-const openRecordAsc = () => {
-  record.value?.recordList("1");
+const openRecord = () => {
+  record.value?.recordList();
 }
 
-const openRecordDesc = () => {
-  record.value?.recordList("0");
-}
+
 
 const openAuthClient = () => {
   authClient.value?.authClientList();
