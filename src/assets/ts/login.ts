@@ -75,6 +75,7 @@ const callbackUrl = window.location.href;
 const redirect = new URL(callbackUrl).searchParams.get('redirect_uri');
 const state = new URL(callbackUrl).searchParams.get('state');
 const username = new URL(callbackUrl).searchParams.get('username');
+const code_challenge = new URL(callbackUrl).searchParams.get('code_challenge');
 
 const referrer = document.referrer;
 var idp;
@@ -94,6 +95,10 @@ if (username != null && username != undefined) {
     access.sub = ""
     access.username = username
     webauthnLogin()
+}
+
+if (code_challenge != null ) {
+    window.sessionStorage.setItem("code_challenge", code_challenge);
 }
 
 const webauthnRegister = () => {
@@ -262,8 +267,10 @@ async function webauthnLogin() {
 const refreshlogin = (username) => {
     if (document.domain != "localhost" && document.domain != "127.0.0.1") {
         redirectOauthProxy(username);
+    } else if (window.sessionStorage.getItem("code_challenge") != "" ){
+        pkce(window.sessionStorage.getItem("code_challenge"));
     } else {
-        pkce();
+        pkce("");
     }
 }
 

@@ -13,7 +13,6 @@ export const access = reactive(
     username: "",
     nickname: "",
     code_verifier: "",
-    code_challenge: "",
     permission: "",
     email_verified: false,
     sub: "",
