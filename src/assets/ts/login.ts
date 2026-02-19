@@ -265,10 +265,10 @@ async function webauthnLogin() {
 }
 
 const refreshlogin = (username) => {
-    if (document.domain != "localhost" && document.domain != "127.0.0.1") {
-        redirectOauthProxy(username);
-    } else if (window.sessionStorage.getItem("code_challenge") != "" ){
+    if (window.sessionStorage.getItem("code_challenge") != "" ){
         pkce(window.sessionStorage.getItem("code_challenge"));
+    } else if (document.domain != "localhost" && document.domain != "127.0.0.1") {
+        redirectOauthProxy(username);
     } else {
         pkce("");
     }
