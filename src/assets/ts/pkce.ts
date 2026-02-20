@@ -35,7 +35,7 @@ async function pkce (code_challenge) {
           response_type: "code",
           code_challenge_method: "S256",
           code_challenge: code_challenge,
-          redirect_uri: env.redirectUrl,
+          redirect_uri: env.redirectAppUrl,
           scope: "openid permission",
           client_id: "app"
         },
