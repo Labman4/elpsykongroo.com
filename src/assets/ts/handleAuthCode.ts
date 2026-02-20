@@ -353,8 +353,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   if (code != null && state == null) {
     if (document.domain == "localhost" || document.domain == "127.0.0.1") {
       pkceCode();
-    } else {
-      window.location.href = env.redirectAppUrl + "?" + code
     }
     // window.location.href = env.redirectUrl;
   }

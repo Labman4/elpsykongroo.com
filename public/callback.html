@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>OAuth Callback</title>
+
+  <!-- 防止 SPA 接管 -->
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta name="robots" content="noindex,nofollow" />
+</head>
+<body>
+  <p>正在跳转到 App，请稍候…</p>
+
+  <script>
+    (function () {
+      const search = window.location.search;
+      const params = new URLSearchParams(search);
+
+      const code = params.get('code');
+      const state = params.get('state');
+
+      if (!code) {
+        document.body.innerHTML = '<p>未获取到 code</p>';
+        return;
+      }
+
+      const appUrl =
+        'labroom://oauth2/callback'
+        + '?code=' + encodeURIComponent(code)
+        + (state ? '&state=' + encodeURIComponent(state) : '');
+
+      window.location.href = appUrl;
+
+      // 兜底：App 未安装
+      setTimeout(function () {
+        window.location.href = 'https://elpsykongroo.com/download';
+      }, 1500);
+    })();
+  </script>
+</body>
+</html>
