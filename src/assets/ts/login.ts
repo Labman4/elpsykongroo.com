@@ -1,5 +1,5 @@
 import { access } from '~/assets/ts/access';
-import { pkce } from '~/assets/ts/pkce';
+import { pkce, pkceApp } from '~/assets/ts/pkce';
 import { axios } from '~/assets/ts/axio';
 import { env } from "~/assets/ts/env";
 import * as webauthnJson from "@github/webauthn-json";
@@ -266,11 +266,11 @@ async function webauthnLogin() {
 
 const refreshlogin = (username) => {
     if (window.sessionStorage.getItem("code_challenge") != null ){
-        pkce(window.sessionStorage.getItem("code_challenge"));
+        pkceApp();
     } else if (document.domain != "localhost" && document.domain != "127.0.0.1") {
         redirectOauthProxy(username);
     } else {
-        pkce("");
+        pkce();
     }
 }
 
@@ -281,6 +281,7 @@ const redirectOauthProxy = (username) => {
         window.location.href = env.oauth2ProxyUrl +"/oauth2/start?rd=" + "https://" + window.location.host;
     }
 }
+
 const tmpLogin = () => {
     visible.tmpLogin = false
     const option = {

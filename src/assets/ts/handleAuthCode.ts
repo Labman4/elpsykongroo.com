@@ -170,44 +170,37 @@ if (code != null && state != null) {
 }
 
  function pkceCode() {
-    var codeVerifier;
-    codeVerifier = "841aa35355d86c55c1a948831ab90f23f80f71c65a08feb0dc4830a066fd55d36422c464bc58128edecf2f0bf5e0baadfda1168f8cb5883bd8ff6745454afe8b";
-    // if (window.sessionStorage.getItem("code_verifier") != null) {
-    //     codeVerifier =  window.sessionStorage.getItem("code_verifier");
-    // }
-    const code_verifier = btoa(codeVerifier);
-    const authOption = {
-        baseURL: env.authUrl,
-        url: "/oauth2/token",
-        method: "POST",
-        data: {
-          code_verifier: code_verifier,
-          grant_type: 'authorization_code',
-          code: code,
-          redirect_uri: env.redirectUrl,
-          client_id: "pkce"
-        },
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },   
-        withCredentials: true                  
-    }
-    handleAccess(authOption)
+    const codeVerifier = window.sessionStorage.getItem("code_verifier");
+    if (codeVerifier != null) {
+        const authOption = {
+            baseURL: env.authUrl,
+            url: "/oauth2/token",
+            method: "POST",
+            data: {
+              code_verifier: codeVerifier,
+              grant_type: 'authorization_code',
+              code: code,
+              redirect_uri: env.redirectUrl,
+              client_id: "pkce"
+            },
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            },   
+            withCredentials: true                  
+        }
+        handleAccess(authOption)
+    } 
   }
 
-  function openaiPkceCode(code) {
-    var codeVerifier;
-    codeVerifier = "841aa35355d86c55c1a948831ab90f23f80f71c65a08feb0dc4830a066fd55d36422c464bc58128edecf2f0bf5e0baadfda1168f8cb5883bd8ff6745454afe8b";
-    if (window.sessionStorage.getItem("code_verifier") != null) {
-        codeVerifier =  window.sessionStorage.getItem("code_verifier");
-    }
-    const code_verifier = btoa(codeVerifier);
-    const authOption = {
+  function openaiPkceCode() {
+    const codeVerifier = window.sessionStorage.getItem("code_verifier");
+    if (codeVerifier != null) {
+      const authOption = {
         baseURL: env.authUrl,
         url: "/oauth2/token",
         method: "POST",
         data: {
-          code_verifier: code_verifier,
+          code_verifier: codeVerifier,
           grant_type: 'authorization_code',
           code: code,
           redirect_uri: "com.openai.chat://auth0.openai.com/ios/com.openai.chat/callback",
@@ -219,6 +212,7 @@ if (code != null && state != null) {
         withCredentials: true                  
     }
       axios(authOption).then(function (response) {}) 
+    } 
   }
 
   const handleCookie = () => {
@@ -351,10 +345,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   if (code != null && state == null) {
-    if (document.domain == "localhost" || document.domain == "127.0.0.1") {
+    if (window.sessionStorage.getItem("code_verifier") != null) {
       pkceCode();
     }
-    // window.location.href = env.redirectUrl;
   }
  
 
