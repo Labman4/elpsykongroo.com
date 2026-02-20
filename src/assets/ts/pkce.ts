@@ -17,9 +17,16 @@ async function generateCodeVerifier() {
 }
 
 async function pkce (code_challenge) {
-    if (code_challenge == "") {
+    if (code_challenge == "" || code_challenge == null) {
        code_challenge = await generateCodeVerifier();
     }
+    // if (document.domain == "localhost") {
+    //   access.redirect_uri = env.redirectUrl
+    // } else if (document.referrer != "" ) {
+    //   access.redirect_uri = document.referrer
+    // } else {
+    //   access.redirect_uri = window.location.origin
+    // } 
     const pkceOption = {
         baseURL: env.authUrl,
         url: "oauth2/authorize",
@@ -28,7 +35,7 @@ async function pkce (code_challenge) {
           response_type: "code",
           code_challenge_method: "S256",
           code_challenge: code_challenge,
-          redirect_uri: env.redirectAppUrl,
+          redirect_uri: env.redirectUrl,
           scope: "openid permission",
           client_id: "app"
         },
