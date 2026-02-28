@@ -67,7 +67,7 @@ axios.interceptors.response.use(async function (response) {
     }
     if (error.config.url == "/login" || error.config.url == "/register" || error.config.url == "/public/token/qrcode") {
       ElMessageBox.alert("service error, please try again later")
-      wakeServer()
+      // wakeServer()
     } 
     return error
   });

@@ -8,6 +8,8 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { visible } from "./visible";
 import { ElNotification } from "element-plus";
 import { usePeerStore } from "./webrtc";
+// import { createDPoPProof, generateDPoPKey } from "./encrypt";
+
 // import { registerSW } from 'virtual:pwa-register';
 
 const firebaseConfig = {
@@ -169,10 +171,19 @@ if (code != null && state != null) {
     // dialogFormVisible.value = true
 }
 
- function pkceCode() {
+ async function pkceCode() {
     const codeVerifier = window.sessionStorage.getItem("code_verifier");
     if (codeVerifier != null) {
-        const authOption = {
+        // const { publicKey, privateKey } = await generateDPoPKey();
+        // const dpop = await createDPoPProof({
+        //   privateKey: privateKey,
+        //   publicKey: publicKey,
+        //   htm: "POST",
+        //   htu: env.authUrl + "/oauth2/token",
+        //   accessToken: ""
+        // });
+
+        const tokenOption = {
             baseURL: env.authUrl,
             url: "/oauth2/token",
             method: "POST",
@@ -184,11 +195,13 @@ if (code != null && state != null) {
               client_id: "pkce"
             },
             headers: {
-              "Content-Type": "application/x-www-form-urlencoded"
+              "Content-Type": "application/x-www-form-urlencoded",
+              // "DPoP": dpop
+
             },   
             withCredentials: true                  
         }
-        handleAccess(authOption)
+        handleAccess(tokenOption)
     } 
   }
 
@@ -284,7 +297,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
   const handleAccess = async(option) => {
-    const jwtString = await axios(option).then(function (response) {
+    const jwtString = await axios(option).then(async function (response) {
       let decoded
       if (response.data == undefined && response.data == "") {
           return ""

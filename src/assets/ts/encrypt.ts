@@ -1,4 +1,6 @@
 
+import { SignJWT, exportJWK } from "jose";
+
 const generateSHA256ByInput = async(text) => {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
@@ -108,5 +110,49 @@ async function decryptData(ciphertext, text, algorithm) {
     )
 }
 
+async function generateDPoPKey() {
+  return crypto.subtle.generateKey(
+    {
+      name: "ECDSA",
+      namedCurve: "P-256",
+    },
+    true,
+    ["sign", "verify"]
+  );
+}
 
-export { encryptData, decryptData, computeFileSHA256, arrayBufferToBase64, base64ToArrayBuffer, generateFixedKey }
+async function createDPoPProof({
+  privateKey,
+  publicKey,
+  htm,
+  htu,
+  accessToken
+}) {
+  const jwk = await exportJWK(publicKey);
+
+  const payload = {
+    htm,                 // HTTP method
+    htu,                 // HTTP URL
+    iat: Math.floor(Date.now() / 1000),
+    jti: crypto.randomUUID(),
+    ...(accessToken && { ath: await sha256Base64Url(accessToken) })
+  };
+
+  return new SignJWT(payload)
+    .setProtectedHeader({
+      typ: "dpop+jwt",
+      alg: "ES256",
+      jwk
+    })
+    .sign(privateKey);
+}
+
+async function sha256Base64Url(input) {
+  const data = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return btoa(String.fromCharCode(...new Uint8Array(hash)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+export { encryptData, decryptData, computeFileSHA256, arrayBufferToBase64, base64ToArrayBuffer, generateFixedKey, generateDPoPKey, createDPoPProof }

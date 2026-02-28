@@ -17,10 +17,9 @@ function generateCodeVerifier(length = 64) {
 
 async function generateCodeChallenge() {
     const codeVerifier = generateCodeVerifier(64);
-    var base64Str = btoa(codeVerifier);
-    window.sessionStorage.setItem("code_verifier", base64Str);
+    window.sessionStorage.setItem("code_verifier", codeVerifier);
     const sha256 = new jsSHA("SHA-256", "TEXT");
-    sha256.update(base64Str);
+    sha256.update(codeVerifier);
     var codeChallenge = sha256.getHash("B64");
     codeChallenge = codeChallenge.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
     return codeChallenge;
@@ -54,7 +53,7 @@ async function pkce () {
         response_type: "code",
         client_id: "app",
         redirect_uri: env.redirectAppUrl,
-        scope: "openid permission",
+        scope: "openid permission offline_access",
         code_challenge_method: "S256",
         code_challenge: code_challenge,
       })
