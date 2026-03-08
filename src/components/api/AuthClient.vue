@@ -824,24 +824,31 @@ const registerAdd = (formEl: FormInstance | undefined)  => {
           "Content-Type": "application/json"
         },
       }
-      if (registerForm.clientSecret.startsWith("{bcrypt}")  || registerForm.clientSecret == "" || registerForm.clientSecret == null ){
-          axios(option).then(function (response) {
-            if(response.status == 200) {
-              authClientRegisterForm.value = false ;
-              authClientRegisterList();
-            } 
-          })
-      } else {
-        bcrypt.hash(registerForm.clientSecret, 10).then(function(hash) {
-          authRegister.clientSecret = '{bcrypt}' + hash ;
-          axios(option).then(function (response) {
-            if(response.status == 200) {
-              authClientRegisterForm.value = false ;
-              authClientRegisterList();
-            } 
-          })
-        });
-      }
+      axios(option).then(function (response) {
+        if(response.status == 200) {
+          authClientRegisterForm.value = false ;
+          authClientRegisterList();
+        } 
+      })
+      // if (registerForm.clientSecret.startsWith("{bcrypt}")  || registerForm.clientSecret == "" || registerForm.clientSecret == null ){
+      //     axios(option).then(function (response) {
+      //       if(response.status == 200) {
+      //         authClientRegisterForm.value = false ;
+      //         authClientRegisterList();
+      //       } 
+      //     })
+      // } 
+      // else {
+      //   bcrypt.hash(registerForm.clientSecret, 10).then(function(hash) {
+      //     authRegister.clientSecret = '{bcrypt}' + hash ;
+      //     axios(option).then(function (response) {
+      //       if(response.status == 200) {
+      //         authClientRegisterForm.value = false ;
+      //         authClientRegisterList();
+      //       } 
+      //     })
+      //   });
+      //}
     } else {
       return false
     }
