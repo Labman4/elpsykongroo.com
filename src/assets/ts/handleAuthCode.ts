@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       access.expires_in = jwt["exp"] - jwt["iat"]
       access.update(access.access_token, access.expires_in);
       if (jwt["picture"]) {
-        access.avatarUrl = env.apiUrl + "/storage/object?bucket=" + access.sub + "&key=" + jwt['picture'] + "&idToken=" + access.id_token;
+        access.avatarUrl = env.storageUrl + "/storage/object?bucket=" + access.sub + "&key=" + jwt['picture'] + "&idToken=" + access.id_token;
       }
       await register(access.sub)
       toggleDark();
